@@ -1,0 +1,113 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage{latexsym}
+\usepackage[T1]{fontenc}
+%\usepackage{times}
+
+\usepackage{natbib}
+\bibliographystyle{plainnat}
+\setcitestyle{open=(,close=)}
+
+\usepackage{url}
+
+\usepackage[acronym]{glossaries}
+\glsdisablehyper
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{enumitem}
+
+\begin{document}
+
+\title{Visual question answering using type theory with records}
+
+\author{Arild Matsson \\
+  \small\tt <arild@klavaro.se>
+}
+
+\date{}
+
+\newacronym{hmm}{HMM}{Hidden Markov Model}
+\newacronym{lstm}{LSTM}{Long Short-Term Memory}
+\newacronym{cnn}{CNN}{convolutional neural network}
+\newacronym{ttr}{TTR}{Type theory with records}
+\newacronym{nlg}{NLG}{Natural language generation}
+\newacronym{vqa}{VQA}{visual question answering}
+\newacronym{yolo}{YOLO}{You only look once}
+
+\maketitle
+
+\noindent
+
+\begin{abstract}
+
+I'm connecting an off-the-shelf image recognition system to PyTTR, a Python implementation of TTR.
+This enables representing concepts in the image as TTR types.
+Then I'm implementing a \gls{vqa} task.
+Questions are represented in TTR through really simple text parsing, and are answered using the representation of the image recognition results.
+This shows that \gls{ttr} is helpful for representing visual perception, semantics and cognition.
+\glsresetall
+\end{abstract}
+
+\section{Introduction}
+
+This project will explore how \gls{ttr} can be used with image recognition tasks such as question answering and description generation.
+How can off-the-shelf image recognition software output be expressed in \gls{ttr}, and what can we do with it?
+
+\begin{itemize}
+\item Express image classification results in \gls{ttr}
+\item Detect and recognize multiple objects in an image, as well as relationships between them
+\begin{itemize}
+\item Spatial, geometric relationships such as "above" and "to the left of"
+\item Interaction such as "riding" or "holding"
+\end{itemize}
+\item Question anwering: parsing questions or statements into \gls{ttr} and judging their validity in relation to an image
+\item \gls{nlg} of image descriptions
+\end{itemize}
+
+\noindent
+Development should focus on utilizing and possibly extending PyTTR, a Python implementation of \gls{ttr} \citep{pyttr}. Image recognition and natural language parsing/generation should use existing solutions as far as possible.
+
+\section{Related work}
+
+\subsection{Type theory}
+
+\subsubsection{Type theory and natural language}
+
+\glsreset{ttr}
+\subsection{\gls{ttr}}
+
+\gls{ttr} is a formal framework for semantics \citep{CooperRecordsRecordTypes2005}.
+It has been employed to model natural language in the context of dialogue, situated agents and spoken language.
+
+\subsection{Applications of \gls{ttr}}
+
+\cite{DobnikModellinglanguageaction2012} model a robot that would move around and use laser range scanner or similar to collect points in space, group them into objects and detect spatial relations between them.
+\Gls{ttr} is used throughout the model, accounting for perception and cognition.
+
+\subsection{Models for object detection and classification}
+
+ResNet, Detectron, YOLO
+
+\section{Technical details}
+
+
+\subsection{PyTTR}
+
+\subsection{Image recognition}
+
+\subsubsection{YOLO object recognition model}
+
+You only look once (YOLO) \citep{RedmonYouOnlyLook2015} is a neural network model that simultaneously predicts bounding boxes around objects and classifies the contained objects.
+
+\glsreset{vqa}
+\section{\Gls{vqa} application}
+
+\subsection{Parsing}
+
+\section{Results}
+
+\section{Conclusions}
+
+\subsection{Future work}
+
+\bibliography{imagettr}
+\end{document}
