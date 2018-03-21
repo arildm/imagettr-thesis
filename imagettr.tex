@@ -1,13 +1,15 @@
-\documentclass[11pt,a4paper]{article}
-\usepackage{latexsym}
-\usepackage[T1]{fontenc}
-%\usepackage{times}
+\documentclass[11pt, a4paper]{article}
 
-\usepackage{natbib}
-\bibliographystyle{plainnat}
-\setcitestyle{open=(,close=)}
+\usepackage{mlt-thesis-2015}
 
-\usepackage{url}
+% With Xetex/Luatex this shouldn't be used
+%\usepackage[utf8]{inputenc}
+%\usepackage{latexsym}
+%\usepackage[T1]{fontenc}
+
+\usepackage[english]{babel}
+\usepackage{graphicx}
+\usepackage{setspace}
 
 \usepackage[acronym]{glossaries}
 \glsdisablehyper
@@ -15,14 +17,9 @@
 \usepackage{subcaption}
 \usepackage{enumitem}
 
-\begin{document}
-
 \title{Visual question answering using type theory with records}
-
-\author{Arild Matsson \\
-  \small\tt <arild@klavaro.se>
-}
-
+\subtitle{Subtitle}
+\author{Arild Matsson \\ \small\tt <arild@klavaro.se>}
 \date{}
 
 \newacronym{hmm}{HMM}{Hidden Markov Model}
@@ -33,21 +30,82 @@
 \newacronym{vqa}{VQA}{visual question answering}
 \newacronym{yolo}{YOLO}{You only look once}
 
+\begin{document}
+
+%% ============================================================================
+%% Title page
+%% ============================================================================
+\begin{titlepage}
+
 \maketitle
 
-\noindent
+\vfill
 
-\begin{abstract}
+\begingroup
+\renewcommand*{\arraystretch}{1.2}
+\begin{tabular}{l@{\hskip 20mm}l}
+\hline
+Master's Thesis: & 30 credits / 15 credits (select what applies in your case)\\
+Programme: & Master’s Programme in Language Technology\\
+Level: & Advanced level \\
+Semester and year: & Spring, 2015\\
+Supervisor & (name of the supervisor)\\
+Examiner & (name of the examiner)\\
+Report number & (number will be provided by the administrators) \\
+Keywords & (enter a few keywords) 
+\end{tabular}
+\endgroup
 
+\thispagestyle{empty}
+\end{titlepage}
+
+%% ============================================================================
+%% Abstract
+%% ============================================================================
+\newpage
+\singlespacing
+\section*{Abstract}
+
+%\begin{abstract}
 I'm connecting an off-the-shelf image recognition system to PyTTR, a Python implementation of TTR.
 This enables representing concepts in the image as TTR types.
 Then I'm implementing a \gls{vqa} task.
 Questions are represented in TTR through really simple text parsing, and are answered using the representation of the image recognition results.
 This shows that \gls{ttr} is helpful for representing visual perception, semantics and cognition.
 \glsresetall
-\end{abstract}
+%\end{abstract}
+
+\thispagestyle{empty}
+
+%% ============================================================================
+%% Preface
+%% ============================================================================
+\newpage
+\section*{Preface}
+
+Acknowledgements, etc.
+
+\thispagestyle{empty}
+
+%% ============================================================================
+%% Contents
+%% ============================================================================
+\newpage
+
+\begin{spacing}{0.0}
+\tableofcontents
+\end{spacing}
+
+\thispagestyle{empty}
+
+%% ============================================================================
+%% Introduction
+%% ============================================================================
+\newpage
+\setcounter{page}{1}
 
 \section{Introduction}
+\label{sec:intro}
 
 This project will explore how \gls{ttr} can be used with image recognition tasks such as question answering and description generation.
 How can off-the-shelf image recognition software output be expressed in \gls{ttr}, and what can we do with it?
