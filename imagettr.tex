@@ -2,31 +2,23 @@
 
 \usepackage{mlt-thesis-2015}
 
-% With Xetex/Luatex this shouldn't be used
-%\usepackage[utf8]{inputenc}
-%\usepackage{latexsym}
-%\usepackage[T1]{fontenc}
-
 \usepackage[english]{babel}
 \usepackage{graphicx}
 \usepackage{setspace}
 
 \usepackage[acronym]{glossaries}
 \glsdisablehyper
-\usepackage{graphicx}
-\usepackage{subcaption}
-\usepackage{enumitem}
 
-\title{Visual question answering using type theory with records}
-\subtitle{Subtitle}
-\author{Arild Matsson \\ \small\tt <arild@klavaro.se>}
+\title{Visual question answering with type theory}
+\subtitle{Using \gls{ttr} to model visual perception and language}
+\author{Arild Matsson}
 \date{}
 
 \newacronym{hmm}{HMM}{Hidden Markov Model}
 \newacronym{lstm}{LSTM}{Long Short-Term Memory}
 \newacronym{cnn}{CNN}{convolutional neural network}
-\newacronym{ttr}{TTR}{Type theory with records}
-\newacronym{nlg}{NLG}{Natural language generation}
+\newacronym{ttr}{TTR}{type theory with records}
+\newacronym{nlg}{NLG}{natural language generation}
 \newacronym{vqa}{VQA}{visual question answering}
 \newacronym{yolo}{YOLO}{You only look once}
 
@@ -45,14 +37,13 @@
 \renewcommand*{\arraystretch}{1.2}
 \begin{tabular}{l@{\hskip 20mm}l}
 \hline
-Master's Thesis: & 30 credits / 15 credits (select what applies in your case)\\
+Master's Thesis: & 30 credits\\
 Programme: & Master’s Programme in Language Technology\\
 Level: & Advanced level \\
-Semester and year: & Spring, 2015\\
-Supervisor & (name of the supervisor)\\
+Semester and year: & Spring, 2018\\
+Supervisors & Simon Dobnik and Staffan Larsson\\
 Examiner & (name of the examiner)\\
-Report number & (number will be provided by the administrators) \\
-Keywords & (enter a few keywords) 
+Keywords & type theory, image recognition, object recognition, visual question answering
 \end{tabular}
 \endgroup
 
@@ -124,44 +115,36 @@ How can off-the-shelf image recognition software output be expressed in \gls{ttr
 \noindent
 Development should focus on utilizing and possibly extending PyTTR, a Python implementation of \gls{ttr} \citep{pyttr}. Image recognition and natural language parsing/generation should use existing solutions as far as possible.
 
-\section{Related work}
+\section{Background}
 
 \subsection{Type theory}
 
 \subsubsection{Type theory and natural language}
 
 \glsreset{ttr}
-\subsection{\gls{ttr}}
+\subsubsection{\Gls{ttr}}
 
 \gls{ttr} is a formal framework for semantics \citep{CooperRecordsRecordTypes2005}.
 It has been employed to model natural language in the context of dialogue, situated agents and spoken language.
 
-\subsection{Applications of \gls{ttr}}
+\subsubsection{Applications of \gls{ttr}}
 
 \cite{DobnikModellinglanguageaction2012} model a robot that would move around and use laser range scanner or similar to collect points in space, group them into objects and detect spatial relations between them.
 \Gls{ttr} is used throughout the model, accounting for perception and cognition.
 
-\subsection{Models for object detection and classification}
+\subsubsection{PyTTR}
 
-ResNet, Detectron, YOLO
+\subsection{Visual object recognition}
 
-\section{Technical details}
-
-
-\subsection{PyTTR}
-
-\subsection{Image recognition}
+Detectron
 
 \subsubsection{YOLO object recognition model}
 
 You only look once (YOLO) \citep{RedmonYouOnlyLook2015} is a neural network model that simultaneously predicts bounding boxes around objects and classifies the contained objects.
 
-\glsreset{vqa}
-\section{\Gls{vqa} application}
+\section{\Gls{vqa} using \gls{ttr}}
 
 \subsection{Parsing}
-
-\section{Results}
 
 \section{Conclusions}
 
