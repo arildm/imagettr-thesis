@@ -121,6 +121,9 @@ Development should focus on utilizing and possibly extending PyTTR, a Python imp
 
 \section{Background}
 
+\cite{BlackburnComputationalsemantics2003}:
+FOPC for the win. But "other approaches are both possible and interesting".
+
 \subsection{Perceptual semantics}
 
 \cite{LoganComputationalAnalysisApprehension1996}:
@@ -134,7 +137,7 @@ They present "evidence" for their theory, does that evidence contradict the pres
 AVS
 Four models. AVS.
 Many experiments.
-Spatial term ratings influenced by: proximal & center-of-mass orientations, grazing line, distance.
+Spatial term ratings influenced by: proximal \& center-of-mass orientations, grazing line, distance.
 
 \cite{PustejovskyPerceptualsemanticsconstruction1990}?
 
@@ -144,6 +147,9 @@ Spatial term ratings influenced by: proximal & center-of-mass orientations, graz
 
 \glsreset{ttr}
 \subsection{\Gls{ttr}}
+
+\citep{CooperRecordsRecordTypes2005}:
+TTR combines lambda calculus, phrase structure grammar, (DRT), (situation semantics) (what are the latter)?
 
 \gls{ttr} is a formal framework for semantics \citep{CooperRecordsRecordTypes2005}.
 It has been employed to model natural language in the context of dialogue, situated agents and spoken language.
@@ -365,9 +371,7 @@ Negations in TTR are treated by \cite{CooperNegationdialogue2018} but are not co
 \end{array}\right]\end{equation}
 
 
-\subsection{Parsing}
-
-\subsubsection{Parsing natural language to TTR}
+\subsection{Natural language parsing}
 
 A dog is to the left of a car
 \begin{equation}\left[\begin{array}{rcl}
@@ -378,7 +382,17 @@ A dog is to the left of a car
 \text{c}_\text{left} &:& \text{left}(x, y)\\
 \end{array}\right]\end{equation}
 
-\subsubsection{Evaluating propositions}
+\subsubsection{Implementation}
+
+NLTK FCFG.
+FOPC to RecType.
+
+\subsubsection{Limitations}
+
+Disjunction ("or").
+
+
+\subsection{Evaluating propositions (answering questions)}
 
 Essentially, we would like to check if the situation observed is a subtype of the situation described by the text/question, whether $Q \sqsupseteq A$. A new problem here is that field labels do not match, even if the field values (the types) match. We thus need to consider all (?) relabelings of $Q$:
 
@@ -395,6 +409,10 @@ Could we forget field labels and just look at the two sets of field values? Not 
 Basic->Deictic->Intrinsic relations  \cite{LoganComputationalAnalysisApprehension1996}
 
 Spatial templates \& regions of acceptability. Compound relations (above right) finer (directly). Functional aspect.  \cite{LoganComputationalAnalysisApprehension1996} (also Dobnik etc)
+
+4 question types.
+
+Classification after Q.
 
 Probabilistic TTR for "good fit" (is is more to the left or more above?).
 
