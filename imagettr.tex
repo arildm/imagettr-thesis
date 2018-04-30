@@ -14,8 +14,8 @@
 \usepackage[acronym]{glossaries}
 \glsdisablehyper
 
-\title{Visual question answering with type theory}
-\subtitle{Using \gls{ttr} to model visual perception and language}
+\title{Perceptual and spatial semantics with type theory}
+\subtitle{An implementation of visual perception and spatial relations in \gls{ttr}}
 \author{Arild Matsson}
 \date{}
 
@@ -43,13 +43,13 @@
 \renewcommand*{\arraystretch}{1.2}
 \begin{tabular}{l@{\hskip 20mm}l}
 \hline
-Master's Thesis: & 30 credits\\
-Programme: & Master’s Programme in Language Technology\\
-Level: & Advanced level \\
-Semester and year: & Spring, 2018\\
+Master's Thesis & 30 credits\\
+Programme & Master’s Programme in Language Technology\\
+Level & Advanced level \\
+Semester and year & Spring, 2018\\
 Supervisors & Simon Dobnik and Staffan Larsson\\
 Examiner & (name of the examiner)\\
-Keywords & type theory, image recognition, object recognition, visual question answering
+Keywords & type theory, image recognition, object recognition, perceptual semantics, visual question answering
 \end{tabular}
 \endgroup
 
@@ -61,28 +61,31 @@ Keywords & type theory, image recognition, object recognition, visual question a
 %% ============================================================================
 \newpage
 \singlespacing
+\glsresetall
 \section*{Abstract}
 
-%\begin{abstract}
-I'm connecting an off-the-shelf image recognition system to PyTTR, a Python implementation of TTR.
-This enables representing concepts in the image as TTR types.
-Then I'm implementing a \gls{vqa} task.
-Questions are represented in TTR through really simple text parsing, and are answered using the representation of the image recognition results.
-This shows that \gls{ttr} is helpful for representing visual perception, semantics and cognition.
-\glsresetall
-%\end{abstract}
+\Gls{ttr} combines several theories of semantic modeling in a single framework.
+[more ttr appraisal: type checking, robustness, verifiable...]
+The present work suggests a \gls{ttr} model of perception, spatial cognition and language.
+Utilizing PyTTR, a Python implementation of \gls{ttr}, the model is then implemented as an executable script.
+%The Python implementation includes reformatting the output of an external image recognition system and parsing natural language.
+Over pure Python programming, \gls{ttr} provides a transparent formal specification, as well as advanced typing and type checking.
+The implementation is evaluated in a \acrlong{vqa} task.
+The results confirm the suitability of this approach.
+... as well as identifying some desired additions to PyTTR.
+... machine learning??
 
 \thispagestyle{empty}
 
 %% ============================================================================
 %% Preface
 %% ============================================================================
-\newpage
-\section*{Preface}
+%\newpage
+%\section*{Preface}
 
-Acknowledgements, etc.
+%Acknowledgements, etc.
 
-\thispagestyle{empty}
+%\thispagestyle{empty}
 
 %% ============================================================================
 %% Contents
@@ -90,6 +93,7 @@ Acknowledgements, etc.
 \newpage
 
 \begin{spacing}{0.0}
+\glsresetall
 \tableofcontents
 \end{spacing}
 
@@ -101,6 +105,7 @@ Acknowledgements, etc.
 \newpage
 \setcounter{page}{1}
 
+\glsresetall
 \section{Introduction}
 \label{sec:intro}
 
@@ -121,11 +126,14 @@ How can off-the-shelf image recognition software output be expressed in \gls{ttr
 \noindent
 Development should focus on utilizing and possibly extending PyTTR, a Python implementation of \gls{ttr} \citep{pyttr}. Image recognition and natural language parsing/generation should use existing solutions as far as possible.
 
+\glsresetall
 \section{Background}
 \label{sec:background}
 
 \cite{BlackburnComputationalsemantics2003}:
 FOPC for the win. But "other approaches are both possible and interesting".
+
+
 
 \subsection{Perceptual semantics}
 
@@ -142,56 +150,88 @@ Four models. AVS.
 Many experiments.
 Spatial term ratings influenced by: proximal \& center-of-mass orientations, grazing line, distance.
 
+[functional aspect, Coventry?]
+
 \cite{PustejovskyPerceptualsemanticsconstruction1990}?
 
-\subsection{Type theory}
+[mention grounding!?]
 
-\subsubsection{Type theory, semantics and \gls{nlp}}
 
-\glsreset{ttr}
-\subsection{\Gls{ttr}}
 
-\citep{CooperRecordsRecordTypes2005}:
-TTR combines lambda calculus, phrase structure grammar, (DRT), (situation semantics) (what are the latter)?
+\subsubsection{Object recognition}
 
-\gls{ttr} is a formal framework for semantics \citep{CooperRecordsRecordTypes2005}.
-It has been employed to model natural language in the context of dialogue, situated agents and spoken language.
+Detectron \citep{Detectron2018}
 
-\subsubsection{Applications of \gls{ttr}}
-
-\cite{DobnikModellinglanguageaction2012} model a robot that would move around and use laser range scanner or similar to collect points in space, group them into objects and detect spatial relations between them.
-\Gls{ttr} is used throughout the model, accounting for perception and cognition.
-
-\subsubsection{PyTTR}
-
-\subsection{Visual object recognition}
+You only look once (YOLO) \citep{RedmonYouOnlyLook2015} is a neural network model that simultaneously predicts bounding boxes around objects and classifies the contained objects.
 
 \begin{figure}[h]
 \label{fig:dogbike_annotated}
 \includegraphics[width=\textwidth]{dogbike_annotated}
 \centering
-\caption{Visualization of labels and bounding boxes emitted by YOLO given an image depicting a cyclist with a dog.}
+\caption{Visualization of the labels and bounding boxes emitted by YOLO when given an image depicting a cyclist with a dog.}
 \end{figure}
 
-\cite{Detectron2018}
 
-\subsubsection{\Gls{vqa}}
 
-\subsubsection{YOLO object recognition model}
+\subsection{Type theory in natural language processing}
 
-You only look once (YOLO) \citep{RedmonYouOnlyLook2015} is a neural network model that simultaneously predicts bounding boxes around objects and classifies the contained objects.
+\cite{martinlof84}
+
+\citep{CooperRecordsRecordTypes2005}:
+TTR combines lambda calculus, phrase structure grammar, (DRT), (situation semantics) (what are the latter)?
+
+\Gls{ttr} is a formal framework for semantics \citep{CooperRecordsRecordTypes2005}.
+It has been employed to model natural language in the context of dialogue, situated agents and spoken language.
+
+[brief summary of TTR syntax?]
+
+
+
+\subsubsection{Applications of \gls{ttr}}
+
+\cite{lspc} model a robot that would move around and use laser range scanner or similar to collect points in space, group them into objects and detect spatial relations between them.
+\Gls{ttr} is used throughout the model, accounting for perception and cognition.
+
+\cite{ttrspat} develop this further, focusing especially on spatial relations.
+
+Parsing: \cite{CooperRecordsRecordTypes2005}, \cite{RobinCooperAustiniantruthattitudes2005}, \cite{CooperTypetheorysemantics2012}, \cite{CooperTypetheorylanguage2016}
+
+
+
+\subsubsection{PyTTR}
+
+\cite{pyttr} is a Python implementation of \gls{ttr}.
+It supports modeling records, record types, ptypes, functions and other TTR objects.
+Additionally, it allows operations such as judgement, type checking and subtype checking.
+As a Python library it also ebales other features and peripheral procedures to be written in Python.
+
+[What has been written in PyTTR so far?]
 
 
 
 \section{Method}
 \label{sec:method}
 
+"we are using TTR as a formal specification language that tell us how to do visual question answering in Python. This additional layer gives us a formal transparency and the ability to type check the code before running it." (SD)
+
+Goal: Implement \cite{ttrspat}.
+Except we 1) do images and 2) add language.
+We do images because a) it's interesting to look at another medium and b) it's easier to get data?
+We add language because we're just really interested in language.
+We don't take it very far in that direction, though, just the basics.
+
+Below, we first develop on the theory of object recognition and spatial descriptions, in terms very similar to \cite{ttrspat}, but with our own additions and modifications as appropriate.
+Then we describe how implementation was done, focusing especially on some details that were not straightforward.
+
 
 
 \subsection{Theory development}
+\label{ssec:theory}
 
-We looked at the suggestions put forward in LSPC and took it to the implementation stage.
-Instead of pointspaces we used images.
+The different input space implies a different type of location data.
+Spatial relation classification is simplistic.
+In the end, language input is added.
+
 To connect more with the linguistics of spatial semantics, we added simple parsing and validation of natural-language propositions/questions.
 
 To collect the various parts as a united whole, we create an agent.
@@ -259,19 +299,98 @@ IndObj = \left[\begin{array}{rcl}
 \end{array}\right]
 \end{equation}
 
-Had TTR allowed it, we could have been more specific by stating that the field $cp$ should be of a ptype dependent on the field $x$.
+[remove?] Had TTR allowed it, we could have been more specific by stating that the field $cp$ should be of a ptype dependent on the field $x$.
 
-The step from the perceptual to the conceptual level is conducted by an \textit{individuation function}, a function of the type $IndFun$.
+The step from the perceptual to the conceptual level is conducted by an \textit{individuation function}, a function of the type $IndFun$. [why? what does it do?]
 
 \begin{equation}\label{eq:indfun}
 IndFun = ( Obj \rightarrow RecType )
 \end{equation}
 
 As a constraint that cannot be expressed in TTR, the record type resulting from applying an $IndFun$ function should be a subtype of $IndObj$.
+[How about a notation $RecType_{\sqsubseteq IndObj}$ "the type of all record types which are subtypes of $IndObj$"?]
 
-So far, we have been following LSPC very closely.
-But we also need $IndObj$ records (why, exactly?).
-Thus, we let the record types created by the individuation function be \textit{fully specified}.
+
+
+\subsubsection{Proof objects and singleton record types}
+
+A record type can descibe a situation.
+The situation is true if there is a record of that type.
+To say that a situation returned by the individuation function is true, we need a record of that type.
+
+For each record type returned by the individuation function, we create a record.
+The $loc$ value of this record is naturally identical to the $seg$ value of the $Obj$ input record.
+For the remaining fields, we need to make up new objects on the spot.
+Object creation is notated here as $A_{new}$, where the symbol $A$ may vary for the sake of readability.
+%For the $x$ field, we create a new individual object $a_{new} : Ind$.
+%For the ptype fields $cp$ and $cl$, we also create new objects $e_{new} : r.\text{pfun}(\text{x})$ and $e_{new} : \text{location}(\text{x}, \text{loc})$.
+
+We can now be more specific in the output of the individuation function.
+Using manifest fields, we can denote the \textit{fully specified} record type, or singleton record type.
+The definition of our individuation function is given in \autoref{eq:indfundef}, with an example application in \autoref{eq:indfunrec}.
+
+\begin{equation}\label{eq:indfundef}
+\lambda r : Obj\ . \left[\begin{array}{lcl}
+    \text{x} = a_{new} &:& Ind \\
+    \text{cp} = e_{new} &:& r.\text{pfun}(\text{x}) \\
+    \text{cl} = e_{new} &:& \text{location}(\text{x}, \text{loc}) \\
+    \text{loc} = r.\text{seg} &:& Segment\\
+\end{array}\right]
+\end{equation}
+
+\begin{equation}\label{eq:indfunrec}
+\left[\begin{array}{rcl}
+\text{seg} &=& \left[\begin{array}{rcl}
+\text{cx} &=& 138\\
+\text{w} &=& 276\\
+\text{cy} &=& 654\\
+\text{h} &=& 809
+\end{array}\right]\\
+\text{pfun} &=& \lambda v:Ind\ .\ \text{person}(v)\\
+\end{array}\right]
+\mapsto
+\left[\begin{array}{lcl}
+    \text{x} = a_0 &:& Ind \\
+    \text{cp} = e_0 &:& \text{person}(\text{x}) \\
+    \text{cl} = e_1 &:& \text{location}(\text{x}, \text{loc}) \\
+    \text{loc} = \left[\begin{array}{rcl}
+\text{cx} &=& 138\\
+\text{w} &=& 276\\
+\text{cy} &=& 654\\
+\text{h} &=& 809
+\end{array}\right] &:& Segment\\
+\end{array}\right]
+\end{equation}
+
+An interesting feature of fully specified types is that it can only have one element in its extension (or zero).
+
+\begin{comment}
+From a fully specified record type, the one record that it describes can be \textit{instantiated}.
+[define formally?]
+[wait, it's already called \textit{extension}]
+
+\begin{equation}
+\left[\begin{array}{rcl}
+\text{x} = a &:& Ind\\
+\end{array}\right]
+\mapsto
+\left[\begin{array}{rcl}
+\text{x} &=& a\\
+\end{array}\right]
+\end{equation}
+
+The \textbf{generalization} of a record type $T$ is a record type whose fields are the same as $T$ except that singleton fields are replaced by non-singleton fields. In other words, it is $T$ with manifest fields removed.
+
+\begin{equation}
+\left[\begin{array}{rcl}
+\text{x} = a &:& Ind\\
+\end{array}\right]
+\mapsto
+\left[\begin{array}{rcl}
+\text{x} &:& Ind\\
+\end{array}\right]
+\end{equation}
+\end{comment}
 
 
 
@@ -281,7 +400,9 @@ Between any pair of individuals, a binary relation may take place.
 Our concept of individuals is now a collection of fully specified $IndObj$ record types.
 How do we detect and model a certain relation between such a pair?
 
-Since we are interested in the spatial relation between a \textit{reference object} and a \textit{located object}, we will be constructing tuple-like records of the type $LocTup$:
+Since we are interested in the spatial relation between a \textit{reference object} and a \textit{located object}, we will be constructing tuple-like records of the type $LocTup$ defined in \autoref{eq:loctup}.
+Records of this type contain instantiations of two $IndObj$ record types.
+In \autoref{eq:clf}, a classifier is modeled as a function from such a record to a new record type which should describe the relation.
 
 \begin{equation}\label{eq:loctup}
 LocTup = \left[\begin{array}{rcl}
@@ -290,13 +411,12 @@ LocTup = \left[\begin{array}{rcl}
     \end{array}\right]
 \end{equation}
 
-We model a classifier as a function from such a record to a new record type which should describe the relation:
-
 \begin{equation}\label{eq:clf}
 Clf = ( LocTup \rightarrow RecType )
 \end{equation}
 
-For instance, a classifier for "to the left of" might look like the following, where $\kappa_{left}$ is a non-TTR, boolean function algorithm with a boolean range.
+For instance, a classifier for "to the left of" might look like in \autoref{eq:leftclfdef}, where $\kappa_{left}$ is a non-TTR, boolean function algorithm with a boolean range.
+Of course, the requirement that the individual $r.\text{lo}.\text{x}$ is actually located at $r.\text{lo}.\text{loc}$ (and same for $r.\text{refo}$) is implicit from the typing as $IndObj$, where the field $\text{cl} : \text{location}(\text{x}, \text{loc})$ is necessarily present.
 
 \begin{equation}\label{eq:leftclfdef}
 \lambda r : LocTup \ .\ 
@@ -309,9 +429,17 @@ For instance, a classifier for "to the left of" might look like the following, w
 \end{cases}
 \end{equation}
 
+[move this paragraph to Discussion?]
+\cite{ttrspat} includes two important aspects that are not covered here.
+First, it assumes a 3D point space as visual input, in contrast to the 2D image considered here.
+Spatial relations in 3D crucially involves adapting the reference frame according to the viewpoint, while those are trivially fixed in the 2D case.
+Second, it accounts for the functional aspect of spatial relationship, as detailed by \cite{CoventryClassificationExtrageometricInfluences2004}.
+
 
 
 \subsubsection{Language}
+
+[highlight how TTR makes it easy to answer a yes/no question]
 
 A dog is to the left of a car
 \begin{equation}\left[\begin{array}{rcl}
@@ -377,14 +505,14 @@ While running, the agent will modify the $AgentState$ record in $state$.
 
 \subsection{Implementation}
 
-Much of the theory developed above is straightforwardly implemented in PyTTR. 
+Much of the theory developed above is straightforwardly implemented in PyTTR.
 Python is used mostly for binding the pieces together, but also some significant processes.
 
 
 
 \subsubsection{Invoking YOLO}
 
-YOLO is made with C but there is a Python wrapper.
+YOLO \citep{yolo} is made with C but there is a Python wrapper.
 When invoked from Python, the return value is a collection of dict objects with field for label, coordinates and a confidence score.
 I made a Python function which takes this collection and translates it to a list of PyTTR $Obj$ records.
 
@@ -450,7 +578,6 @@ With a custom Python function, the FOPC output is transformed to a TTR record ty
 
 The individuation function, although expressible in TTR, is not possible to implement in PyTTR.
 Therefore, it was implemented as a Python function named {\tt individualize}.
-[Is the .create() usage also expressible in TTR?]
 
 The \textit{relabel-subtype} relation, $\sqsubseteq_{rlb}$, was also implemented in Python.
 
@@ -458,37 +585,47 @@ The \textit{relabel-subtype} relation, $\sqsubseteq_{rlb}$, was also implemented
 
 \subsection{Evaluation}
 
+[test on a few images and sentences] [or is one enough? it does what it does...]
+
 
 
 \section{Results}
 \label{sec:results}
 
+?
 
 
-\subsection{Limitations}
 
-Disjunction ("or").
+\section{Discussion}
+\label{sec:discussion}
+
+Contradiction of Logan \& Sadler's "evidence" for their "theory of apprehension" (which is different from mine)?
+
+...
 
 
 
 \section{Conclusions}
 \label{sec:conclusions}
 
+It works and it's nice because...
+
 
 
 \subsection{Future work}
 
-Basic->Deictic->Intrinsic relations  \cite{LoganComputationalAnalysisApprehension1996}
-
 Spatial templates \& regions of acceptability. Compound relations (above right) finer (directly). Functional aspect.  \cite{LoganComputationalAnalysisApprehension1996} (also Dobnik etc)
 
+Basic->Deictic->Intrinsic relations  \cite{LoganComputationalAnalysisApprehension1996}. 3D.
+
 4 question types.
+Moar question types (tasks/programs/routines in L\&S).
+
+Dialogue.
 
 Classification after Q.
 
 Probabilistic TTR for "good fit" (is is more to the left or more above?).
-
-Moar question types (tasks/programs/routines in L\&S).
 
 
 
