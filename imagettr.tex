@@ -339,26 +339,28 @@ As a constraint that cannot be expressed in TTR, the record type resulting from 
 
 \subsubsection{Proof objects and singleton record types}
 
+The type of the individuation function was given above.
+But before a definition of it can be given, we need to dive deeper into some \gls{ttr} concepts.
+
 There is a certain notable difference between the types $Obj$ and $IndObj$.
 The former is a single record type, of which there will be many records.
 Each record will hold information about a given detected object.
-With the latter, what is primarily relevant is its various \textit{subtypes} that will be generated.
+With the latter, it is the type itself that holds meaning, by describing a situation.
+However, note that the $cp$ field is only being declared generally as $Type$.
+Thus, it is \textit{subtypes} of $IndObj$, with a more specific typing of $cp$, that will be truly informative.
 
+[propositions as types, true if there is an object of the type, situation semantics? \cite{BarwiseSituationsAttitudes1981}]
+A record of a situation type then serves as a witness for the situation.
 
-A record type can descibe a situation.
-The situation is true if there is a record of that type.
-To say that a situation returned by the individuation function is true, we need a record of that type.
-
-For each record type returned by the individuation function, we create a record.
+For each record type returned by the individuation function, a record is simultaneously created.
 The $loc$ value of this record is naturally identical to the $seg$ value of the $Obj$ input record.
-For the remaining fields, we need to make up new objects on the spot.
+Objects for the remaining fields need to be instantiated on the spot.
 Object creation is notated here as $A_{new}$, where the symbol $A$ may vary for the sake of readability.
 %For the $x$ field, we create a new individual object $a_{new} : Ind$.
 %For the ptype fields $cp$ and $cl$, we also create new objects $e_{new} : r.\text{pfun}(\text{x})$ and $e_{new} : \text{location}(\text{x}, \text{loc})$.
 
-We can now be more specific in the output of the individuation function.
-Using manifest fields, we can denote the \textit{fully specified} record type, or singleton record type.
-The definition of our individuation function is given in \autoref{eq:indfundef}, with an example application in \autoref{eq:indfunrec}.
+We are now ready to define the individuation function as in \autoref{eq:indfundef}, with an example application in \autoref{eq:indfunrec}.
+The definition uses manifest fields to denote the \textit{fully specified} record type, or singleton record type.
 
 \begin{equation}\label{eq:indfundef}
 \lambda r : Obj\ . \left[\begin{array}{lcl}
@@ -393,8 +395,6 @@ The definition of our individuation function is given in \autoref{eq:indfundef},
 \end{array}\right]
 \end{equation}
 
-An interesting feature of fully specified types is that it can only have one element in its extension (or zero).
-
 \begin{comment}
 From a fully specified record type, the one record that it describes can be \textit{instantiated}.
 [define formally?]
@@ -427,7 +427,7 @@ The \textbf{generalization} of a record type $T$ is a record type whose fields a
 
 \subsubsection{Spatial relations}
 
-Between any pair of individuals, a binary relation may take place.
+Between any pair of individuals, a relation may take place.
 Our concept of individuals is now a collection of fully specified $IndObj$ record types.
 How do we detect and model a certain relation between such a pair?
 
@@ -443,10 +443,10 @@ LocTup = \left[\begin{array}{rcl}
 \end{equation}
 
 \begin{equation}\label{eq:clf}
-Clf = ( LocTup \rightarrow RecType )
+ClfFun = ( LocTup \rightarrow RecType )
 \end{equation}
 
-For instance, a classifier for "to the left of" might look like in \autoref{eq:leftclfdef}, where $\kappa_{left}$ is a non-TTR, boolean function algorithm with a boolean range.
+For instance, a classifier for "to the left of" might look like in \autoref{eq:leftclfdef}, where $\kappa_{left}$ is a non-TTR, boolean function.
 Of course, the requirement that the individual $r.\text{lo}.\text{x}$ is actually located at $r.\text{lo}.\text{loc}$ (and same for $r.\text{refo}$) is implicit from the typing as $IndObj$, where the field $\text{cl} : \text{location}(\text{x}, \text{loc})$ is necessarily present.
 
 \begin{equation}\label{eq:leftclfdef}
