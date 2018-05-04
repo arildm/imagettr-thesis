@@ -128,18 +128,30 @@ Then follows an account of the \textit{Results} with discussion, and finally som
 \section{Background}
 \label{sec:background}
 
+This section will highlight some important pieces of the history of past research in relevant fields.
+
 \subsection{Computational semantics}
 
-[formal semantics, FOL]
+Philosophers have long been interested in the study of meaning.
+[Frege, ...]
 
+Computational accounts of meaning emerged [how].
+They are/were characterized by [what].
+[Montague, ...]
+[FOL]
+
+With recent advancements in computer science, ambitious computational-semantic theories are now in abundance.
+As a competitor to formal systems, statistical methods have emerged which do well in various tasks within semantics, leveraging the large amounts of digital data that are available as a product of our largely digitalized society.
+
+If statistical models of semantics do well in [empirical/data-driven/practical] tasks, formal theories of semantics [do what?]
 \cite{BlackburnComputationalsemantics2003}:
-FOPC for the win. But "other approaches are both possible and interesting".
-
-[statistical models of semantics]
+FOPC for the win, but "other approaches are both possible and interesting".
 
 
 
 \subsubsection{Perceptual semantics}
+
+\cite{HarnadSymbolGroundingProblem1990}
 
 \cite{LoganComputationalAnalysisApprehension1996}:
 Basic–deictic(–intrinsic) relations.
@@ -197,12 +209,18 @@ It has been employed to model natural language in the context of dialogue, situa
 
 \subsubsection{Applications of \gls{ttr}}
 
+\cite{LarssonDialoguesHaveContent2011}
+
+\cite{DobnikModellinglanguageaction2012}
+
 \cite{lspc} model the point space perception of a mobile robot equipped with a rangefinder.
  that would move around and use laser range scanner or similar to collect points in space, group them into objects and detect spatial relations between them.
 \Gls{ttr} is mainly used to model the transition from the perceptual to the cognitive domain as well as 
  throughout the model, accounting for perception and cognition.
 
 \cite{ttrspat} develop this further, focusing especially on spatial relations.
+
+\cite{LarssonFormalsemanticsperceptual2015}
 
 Parsing: \cite{CooperRecordsRecordTypes2005}, \cite{RobinCooperAustiniantruthattitudes2005}, \cite{CooperTypetheorysemantics2012}, \cite{CooperTypetheorylanguage2016}
 
@@ -231,7 +249,7 @@ Another motivation for implementation is to compete with existing, less theoreti
 
 Goal: Implement \cite{ttrspat}.
 Except we 1) do images and 2) add language.
-We do images because a) it's interesting to look at another medium and b) it's easier to get data?
+We do images because a) it's interesting to look at another medium and b) it's easier to get data? c) to do vqa.
 We add language because we're just really interested in language.
 We don't take it very far in that direction, though, just the basics.
 
