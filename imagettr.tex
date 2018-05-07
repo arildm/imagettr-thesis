@@ -15,8 +15,8 @@
 \usepackage[acronym]{glossaries}
 \glsdisablehyper
 
-\title{Perceptual and spatial semantics with type theory}
-\subtitle{An implementation of visual perception and spatial relations in \gls{ttr}}
+\title{Implementing perceptual and spatial semantics in type theory with records (TTR)}
+%\subtitle{An implementation of visual perception and spatial relations in \gls{ttr}}
 \author{Arild Matsson}
 \date{}
 
@@ -75,6 +75,8 @@ The implementation is evaluated in a \acrlong{vqa} task.
 The results confirm the suitability of this approach.
 ... as well as identifying some desired additions to PyTTR.
 ... machine learning??
+
+% TTR also provides a connection between perception and a wide range of semantic phenomena described in TTR, e.g. quantification, inference, modality, negation, semantic coordination,.
 
 \thispagestyle{empty}
 
@@ -253,8 +255,10 @@ We do images because a) it's interesting to look at another medium and b) it's e
 We add language because we're just really interested in language.
 We don't take it very far in that direction, though, just the basics.
 
-Below, we first develop on the theory of object recognition and spatial descriptions, in terms very similar to \cite{ttrspat}, but with our own additions and modifications as appropriate.
-Then we describe how implementation was done, focusing especially on some details that were not straightforward.
+%To connect more with the linguistics of spatial semantics, we added simple parsing and validation of natural-language propositions/questions.
+
+%Below, we first develop on the theory of object recognition and spatial descriptions, in terms very similar to \cite{ttrspat}, but with our own additions and modifications as appropriate.
+%Then we describe how implementation was done, focusing especially on some details that were not straightforward.
 
 
 
@@ -264,65 +268,38 @@ Then we describe how implementation was done, focusing especially on some detail
 The different input space implies a different type of location data.
 Spatial relation classification is simplistic.
 In the end, language input is added.
-
-To connect more with the linguistics of spatial semantics, we added simple parsing and validation of natural-language propositions/questions.
+[...]
 
 To collect the various parts as a united whole, we create an agent.
+[...]
 
 
 
-\subsubsection{Objects}
+\subsubsection{Concepts of objects}
+% Distinguish different uses of "object": TTR a:T, Obj, IndObj.
 
-We begin the model formulation by declaring three basic types.
-
-\begin{description}
-\item [$Int$] An integer, such as 415.
-\item [$Image$] A 2-dimensional digital image. It serves as an identifier to a set of extracted information, and its file type and actual data is not important in this thesis.
-\item [$Ind$] A single individual object (or person), such as the reader or the Eiffel Tower.
-\end{description}
-
-A $Segment$ is a record type describing a rectangular bounding box within an (implicit) image (\autoref{eq:seg}).
-$Ppty$ is the type of functions that can be applied to an individual and return a type (\autoref{eq:ppty}).
-In our account the resulting type will be restricted to a ptype that is dependent on the individual, thus describing a property of it.
-
-\begin{equation}\label{eq:seg}
-Segment = \left[\begin{array}{rcl}
-\text{cy} &:& Int\\
-\text{cx} &:& Int\\
-\text{w} &:& Int\\
-\text{h} &:& Int
-\end{array}\right]\end{equation}
-
-\begin{equation}\label{eq:ppty}
-Ppty = (Ind \rightarrow Type)\end{equation}
-
-An object that has been detected in an image is, at the perceptual level, modeled as a record of the type $Obj$, essentially a tuple of a position and a semantic property (\autoref{eq:obj}).
-An example $Obj$ record is given in \autoref{eq:objrec}.
-$Obj$ records are the result of performing \textit{object detection}.
-This fact is expressed in TTR as the function type $ObjDetector$ (\autoref{eq:objdetector}).
-
-\begin{equation}\label{eq:obj}
-Obj = \left[\begin{array}{rcl}
-\text{seg} &:& Segment\\
-\text{pfun} &:& Ppty \\
-\end{array}\right]\end{equation}
-
-\begin{equation}\label{eq:objrec}
-obj =
-\left[\begin{array}{rcl}
-\text{seg} &=& \left[\begin{array}{rcl}
-\text{cx} &=& 138\\
-\text{w} &=& 276\\
-\text{cy} &=& 654\\
-\text{h} &=& 809
-\end{array}\right]\\
-\text{pfun} &=& \lambda v:Ind\ .\ \text{person}(v)\\
-\end{array}\right] : Obj\end{equation}
+The term \textit{object} occurs in various fields with different meanings, and it is overloaded within this thesis as well.
+In \gls{ttr}, an object is something that belongs to the extension of a type.
+In computer vision, an object can be detected in a certain location within an image, and subsequently classified.
+[...]
 
 
-\begin{equation}\label{eq:objdetector}
-ObjDetector = ( Image \rightarrow [Obj] )
-\end{equation}
+
+\subsubsection{Spatial relations}
+% Classification algorithm non-TTR. Simplistic, compare to sophisitcated alternatives.
+
+
+
+\subsubsection{Language}
+% Why connect language? Is it VQA? Parsing. Classification before or after question.
+
+
+
+\subsubsection{Implementation plan}
+% How did I go about to implement this? PyTTR, YOLO, 
+
+
+
 
 The $Obj$ type couples a property with a location, but it does not explicitly say anything about any individual object.
 In \cite{lspc}, this corresponds to a \textit{perceptual} notion.
@@ -445,7 +422,7 @@ The \textbf{generalization} of a record type $T$ is a record type whose fields a
 
 \subsubsection{Spatial relations}
 
-Between any pair of individuals, a relation may take place.
+Between any pair of individuals, a relation may hold.
 Our concept of individuals is now a collection of fully specified $IndObj$ record types.
 How do we detect and model a certain relation between such a pair?
 
@@ -641,7 +618,62 @@ The \textit{relabel-subtype} relation, $\sqsubseteq_{rlb}$, was also implemented
 \section{Results}
 \label{sec:results}
 
-?
+
+
+
+\subsubsection{Objects}
+
+We begin the model formulation by declaring three basic types.
+
+\begin{description}
+\item [$Int$] An integer, such as 415.
+\item [$Image$] A 2-dimensional digital image. It serves as an identifier to a set of extracted information, and its file type and actual data is not important in this thesis.
+\item [$Ind$] A single individual object (or person), such as the reader or the Eiffel Tower.
+\end{description}
+
+A $Segment$ is a record type describing a rectangular bounding box within an (implicit) image (\autoref{eq:seg}).
+$Ppty$ is the type of functions that can be applied to an individual and return a type (\autoref{eq:ppty}).
+In our account the resulting type will be restricted to a ptype that is dependent on the individual, thus describing a property of it.
+
+\begin{equation}\label{eq:seg}
+Segment = \left[\begin{array}{rcl}
+\text{cy} &:& Int\\
+\text{cx} &:& Int\\
+\text{w} &:& Int\\
+\text{h} &:& Int
+\end{array}\right]\end{equation}
+
+\begin{equation}\label{eq:ppty}
+Ppty = (Ind \rightarrow Type)\end{equation}
+
+An object that has been detected in an image is, at the perceptual level, modeled as a record of the type $Obj$, essentially a tuple of a position and a semantic property (\autoref{eq:obj}).
+An example $Obj$ record is given in \autoref{eq:objrec}.
+$Obj$ records are the result of performing \textit{object detection}.
+This fact is expressed in TTR as the function type $ObjDetector$ (\autoref{eq:objdetector}).
+
+\begin{equation}\label{eq:obj}
+Obj = \left[\begin{array}{rcl}
+\text{seg} &:& Segment\\
+\text{pfun} &:& Ppty \\
+\end{array}\right]\end{equation}
+
+\begin{equation}\label{eq:objrec}
+obj =
+\left[\begin{array}{rcl}
+\text{seg} &=& \left[\begin{array}{rcl}
+\text{cx} &=& 138\\
+\text{w} &=& 276\\
+\text{cy} &=& 654\\
+\text{h} &=& 809
+\end{array}\right]\\
+\text{pfun} &=& \lambda v:Ind\ .\ \text{person}(v)\\
+\end{array}\right] : Obj\end{equation}
+
+
+\begin{equation}\label{eq:objdetector}
+ObjDetector = ( Image \rightarrow [Obj] )
+\end{equation}
+
 
 
 
