@@ -10,6 +10,7 @@
 \usepackage{caption}
 \usepackage{listings}
 \usepackage{textgreek}
+\usepackage{lscape}
 \lstset{language=Python}
 
 \usepackage[acronym]{glossaries}
@@ -279,14 +280,18 @@ Although the present work does not provide a solution to any reasonable definiti
 % detected object vs. individuated object ?
 % perceptual object vs. conceptual object ?
 
-The perception of recognized object is largely based on \cite{lspc}.
+The perception of recognized objects is largely based on \cite{lspc}.
 The different input space implies a different type of location data.
 ...
 
-The term \textit{object} occurs in various fields with different meanings, and it is overloaded within this thesis as well.
+%The term \textit{object} occurs in various fields with different meanings, and it is overloaded within this thesis as well.
 In \gls{ttr}, an object is something that belongs to the extension of a type.
-In computer vision, an object can be detected in a certain location within an image, and subsequently classified.
-[...]
+...
+
+In computer vision, objects can refer to the results of object detection.
+...
+
+This thesis is mostly concerned with the second kind of objects.
 
 An object that has been detected in an image is, at the perceptual level, essentially modeled as a tuple of a location and a semantic property.
 
@@ -358,7 +363,7 @@ Python is used mostly for binding the pieces together, but also some significant
 
 
 
-\subsubsection{Invoking YOLO}
+\subsubsection{External object recognizer}
 
 YOLO \citep{yolo} is made with C but there is a Python wrapper.
 When invoked from Python, the return value is a collection of dict objects with field for label, coordinates and a confidence score.
@@ -608,7 +613,67 @@ While running, the agent will modify the $AgentState$ record in $state$.
 \item The record types in $agt.\text{state.bel}$ are combined/concatenated. If the resulting record type is a relabel-subtype of $agt.\text{state.utt}$, a positive answer is emitted; otherwise a negative answer is emitted.
 \end{enumerate}
 
+An example state of an agent $agt$ is shown in \autoref{eq:agt}.
 
+\begin{landscape}
+\begin{equation}\label{eq:agt}
+\renewcommand{\arraystretch}{1.2}
+agt = \left[\begin{array}{rcl}
+    \text{objdetector} &=& \mathtt{yolo\_detector} \\
+    \text{indfun} &=& \mathtt{individualize} \\
+    \text{appr} &=& [Clf_{left}, Clf_{right}, Clf_{above}, Clf_{below}, ...] \\
+    \text{state} &=& \left[\begin{array}{rcl}
+		\text{img} &=& \mathtt{dogride.jpg} \\
+		\text{perc} &=& [
+			\left[\begin{array}{rcl}
+				\text{seg} &=& \left[\begin{array}{rcl}
+					\text{w} &=& 197\\
+					\text{cx} &=& 452\\
+					\text{h} &=& 351\\
+					\text{cy} &=& 261
+					\end{array}\right]\\
+				\text{pfun} &=& \lambda a:Ind\ .\ \text{person}(a)
+				\end{array}\right],
+			\left[\begin{array}{rcl}
+				\text{seg} &=& \left[\begin{array}{rcl}
+					\text{w} &=& 422\\
+					\text{cx} &=& 435\\
+					\text{h} &=& 242\\
+					\text{cy} &=& 355
+					\end{array}\right]\\
+				\text{pfun} &=& \lambda a:Ind\ .\ \text{bicycle}(a)
+				\end{array}\right],
+			...
+			] \\
+		\text{bel} &=& \begin{array}{l} [
+			\left[\begin{array}{rcl}
+				\text{x} = a_0 &:& Ind\\
+				\text{cp} = e_0 &:& \text{person}(x)\\
+				\text{cl} = e_{1} &:& \text{location}(x, loc)\\
+				\text{loc} = \left[\begin{array}{rcl}
+					\text{w} &=& 197\\
+					\text{cx} &=& 452\\
+					\text{h} &=& 351\\
+					\text{cy} &=& 261
+					\end{array}\right]
+					&:& Segment \\
+				\end{array}\right],
+			{}{} \left[\begin{array}{rcl}
+				\text{cr}=e_6 &:& \text{above}(a_{0}, a_{1})
+				\end{array}\right],
+			... ]
+			\end{array} \\
+		\text{utt} &=& \left[\begin{array}{rcl}
+			\text{x} &:& Ind\\
+			\text{y} &:& Ind\\
+			\text{c}_\text{0} &:& \text{dog}(x)\\
+			\text{c}_\text{1} &:& \text{bicycle}(y)\\
+			\text{c}_\text{2} &:& \text{left}(x, y)\\
+			\end{array}\right] \\
+		\end{array}\right] \\
+    \end{array}\right]
+\end{equation}
+\end{landscape}
 
 
 
