@@ -140,10 +140,12 @@ This section will highlight some important pieces of the history of past researc
 
 \subsection{Computational semantics}
 
+[semantics]
 Philosophers have long been interested in the study of meaning.
 Frege.
 [Frege?, formal semantics, Montague ...]
 
+["classical" computational semantics]
 Computational accounts of meaning emerged [how].
 They are/were characterized by [what].
 [Montague, ...]
@@ -151,11 +153,13 @@ They are/were characterized by [what].
 \citep{BlackburnComputationalsemantics2003}
 
 
+[modern methodologies]
 With recent advancements in computer science, ambitious computational-semantic theories are now in abundance.
 As a competitor to formal systems, statistical methods have emerged which do well in various tasks within semantics.
 They utilize the performance of modern computers and leverage the large amounts of data that are available as a product of our largely digitalized society.
 
 
+[formal systems]
 If statistical models of semantics do well in [empirical/data-driven/practical] tasks, formal theories of semantics [do what?]
 \cite{BlackburnComputationalsemantics2003}:
 FOPC for the win, but "other approaches are both possible and interesting".
@@ -167,6 +171,7 @@ FOPC for the win, but "other approaches are both possible and interesting".
 
 
 \subsubsection{Perceptual semantics}
+% ... in general, and spatial relations in particular
 
 
 \cite{LoganComputationalAnalysisApprehension1996} account for the state of 
@@ -197,23 +202,6 @@ Spatial term ratings influenced by: proximal \& center-of-mass orientations, gra
 
 
 
-\subsubsection{Computer vision and object recognition}
-
-[computer vision]
-
-You only look once (YOLO) \citep{RedmonYouOnlyLook2015} is a neural network model that simultaneously predicts bounding boxes around objects and classifies the contained objects.
-
-Among the most recent contributions to computer vision, Facebook's \textit{Detectron} \citep{Detectron2018} features outlining of identified objects and classification with impressive accuracy.
-
-\begin{figure}[h]
-\label{fig:dogbike_annotated}
-\includegraphics[width=\textwidth]{dogbike_annotated}
-\centering
-\caption{Visualization of the labels and bounding boxes emitted by YOLO when given an image depicting a cyclist with a dog.}
-\end{figure}
-
-
-
 \subsection{Type theory in natural language processing}
 
 Type theory was developed as an alternative to set theory, responding to paradoxes found in the latter.
@@ -231,7 +219,7 @@ It has been employed to model natural language in the context of dialogue, situa
 
 
 
-\subsubsection{Applications of \gls{ttr}}
+\subsubsection{Perceptual semantics in \gls{ttr}}
 
 \cite{LarssonDialoguesHaveContent2011}
 
@@ -263,6 +251,27 @@ By implementing a theoretical model as a computer program, it can "come alive" a
 Another motivation for implementation is to compete with existing, less theoretically strong techniques to solve a given task, but it is possibly secondary to the former reason.
 
 %[What has been written in PyTTR so far? nu, animat]
+
+
+
+\subsection{Computer vision}
+
+[computer vision]
+
+[object recognition]
+
+You only look once (YOLO) \citep{RedmonYouOnlyLook2015} is a neural network model that simultaneously predicts bounding boxes around objects and classifies the contained objects.
+
+Among the most recent contributions to computer vision, Facebook's \textit{Detectron} \citep{Detectron2018} features outlining of identified objects and classification with impressive accuracy.
+
+\begin{figure}[h]
+\label{fig:dogbike_annotated}
+\includegraphics[width=\textwidth]{dogbike_annotated}
+\centering
+\caption{Visualization of the labels and bounding boxes emitted by YOLO when given an image depicting a cyclist with a dog.}
+\end{figure}
+
+\subsubsection{\Acrfull{vqa}}
 
 
 
@@ -701,11 +710,20 @@ agt = \left[\begin{array}{rcl}
 \subsection{Discussion}
 \label{sec:discussion}
 
-Contradiction of Logan \& Sadler's "evidence" for their "theory of apprehension" (which is different from mine)?
+Contradiction of Logan \& Sadler's "evidence" for their "theory of apprehension" (which is different from mine)? (Already Regier \& Carlson did.)
 
-VQA?
+Not a full VQA solution.
+It can only answer one question type, and only in the form "A P is R a Q", which is not even a question.
+With only the extension of parsing, it could understand (= educe situation record types) more complex forms like "A R1 B1 and R2 B2", "A1 R1 B1 and A2 R2 B2".
+"What is R B?"
+"What color is the A?"
+"How many A are there?" etc.
 
 ...
+
+PyTTR extensions (here or Conclusions?)
+
+Functional aspect (Coventry).
 
 
 
@@ -713,6 +731,7 @@ VQA?
 \label{sec:conclusions}
 
 It works and it's nice because...
+robustness, type checking, verifiable (?)
 
 
 
@@ -730,6 +749,8 @@ Dialogue.
 Classification after Q.
 
 Probabilistic TTR for "good fit" (is is more to the left or more above?).
+
+Negation.
 
 
 
