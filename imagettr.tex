@@ -113,13 +113,13 @@ The results confirm the suitability of this approach.
 \section{Introduction}
 \label{sec:intro}
 
-Having computers "understand" images is desirable in several areas.
+Having computers ``understand'' images is desirable in several areas.
 In this context, understanding means to process visual input on a cognitive level.
 Sub-cognitive image processing may include tasks such as prominent color extraction, edge detection and visual pattern recognition.
 Cognitive processing, however, includes identifying objects, their properties and their relations to each other, as well as including this information in further cognitive processes, such as reasoning and prediction [sources?].
 To make meaning out of sensory (such as visual) input is known as \textit{perceptual semantics}.
 
-["Image understanding"] is interesting in various applications.
+[``Image understanding''] is interesting in various applications.
 It is required in domestic assistant, driver-less cars and other camera-equipped (often mobile) robots, in order to obtain knowledge (or beliefs) and select appropriate actions.
 The same kind of processing can also be used outside situated agents, for automatic processing of large sets of visual data [?].
 
@@ -127,10 +127,17 @@ The same kind of processing can also be used outside situated agents, for automa
 
 [the creation of ttr]
 
+[research question]
+The goal of this thesis is to implement visual perception, cognition of spatial relations and basic natural language understanding in \gls{ttr}.
+The implementation shall build on past relevant \gls{ttr} model proposals and focus on high-level completeness, meaning connecting vision and language through a cognitive model using \gls{ttr} as far as possible.
+These are the points on which the result is finally qualitatively evaluated.
+Lower level parts shall use existing solutions or basic placeholder implementations.
+
 The theoretical background for this thesis is summarized in \textit{Background}.
 In the \textit{Method} section, a model is defined and its implementation in Python and PyTTR described.
 Then follows an account of the \textit{Results} with discussion, and finally some \textit{Conclusions}.
-[enable numbered sections instead]
+
+
 
 \glsresetall
 \section{Background}
@@ -162,9 +169,7 @@ They utilize the performance of modern computers and leverage the large amounts 
 [formal systems]
 If statistical models of semantics do well in [empirical/data-driven/practical] tasks, formal theories of semantics [do what?]
 \cite{BlackburnComputationalsemantics2003}:
-FOPC for the win, but "other approaches are both possible and interesting".
-
-\cite{HarnadSymbolGroundingProblem1990}
+FOPC for the win, but ``other approaches are both possible and interesting''.
 
 
 
@@ -173,6 +178,13 @@ FOPC for the win, but "other approaches are both possible and interesting".
 \subsubsection{Perceptual semantics}
 % ... in general, and spatial relations in particular
 
+\cite{Garnhamunifiedtheorymeaning1989}:
+Left/right/above/below/front/behind.
+Basic meaning (of spatial relational terms).
+Framework vertical constraint.
+Gravitation. NESW.
+Clark: canonical encounter? (left of cabinet, left of chair.)
+(Ships and outer space.)
 
 \cite{LoganComputationalAnalysisApprehension1996} account for the state of 
 Basic–deictic(–intrinsic) relations.
@@ -194,11 +206,26 @@ Four models. AVS.
 Many experiments.
 Spatial term ratings influenced by: proximal \& center-of-mass orientations, grazing line, distance.
 
+\cite{CoventryClassificationExtrageometricInfluences2004}:
+Extra-geometric constraints on the meaning of spatial relational terms.
+Especially functional.
+Functional geometric framework.
 [functional aspect, Coventry?]
 
-[mention grounding!?]
+\cite{HarnadSymbolGroundingProblem1990}:
+Can a computer really ``understand'' concepts, that is, will it operate on grounded symbols or just the (arbitrary) symbols themselves?
+Turing test.
 
-[vqa]
+\cite{SteelsSymbolGroundingProblem2007}:
+Peirce: object, symbol, concept. Grounded with method.
+Searle and other claim that the Symbol grounding problem is insolvable.
+Steels concludes that it is solved.
+Using experiments where a number of agents participate in a language game where they make up random words for preset concepts and manage to ``agree'' on which words to use for which concepts.
+
+\cite{AgrawalVQAVisualQuestion2015} suggest \acrfull{vqa} as a [complete] challenge in AI-completeness.
+``A VQA system takes as input an image and a free-form, open-ended, natural-language question about the image and produces a natural-language answer as the output''.
+The initiative includes a dataset and a series of annual competitions since 2016.
+...
 
 
 
@@ -247,7 +274,7 @@ As a Python library it also enables other features and peripheral procedures to 
 
 [the advantage of implementing a theoretical model]
 PyTTR, itself being an implementation of TTR, allows, in turn, the implementation of models and theories that build on TTR.
-By implementing a theoretical model as a computer program, it can "come alive" and be tested on real problems and data.
+By implementing a theoretical model as a computer program, it can ``come alive'' and be tested on real problems and data.
 Another motivation for implementation is to compete with existing, less theoretically strong techniques to solve a given task, but it is possibly secondary to the former reason.
 
 %[What has been written in PyTTR so far? nu, animat]
@@ -286,42 +313,39 @@ The present agent will feature:
 \item Sensory input in the form of 2D images
 \item Utilizing an external object recognition system
 \item Apprehension of spatial relations
-\item Some degree of natural language understanding
+\item Basic natural language understanding
 \end{enumerate}
 
-An important motivation for these choices is to move toward the field of \gls{vqa}.
-Although the present work does not provide a solution to any reasonable definition of VQA, it takes a few steps in that direction.
-
-[lift vqa motivation before feature list?]
-"we are using TTR as a formal specification language that tell us how to do visual question answering in Python. This additional layer gives us a formal transparency and the ability to type check the code before running it." (SD)
+While operational functionality and the overall procedural code is written in Python, the core model is written in \gls{ttr} (realized as Python code using PyTTR).
+As such, \gls{ttr} serves as a formal specification language.
+The additional layer provides formal transparency and type robustness.
 
 
 
 \subsection{Theory development}
 \label{ssec:theory}
 
-...
 
 
-
-\subsubsection{Concepts of objects}
+\subsubsection{Objects}
 % Distinguish different uses of "object": TTR a:T, Obj, IndObj. Perceptual vs conceptual.
 
 % detected object vs. individuated object ?
 % perceptual object vs. conceptual object ?
 
-The perception of recognized objects is largely based on \cite{lspc}.
-The different input space implies a different type of location data.
-...
+The perception of objects is largely based on \cite{lspc}.
+There, the input space is a 3D point space rather than 2D images.
+This difference necessitates other types for the perceptual input and the locations of perceived objects.
 
-%The term \textit{object} occurs in various fields with different meanings, and it is overloaded within this thesis as well.
+
+
+It may be important to note the overloading of the term ``object''.
 In \gls{ttr}, an object is something that belongs to the extension of a type.
+This is rather different from the semantic notion.
 ...
 
 In computer vision, objects can refer to the results of object detection.
 ...
-
-This thesis is mostly concerned with the second kind of objects.
 
 An object that has been detected in an image is, at the perceptual level, essentially modeled as a tuple of a location and a semantic property.
 
@@ -589,7 +613,7 @@ LocTup = \left[\begin{array}{rcl}
 ClfFun = ( LocTup \rightarrow RecType )
 \end{equation}
 
-For instance, a classifier for "to the left of" might look like in \autoref{eq:leftclfdef}, where $\kappa_{left}$ is a non-TTR, boolean function.
+For instance, a classifier for ``to the left of'' might look like in \autoref{eq:leftclfdef}, where $\kappa_{left}$ is a non-TTR, boolean function.
 Of course, the requirement that the individual $r.\text{lo}.\text{x}$ is actually located at $r.\text{lo}.\text{loc}$ (and same for $r.\text{refo}$) is implicit from the typing as $IndObj$, where the field $\text{cl} : \text{location}(\text{x}, \text{loc})$ is necessarily present.
 
 \begin{equation}\label{eq:leftclfdef}
@@ -637,7 +661,7 @@ While running, the agent will modify the $AgentState$ record in $state$.
 \item $indfun$ is, in turn, invoked on each record in $agt.\text{state.perc}$ and resulting record types are added to $agt.\text{state.bel}$.
 \item Now, the functions in $agt.\text{appr}$ are applied to type-valid combinations of $agt.\text{state.bel}$ records, and resulting record types are added to $agt.\text{state.bel}$
 	\begin{enumerate}
-	\item Define "type-valid combinations"? How detailed?
+	\item Define ``type-valid combinations''? How detailed?
 	\end{enumerate}
 \item Any language input is parsed and the resulting record type assigned to $agt.\text{state.utt}$.
 \item The record types in $agt.\text{state.bel}$ are combined/concatenated. If the resulting record type is a relabel-subtype of $agt.\text{state.utt}$, a positive answer is emitted; otherwise a negative answer is emitted.
@@ -748,7 +772,7 @@ Dialogue.
 
 Classification after Q.
 
-Probabilistic TTR for "good fit" (is is more to the left or more above?).
+Probabilistic TTR for ``good fit'' (is is more to the left or more above?).
 
 Negation.
 
