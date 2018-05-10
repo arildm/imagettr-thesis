@@ -1,0 +1,288 @@
+\section{Results}
+\label{sec:results}
+
+
+
+\subsection{\Gls{ttr} model}
+
+We begin the model formulation by declaring three basic types.
+
+\begin{description}
+\item [$Int$] An integer, such as 415.
+\item [$Image$] A 2-dimensional digital image. It serves as an identifier to a set of extracted information, and its file type and actual data is not important in this thesis.
+\item [$Ind$] A single individual object (or person), such as the reader or the Eiffel Tower.
+\end{description}
+
+A $Segment$ is a record type describing a rectangular bounding box within an (implicit) image (\autoref{eq:seg}).
+$Ppty$ is the type of functions that can be applied to an individual and return a type (\autoref{eq:ppty}).
+In our account the resulting type will be restricted to a ptype that is dependent on the individual, thus describing a property of it.
+
+\begin{equation}\label{eq:seg}
+Segment = \left[\begin{array}{rcl}
+\text{cy} &:& Int\\
+\text{cx} &:& Int\\
+\text{w} &:& Int\\
+\text{h} &:& Int
+\end{array}\right]\end{equation}
+
+\begin{equation}\label{eq:ppty}
+Ppty = (Ind \rightarrow Type)\end{equation}
+
+\subsubsection{Objects}
+
+A detected object is modeled as a record of the type $Obj$ (\autoref{eq:obj}).
+An example $Obj$ record is given in \autoref{eq:objrec}.
+$Obj$ records are the result of performing \textit{object detection}.
+This fact is expressed in TTR as the function type $ObjDetector$ (\autoref{eq:objdetector}).
+
+\begin{equation}\label{eq:obj}
+Obj = \left[\begin{array}{rcl}
+\text{seg} &:& Segment\\
+\text{pfun} &:& Ppty \\
+\end{array}\right]\end{equation}
+
+\begin{equation}\label{eq:objrec}
+obj =
+\left[\begin{array}{rcl}
+\text{seg} &=& \left[\begin{array}{rcl}
+\text{cx} &=& 138\\
+\text{w} &=& 276\\
+\text{cy} &=& 654\\
+\text{h} &=& 809
+\end{array}\right]\\
+\text{pfun} &=& \lambda v:Ind\ .\ \text{person}(v)\\
+\end{array}\right] : Obj\end{equation}
+
+\begin{equation}\label{eq:objdetector}
+ObjDetector = ( Image \rightarrow [Obj] )
+\end{equation}
+
+[...]
+
+A situation type describing an individuated object is defined in \autoref{eq:indobj} as $IndObj$.
+In this situation, $x$ is an individual and $loc$ is a location.
+$cl$ specifies that $loc$ is the location of $x$, and the purpose of $cp$ is to declare a property of $x$.
+%(Had TTR allowed it, we could have been more specific by stating that the field $cp$ should be of a ptype dependent on the field $x$.)
+
+\begin{equation}\label{eq:indobj}
+IndObj = \left[\begin{array}{rcl}
+\text{x} &:& Ind \\
+\text{loc} &:& Segment \\
+\text{cp} &:& PType(\text{x}) [???] \\
+\text{cl} &:& \text{location}(\text{x}, \text{loc}) \\
+\end{array}\right]
+\end{equation}
+
+The function for generating an $IndObj$ subtype from an $Obj$ record is known from \cite{lspc} as an \textit{individuation function}.
+It will be of the type $IndFun$.
+
+\begin{equation}\label{eq:indfun}
+IndFun = ( Obj \rightarrow RecType )
+\end{equation}
+
+The record type resulting from applying an $IndFun$ function should be a subtype of $IndObj$.
+
+However, note that the $cp$ field is only being declared generally as $Type$.
+Thus, it is \textit{subtypes} of $IndObj$, with a more specific typing of $cp$, that will be truly informative.
+...
+
+For each record type returned by the individuation function, a record is simultaneously created.
+The $loc$ value of this record is naturally identical to the $seg$ value of the $Obj$ input record.
+Objects for the remaining fields need to be instantiated on the spot.
+Object creation is notated here as $A_{new}$, where the symbol $A$ may vary for the sake of readability.
+%For the $x$ field, we create a new individual object $a_{new} : Ind$.
+%For the ptype fields $cp$ and $cl$, we also create new objects $e_{new} : r.\text{pfun}(\text{x})$ and $e_{new} : \text{location}(\text{x}, \text{loc})$.
+
+We are now ready to define the individuation function as in \autoref{eq:indfundef}, with an example application in \autoref{eq:indfunrec}.
+The definition uses manifest fields to denote the \textit{fully specified} record type, or singleton record type.
+
+\begin{equation}\label{eq:indfundef}
+\lambda r : Obj\ . \left[\begin{array}{lcl}
+    \text{x} = a_{new} &:& Ind \\
+    \text{cp} = e_{new} &:& r.\text{pfun}(\text{x}) \\
+    \text{cl} = e_{new} &:& \text{location}(\text{x}, \text{loc}) \\
+    \text{loc} = r.\text{seg} &:& Segment\\
+\end{array}\right]
+\end{equation}
+
+\begin{equation}\label{eq:indfunrec}
+\left[\begin{array}{rcl}
+\text{seg} &=& \left[\begin{array}{rcl}
+\text{cx} &=& 138\\
+\text{w} &=& 276\\
+\text{cy} &=& 654\\
+\text{h} &=& 809
+\end{array}\right]\\
+\text{pfun} &=& \lambda v:Ind\ .\ \text{person}(v)\\
+\end{array}\right]
+\mapsto
+\left[\begin{array}{lcl}
+    \text{x} = a_0 &:& Ind \\
+    \text{cp} = e_0 &:& \text{person}(\text{x}) \\
+    \text{cl} = e_1 &:& \text{location}(\text{x}, \text{loc}) \\
+    \text{loc} = \left[\begin{array}{rcl}
+\text{cx} &=& 138\\
+\text{w} &=& 276\\
+\text{cy} &=& 654\\
+\text{h} &=& 809
+\end{array}\right] &:& Segment\\
+\end{array}\right]
+\end{equation}
+
+
+
+\subsubsection{Spatial relations}
+
+Relations may hold between pairs of individuated objects.
+How do we detect and model a certain relation between such a pair?
+
+Since we are interested in the spatial relation between a \textit{reference object} and a \textit{located object}, we will be constructing tuple-like records of the type $LocTup$ defined in \autoref{eq:loctup}.
+Records of this type contain instantiations of two $IndObj$ record types.
+In \autoref{eq:clf}, a classifier is modeled as a function from such a record to a new record type which should describe the relation.
+
+\begin{equation}\label{eq:loctup}
+LocTup = \left[\begin{array}{rcl}
+    \text{lo} &:& IndObj \\
+    \text{refo} &:& IndObj \\
+    \end{array}\right]
+\end{equation}
+
+\begin{equation}\label{eq:clf}
+ClfFun = ( LocTup \rightarrow RecType )
+\end{equation}
+
+For instance, a classifier for ``to the left of'' might look like in \autoref{eq:leftclfdef}, where $\kappa_{left}$ is a non-TTR, boolean function.
+Of course, the requirement that the individual $r.\text{lo}.\text{x}$ is actually located at $r.\text{lo}.\text{loc}$ (and same for $r.\text{refo}$) is implicit from the typing as $IndObj$, where the field $\text{cl} : \text{location}(\text{x}, \text{loc})$ is necessarily present.
+
+\begin{equation}\label{eq:leftclfdef}
+\lambda r : LocTup \ .\ 
+\begin{cases}
+\left[\begin{array}{rcl}
+    \text{cr} &:& \text{left}(r.\text{lo}.\text{x}, r.\text{refo}.\text{x}) \\
+\end{array}\right],
+& \text{if } \kappa_{left}(r.\text{lo}.\text{loc}, r.\text{refo}.\text{loc}) \\
+[], & \text{otherwise}
+\end{cases}
+\end{equation}
+
+
+
+\subsubsection{Agent}
+
+The perceptual-conceptual pieces described above are here combined.
+We are building an agent who receives classified and located objects of an image, apprehends their basic status and spatial relations, and validates natural-language propositions.
+
+\begin{equation}\label{eq:agent}
+Agent = \left[\begin{array}{rcl}
+    \text{objdetector} &:& ObjDetector \\
+    \text{indfun} &:& IndFun \\
+    \text{appr} &:& [(Rec \rightarrow RecType)] \\
+    \text{state} &:& AgentState \\
+    \end{array}\right]
+\end{equation}
+
+\begin{equation}\label{eq:state}
+AgentState = \left[\begin{array}{rcl}
+    \text{img} &:& Image \\
+    \text{perc} &:& [Obj] \\
+    \text{bel} &:& [RecType] \\
+    \text{utt} &:& RecType \\
+    \end{array}\right]
+\end{equation}
+
+The fields $objdetector$, $indfun$ and $appr$ of $Agent$ are to be statically defined for a specific agent.
+While running, the agent will modify the $AgentState$ record in $state$.
+
+\begin{enumerate}
+\item Visual input in the form of an image is received and assigned to $agt.\text{state}.\text{img}$.
+\item $objdetector$ is invoked on $agt.\text{state.img}$ and creates a collection of records that are assigned to $agt.\text{state}.\text{perc}$.
+\item $indfun$ is, in turn, invoked on each record in $agt.\text{state.perc}$ and resulting record types are added to $agt.\text{state.bel}$.
+\item Now, the functions in $agt.\text{appr}$ are applied to type-valid combinations of $agt.\text{state.bel}$ records, and resulting record types are added to $agt.\text{state.bel}$
+	\begin{enumerate}
+	\item Define ``type-valid combinations''? How detailed?
+	\end{enumerate}
+\item Any language input is parsed and the resulting record type assigned to $agt.\text{state.utt}$.
+\item The record types in $agt.\text{state.bel}$ are combined/concatenated. If the resulting record type is a relabel-subtype of $agt.\text{state.utt}$, a positive answer is emitted; otherwise a negative answer is emitted.
+\end{enumerate}
+
+An example state of an agent $agt$ is shown in \autoref{eq:agt}.
+
+\begin{landscape}
+\begin{equation}\label{eq:agt}
+\renewcommand{\arraystretch}{1.2}
+agt = \left[\begin{array}{rcl}
+    \text{objdetector} &=& \mathtt{yolo\_detector} \\
+    \text{indfun} &=& \mathtt{individualize} \\
+    \text{appr} &=& [Clf_{left}, Clf_{right}, Clf_{above}, Clf_{below}, ...] \\
+    \text{state} &=& \left[\begin{array}{rcl}
+		\text{img} &=& \mathtt{dogride.jpg} \\
+		\text{perc} &=& [
+			\left[\begin{array}{rcl}
+				\text{seg} &=& \left[\begin{array}{rcl}
+					\text{w} &=& 197\\
+					\text{cx} &=& 452\\
+					\text{h} &=& 351\\
+					\text{cy} &=& 261
+					\end{array}\right]\\
+				\text{pfun} &=& \lambda a:Ind\ .\ \text{person}(a)
+				\end{array}\right],
+			\left[\begin{array}{rcl}
+				\text{seg} &=& \left[\begin{array}{rcl}
+					\text{w} &=& 422\\
+					\text{cx} &=& 435\\
+					\text{h} &=& 242\\
+					\text{cy} &=& 355
+					\end{array}\right]\\
+				\text{pfun} &=& \lambda a:Ind\ .\ \text{bicycle}(a)
+				\end{array}\right],
+			...
+			] \\
+		\text{bel} &=& \begin{array}{l} [
+			\left[\begin{array}{rcl}
+				\text{x} = a_0 &:& Ind\\
+				\text{cp} = e_0 &:& \text{person}(x)\\
+				\text{cl} = e_{1} &:& \text{location}(x, loc)\\
+				\text{loc} = \left[\begin{array}{rcl}
+					\text{w} &=& 197\\
+					\text{cx} &=& 452\\
+					\text{h} &=& 351\\
+					\text{cy} &=& 261
+					\end{array}\right]
+					&:& Segment \\
+				\end{array}\right],
+			{}{} \left[\begin{array}{rcl}
+				\text{cr}=e_6 &:& \text{above}(a_{0}, a_{1})
+				\end{array}\right],
+			... ]
+			\end{array} \\
+		\text{utt} &=& \left[\begin{array}{rcl}
+			\text{x} &:& Ind\\
+			\text{y} &:& Ind\\
+			\text{c}_\text{0} &:& \text{dog}(x)\\
+			\text{c}_\text{1} &:& \text{bicycle}(y)\\
+			\text{c}_\text{2} &:& \text{left}(x, y)\\
+			\end{array}\right] \\
+		\end{array}\right] \\
+    \end{array}\right]
+\end{equation}
+\end{landscape}
+
+
+
+\subsection{Discussion}
+\label{sec:discussion}
+
+Contradiction of Logan \& Sadler's "evidence" for their "theory of apprehension" (which is different from mine)? (Already Regier \& Carlson did.)
+
+Not a full VQA solution.
+It can only answer one question type, and only in the form "A P is R a Q", which is not even a question.
+With only the extension of parsing, it could understand (= educe situation record types) more complex forms like "A R1 B1 and R2 B2", "A1 R1 B1 and A2 R2 B2".
+"What is R B?"
+"What color is the A?"
+"How many A are there?" etc.
+
+...
+
+PyTTR extensions (here or Conclusions?)
+
+Functional aspect (Coventry).
