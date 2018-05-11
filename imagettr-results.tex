@@ -510,7 +510,105 @@ def find_all_rels(indobjs):
 rels = list(find_all_rels(indobjs))
 \end{lstlisting}
 
+\begin{lstlisting}[label=lst:bel, caption=Combining beliefs.]
+def combine_beliefs(bel):
+    """Combine a list of belief record types into one."""
+    return unsingleton(use_ind_field_labels(reduce(merge_unconflict, bel, RecType())))
 
+bel = indobjs + rels
+bel_comb = combine_beliefs(bel)
+\end{lstlisting}
+
+[...]
+ Parsing to PyTTR cannot really be done directly. NLTK feature grammars support strings and FOPC. Variable substitution is only allowed in FOPC. We produce a FOPC conjunction of ptypes, for each of which we create a new field.
+
+\begin{lstlisting}[label=lst:grammar, caption=Basic parsing of natural language into PyTTR object.]
+import nltk
+
+grammar = nltk.grammar.FeatureGrammar.fromstring(r'''
+%start S
+S[SEM=<?s(x) & ?vp(x, y)>] -> NP[SEM=?s] VP[SEM=?vp]
+NP[SEM=<?det(?n)>] -> Det[SEM=?det] N[SEM=?n]
+Det[SEM=<\P a.P(a)>] -> 'a' | 'an'
+N[SEM=<dog>] -> 'dog'
+N[SEM=<car>] -> 'car'
+N[SEM=<person>] -> 'person'
+N[SEM=<bicycle>] -> 'bicycle'
+N[SEM=<backpack>] -> 'backpack'
+VP[SEM=?pp] -> 'is' PP[SEM=?pp]
+PP[SEM=<\a b.(?prep(a, b) & ?o(b))>] -> Prep[SEM=?prep] NP[SEM=?o]
+Prep[SEM=<left>] -> 'to' 'the' 'left' 'of'
+Prep[SEM=<right>] -> 'to' 'the' 'right' 'of'
+Prep[SEM=<above>] -> 'above'
+Prep[SEM=<under>] -> 'under'
+''')
+parser = nltk.FeatureChartParser(grammar)
+
+def fopc_to_pyttr(expr, T=RecType()):
+    """Turns a FOPC object into a RecType."""
+    from nltk.sem.logic import ApplicationExpression, AndExpression
+    if isinstance(expr, ApplicationExpression):
+        pred, args = expr.uncurry()
+        T.addfield(gensym('c'), mkptype(str(pred), vars=[str(a) for a in args]))
+        for x in args:
+            if str(x) not in T.comps.__dict__:
+                T.addfield(str(x), Ind)
+    if isinstance(expr, AndExpression):
+        fopc_to_pyttr(expr.first, T)
+        fopc_to_pyttr(expr.second, T)
+    return T
+
+def eng_to_pyttr(text):
+    trees = parser.parse(text.lower().split())
+    sem = nltk.sem.root_semrep(list(trees)[0])
+    T = fopc_to_pyttr(sem)
+    return T
+\end{lstlisting}
+
+[...]
+
+\begin{lstlisting}[label=lst:subtyperlb, caption=Implementation of the relabel-subtype relation.]
+from itertools import permutations, combinations
+
+def find_subtype_relabeling(T, U):
+    '''Could record type T be a sub type of record type U if relabeling in T is allowed?'''
+    # Find possible relabelings for basic-type fields
+    basic_label_permutations = set(ps[:len(basic_fields(U))] for ps in permutations(basic_fields(T)))
+    
+    for tks in basic_label_permutations:
+        # Copy U and try a basic-fields relabeling
+        U2 = copy_rectype(U)
+        rlb = dict(zip(basic_fields(U), tks))
+        rectype_relabels(U2, rlb)
+        
+        # For each U field, find a T field that is a subtype
+        match = dict()
+        for uk in nonbasic_fields(U2):
+            for tk in nonbasic_fields(T):
+                if T.comps.__dict__[tk].subtype_of(U2.comps.__dict__[uk]):
+                    match[uk] = tk
+                    break
+            if uk not in match:
+                break
+
+        # Successful if all non-basic fields match.
+        if len(match) == len(nonbasic_fields(U2)):
+            return dict(**rlb, **match)
+    return None
+\end{lstlisting}
+
+\begin{lstlisting}
+def validate_utt(utt, bel):
+    return bool(find_subtype_relabeling(combine_beliefs(bel), utt))
+
+def relabel_utt(utt, bel_comb):
+    """Relabels an utterance record type to match the combined beliefs.
+    
+    The result will be a subtype of bel_comb.
+    """
+    rlb = find_subtype_relabeling(bel_comb, utt)
+    return rectype_relabels(utt, rlb)
+\end{lstlisting}
 
 \subsection{Discussion}
 \label{sec:discussion}
