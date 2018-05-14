@@ -1,9 +1,10 @@
 \section{Method}
 \label{sec:method}
+% Describe TTR decisions?
 
 The work behind this thesis aims to produce a working implementation of an application with visual as well as natural-language input, in \gls{ttr}.
 Such an application largely resembles those put forward in \cite{lspc} and \cite{ttrspat}, but there are some differences.
-The present application will feature:
+This application will feature:
 
 \begin{enumerate}
 \item Sensory input in the form of 2D images
@@ -15,6 +16,27 @@ The present application will feature:
 While operational functionality and the overall procedural code is written in Python, the core model is written in \gls{ttr} (realized as Python code using PyTTR).
 As such, \gls{ttr} serves as a formal specification language.
 The additional layer provides formal transparency and type robustness.
+
+
+
+\subsection{Image recognition with YOLO}
+
+You only look once (YOLO) \citep{RedmonYouOnlyLook2015} is a neural network model for image recognition.
+It is trained using a loss function which takes detection as well as classification into account.
+In other words, it simultaneously predicts bounding boxes and classifies the contained objects.
+Unlike \cite{HeMaskRCNN2017} and others, it does not contain any recurrent layers.
+The joint, recurrence-free model makes for a rather small network size, which in turn means a favorable evaluation speed.
+However, compared to state of the art, it lags behind in accuracy.
+
+\begin{figure}[h]
+\label{fig:dogbike_annotated}
+\includegraphics[width=\textwidth]{dogbike_annotated}
+\centering
+\caption{Visualization of the labels and bounding boxes emitted by YOLO when given an image depicting a cyclist with a dog.}
+\end{figure}
+
+YOLO is written in C, using the Darknet neural network library \citep{darknet13}.
+It can be used in Python with the TensorFlow machine learning library and the Darkflow library which translates a Darknet model to TensorFlow.
 
 
 

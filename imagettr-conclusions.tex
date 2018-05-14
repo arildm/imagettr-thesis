@@ -1,21 +1,38 @@
 \section{Conclusions}
 \label{sec:conclusions}
 
-It works and it's nice because...
+We have implemented \gls{vqa} in PyTTR.
+This involves connecting visual perception and language with formal semantic representations.
+In this, TTR is the single framework that serves to represent all parts of the pipeline: perception, language and grounding.
+
+The system utilizes an external, high-performance object recognition system.
+Spatial relation detection and language parsing are instead performed with makeshift solutions.
+They all share the quality of being easily replaceable by other solutions as needed.
+
+Our model is a framework for detecting objects and relations in visual data, and grounding language in the detected information.
+It provides a \gls{vqa} system based on formal semantics.
+
+The model is one of few applications of the recently developed PyTTR library, which allows TTR to be used in executable programs.
+
+%- What we have contributed to (1) semantic representations of grounded language in TTR; (ii) their implementation in pyTTR; (iii) in the domain of visual question answering? 
+
+%It works and it's nice because...
 robustness, type checking, verifiable (?)
 
 
 
 \subsection{Future work}
 
+%(b) left for future work in terms of (1) semantic representations of grounded language in TTR; (ii) their implementation in pyTTR; (iii) in the domain of visual question answering? 
+
 Spatial templates \& regions of acceptability. Compound relations (above right) finer (directly). Functional aspect.  \cite{LoganComputationalAnalysisApprehension1996} (also Dobnik etc)
 
-Basic->Deictic->Intrinsic relations  \cite{LoganComputationalAnalysisApprehension1996}. 3D.
+Basic->Deictic->Intrinsic relations  \cite{LoganComputationalAnalysisApprehension1996}.
 
 4 question types.
 Moar question types (tasks/programs/routines in L\&S).
 
-Dialogue.
+%Dialogue.
 
 Classification after Q.
 

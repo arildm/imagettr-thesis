@@ -138,22 +138,22 @@ Another motivation for implementation is to compete with existing, less theoreti
 
 
 
-\subsection{Computer vision}
+\subsection{Image recognition}
 
-[computer vision]
+In image recognition, objects are detected and classified in visual data.
+A wide range of models have been developed to solve this task.
+Some focus only on the detection of objects \citep{BlaschkoLearningLocalizeObjects2008}, some only on classification \citep[ResNet,][]{HeDeepResidualLearning2015}, and others attempt to solve the full problem in an integrated fashion \citep{RedmonYouOnlyLook2015,HeMaskRCNN2017}.
 
-[object recognition]
+Some models include a feature extraction stage, where the image is converted to .
+In SIFT, keypoints are extracted at significant locations of an image, so that a group of keys can be compared to a group of keys in a database for an object, in order to do classification.
 
-You only look once (YOLO) \citep{RedmonYouOnlyLook2015} is a neural network model that simultaneously predicts bounding boxes around objects and classifies the contained objects.
+Convolutional neural networks are a commonly applied technique \citep{HeDeepResidualLearning2015} [more citations?].
+Color image data is highly dimensional: it is typically represented digitally as a 2D matrix of pixels, where each pixel itself specifies a quantity of each of three basic colors.
+Convolutional layers reduces the dimensionality so that a single (one-dimensional) vector can encode an image.
+The full image is often first divided into same-size overlapping segments, thus capturing locational aspects of the data.
 
-Among the most recent contributions to computer vision, Facebook's \textit{Detectron} \citep{Detectron2018} features outlining of identified objects and classification with impressive accuracy.
+%Among the most recent contributions to computer vision, Facebook's \textit{Detectron} \citep{Detectron2018} features outlining of identified objects and classification with impressive accuracy.
 
-\begin{figure}[h]
-\label{fig:dogbike_annotated}
-\includegraphics[width=\textwidth]{dogbike_annotated}
-\centering
-\caption{Visualization of the labels and bounding boxes emitted by YOLO when given an image depicting a cyclist with a dog.}
-\end{figure}
 
 
 
