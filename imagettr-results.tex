@@ -203,6 +203,8 @@ AgentState = \left[\begin{array}{rcl}
 The fields $objdetector$, $indfun$ and $appr$ of $Agent$ are to be statically defined for a specific agent.
 While running, the agent will modify the $AgentState$ record in $state$.
 
+For an agent $agt : Agent$, the perception and question-answering procedure is carried out as follows.
+
 \begin{enumerate}
 \item Visual input in the form of an image is received and assigned to $agt.\text{state}.\text{img}$.
 \item $objdetector$ is invoked on $agt.\text{state.img}$ and creates a collection of records that are assigned to $agt.\text{state}.\text{perc}$.
@@ -285,13 +287,17 @@ agt = \left[\begin{array}{rcl}
 
 \subsection{Python implementation}
 
-The full code is published as a Jupyter Notebook \footnote{\url{https://github.com/arildm/imagettr}}.
+This section presents the Python implementation of the model described above.
+The full code, including visualization and more comments, is published as a Jupyter Notebook at \url{https://github.com/arildm/imagettr}.
 
 \subsubsection{Utility functions}
 
 These are PyTTR-related functions that are used in later code.
 
 \begin{lstlisting}[label=lst:utility,caption=Utility functions]
+from pyttr.ttrtypes import *
+from pyttr.utils import *
+import PIL.Image
 from functools import reduce
 
 # The Ind TTR type is used by these utility functions so it needs defining here already.
@@ -363,7 +369,7 @@ def merge_unconflict(T1, T2):
     return T1c.merge(T2c)
 \end{lstlisting}
 
-For example, if $T_1 = [x:Ind]$ and $T_2 = [x:Ind]$, then $\mathtt{merge\_unconflict}(T_1, T_2)$ evaluates to $\left[\begin{array}{rcl} x_0&:&Ind \\ x_1&:&Ind \end{array}\right]$ (or a similar record type with different subscript indices).
+For example, if $T_1 = T_2 = [x:Ind]$, then $\mathtt{merge\_unconflict}(T_1, T_2)$ evaluates to $\left[\begin{array}{rcl} x_0&:&Ind \\ x_1&:&Ind \end{array}\right]$ (or a similar record type with different subscript indices).
 
 \begin{lstlisting}[label={lst:useindfieldlabels},caption={use\_ind\_field\_labels()}]
 def use_ind_field_labels(T):
