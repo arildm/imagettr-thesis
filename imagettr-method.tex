@@ -1,6 +1,5 @@
 \section{Method}
 \label{sec:method}
-% Describe TTR decisions?
 
 The work behind this thesis aims to produce a working implementation of an application with visual as well as natural-language input, in \gls{ttr}.
 Such an application largely resembles those put forward in \cite{lspc} and \cite{ttrspat}, but there are some differences.
@@ -38,59 +37,41 @@ However, compared to state of the art, it lags behind in accuracy.
 YOLO is written in C, using the Darknet neural network library \citep{darknet13}.
 It can be used in Python with the TensorFlow machine learning library and the Darkflow library which translates a Darknet model to TensorFlow.
 
+When invoked from Python, the return value is a collection of dict objects, each containing a label, coordinates and a confidence score.
+This data is cast into a TTR record as described in \autoref{ssec:python}.
+
+\begin{lstlisting}[label=lst:yolo_out, caption=Example output of YOLO invocation]
+[
+	{
+		'topleft': {'x': 354, 'y': 86},
+		'bottomright': {'x': 551, 'y': 437},
+		'label': 'person',
+		'confidence': 0.80116189
+	},
+	{
+		'topleft': {'x': 224, 'y': 234},
+		'bottomright': {'x': 646, 'y': 476},
+		'label': 'bicycle',
+		'confidence': 0.85828924
+	},
+	...
+]
+\end{lstlisting}
 
 
-\subsection{Theory development}
-\label{ssec:theory}
 
-
-
-\subsubsection{Objects}
-% Distinguish different uses of "object": TTR a:T, Obj, IndObj. Perceptual vs conceptual.
-
-% detected object vs. individuated object ?
-% perceptual object vs. conceptual object ?
+\subsection{Objects}
 
 The perception of objects is largely based on \cite{lspc}.
 There, the input space is a 3D point space rather than 2D images.
 This difference necessitates other types for the perceptual input and the locations of perceived objects.
 
-
-
-It may be important to note the overloading of the term ``object''.
-In \gls{ttr}, an object is something that belongs to the extension of a type.
-This is rather different from the semantic notion.
-...
-
-In computer vision, objects can refer to the results of object detection.
-...
-
-An object that has been detected in an image is, at the perceptual level, essentially modeled as a tuple of a location and a semantic property.
-
-The $Obj$ type couples a property with a location, but it does not explicitly say anything about any individual object.
-In \cite{lspc}, this corresponds to a \textit{perceptual} notion.
-The step to the \textit{conceptual} domain is marked by generating a record type that corresponds to a situation, namely the situation that a certain individual has a certain property and is at a certain location.
-[...]
-
-There is a certain notable difference between the types $Obj$ and $IndObj$.
-The former is a single record type, of which there will be many records.
-Each record will hold information about a given detected object.
-With the latter, it is the type itself that holds meaning, by describing a situation.
-[...]
-
-Perceptual object records were defined by declaring its type, but that is useless here.
-The type of all record types is $RecType$, which says nothing about its fields.
-
 [propositions as types, true if there is an object of the type, situation semantics? \cite{BarwiseSituationsAttitudes1981}]
 A record of a situation type then serves as a witness for the situation.
-...
-
-Create records on the fly.
-Record types are fully specified.
 
 
 
-\subsubsection{Spatial relations}
+\subsection{Spatial relations}
 % Classification algorithm non-TTR. Simplistic, compare to sophisitcated alternatives.
 
 Spatial relation classification is mostly based on \cite{ttrspat}, but more simplistic.
@@ -100,10 +81,15 @@ First, it assumes a 3D point space as visual input, in contrast to the 2D image 
 Spatial relations in 3D crucially involves adapting the reference frame according to the viewpoint, while those are trivially fixed in the 2D case.
 Second, it accounts for the functional aspect of spatial relationship, as detailed by \cite{CoventryClassificationExtrageometricInfluences2004}.
 
+Spatial classifiers $\kappa$ take two locations and return a boolean result.
+I have implemented them as Python functions.
+For the purpose of this thesis, no sophisticated spatial classification has been considered.
+Instead, a naive comparison between centers of bounding boxes was implemented.
+This was done for the four relations "left", "right", "above" and "below".
 
 
 
-\subsubsection{Language}
+\subsection{Language}
 % Why connect language? Is it VQA? Parsing. Classification before or after question.
 
 [highlight how TTR makes it easy to answer a yes/no question]
@@ -128,50 +114,11 @@ Could we forget field labels and just look at the two sets of field values? Not 
 
 [classification before/after question]
 
-
-
-\subsection{Implementation}
-% How did I go about to implement this? PyTTR, YOLO, 
-
-Much of the theory developed above is straightforwardly implemented in PyTTR.
-Python is used mostly for binding the pieces together, but also some significant processes.
-
-
-
-\subsubsection{External object recognizer}
-
-YOLO \citep{yolo} is made with C but there is a Python wrapper.
-When invoked from Python, the return value is a collection of dict objects with field for label, coordinates and a confidence score.
-I made a Python function which takes this collection and translates it to a list of PyTTR $Obj$ records.
-
-
-
-\subsubsection{Spatial classifiers}
-
-Spatial classifiers $\kappa$ take two locations and return a boolean result.
-I have implemented them as Python functions.
-For the purpose of this thesis, no sophisticated spatial classification has been considered.
-Instead, a naive comparison between centers of bounding boxes was implemented.
-This was done for the four relations "left", "right", "above" and "below".
-
-
-
-\subsubsection{Natural language parsing}
-
-Parsing text to TTR has been addressed in \cite{CooperRecordsRecordTypes2005}, \cite{RobinCooperAustiniantruthattitudes2005}, \cite{CooperTypetheorysemantics2012}, \cite{CooperTypetheorylanguage2016}.
+Parsing natural language to TTR has been addressed in \cite{CooperRecordsRecordTypes2005}, \cite{RobinCooperAustiniantruthattitudes2005}, \cite{CooperTypetheorysemantics2012}, \cite{CooperTypetheorylanguage2016}.
 These accounts cover basic grammar, and are likely enough for the kind of utterances considered here.
 It would have been interesting to see also those implemented here.
 However, to save time I went for a simpler approach using NLTK's feature structure CFG.
 With a custom Python function, the FOPC output is transformed to a TTR record type.
-
-
-
-\subsubsection{Where PyTTR is not enough}
-
-The individuation function, although expressible in TTR, is not possible to implement in PyTTR.
-Therefore, it was implemented as a Python function named {\tt individualize}.
-
-The \textit{relabel-subtype} relation, $\sqsubseteq_{rlb}$, was also implemented in Python.
 
 
 

@@ -67,8 +67,9 @@ ObjDetector = ( Image \rightarrow [Obj] )
 
 \subsubsection{Individuation}
 
-Moving from the perceptual to the conceptual domain, an individuated object is expressed not as a record, but as a record type.
-The individuated object record type is a subtype of $IndObj$ (\autoref{eq:indobj}).
+The perceptual object couples a property with a location, but it does not explicitly say anything about any individual object.
+In \cite{lspc}, the step from the perceptual to the \textit{conceptual} domain is made by generating a record type that corresponds to a situation, namely the situation that a certain individual has a certain property and is at a certain location.
+This situation record type is known as an \textit{individuated object}, and is a subtype of $IndObj$ (\autoref{eq:indobj}).
 Here, $x$ is an individual and $loc$ is a location.
 $cl$ specifies that $loc$ is the location of $x$, and the purpose of $cp$ is to declare a property of $x$.
 $PTy$ is defined as a supertype of all ptypes (\autoref{eq:pty}).
@@ -286,6 +287,7 @@ agt = \left[\begin{array}{rcl}
 
 
 \subsection{Python implementation}
+\label{ssec:python}
 
 This section presents the Python implementation of the model described above.
 The full code, including visualization and more comments, is published as a Jupyter Notebook at \url{https://github.com/arildm/imagettr}.
