@@ -18,7 +18,7 @@ They are/were characterized by [what].
 [Montague, ...]
 [FOL/FOPC]
 \citep{BlackburnComputationalsemantics2003}
-
+[SD Computational Semantics]
 
 [modern methodologies]
 With recent advancements in computer science, ambitious computational-semantic theories are now in abundance.
@@ -31,11 +31,13 @@ If statistical models of semantics do well in [empirical/data-driven/practical] 
 \cite{BlackburnComputationalsemantics2003}:
 FOPC for the win, but ``other approaches are both possible and interesting''.
 
+\cite{Dobnik:2017ag}
 
 
 
 
-\subsubsection{Perceptual semantics}
+
+\subsection{Perceptual semantics}
 % ... in general, and spatial relations in particular
 
 \cite{Garnhamunifiedtheorymeaning1989}:
@@ -53,7 +55,7 @@ Perceptual–conceptual representation.
 (Drawbacks?)
 They present "evidence" for their theory, does that evidence contradict the present approach?
 
-lo, refo? (refo used bleow)
+Target/Landmark, Figure/Ground, Referent/Relatum, Located object (LO)/Reference object (REFO)
 
 Terms of spatial relations (\textit{behind}, \textit{to the left of}, etc.) have three types of meanings \citep{Garnhamunifiedtheorymeaning1989}: basic, deictic and intrinsical.
 The deictic and intrinsical meanings hold for relations between two objects.
@@ -76,6 +78,10 @@ Functional geometric framework.
 Can a computer really ``understand'' concepts, that is, will it operate on grounded symbols or just the (arbitrary) symbols themselves?
 Turing test.
 
+"say something about recognitising objects as well and grounding in general. So I would add discussions of Roy" SD
+
+
+
 \cite{SteelsSymbolGroundingProblem2007}:
 Peirce: object, symbol, concept. Grounded with method.
 Searle and other claim that the Symbol grounding problem is insolvable.
@@ -87,8 +93,9 @@ Using experiments where a number of agents participate in a language game where 
 
 
 \subsection{Type theory in natural language processing}
+\label{ssec:ttnlp}
 
-Type theory was developed as an alternative to set theory, responding to paradoxes found in the latter.
+Type theory was developed as an alternative to set theory, responding to paradoxes [explain/leave out] found in the latter.
 With set theory widely serving as a \textit{foundation of mathematics}, the development of this new theory was [important].
 Several different type theories have been created, of which Church's \textit{simply typed \textlambda-calculus} \cite{church40} and Martin-Löf's \textit{intuitionistic type theory} \citep{martinlof84} are some prominent examples.
 \citep{CoquandTypeTheory2015} [too detailed?]
@@ -98,12 +105,23 @@ Several different type theories have been created, of which Church's \textit{sim
 \cite{CooperRecordsRecordTypes2005} combines several theories from logic, semantics and linguistics in a single framework called \textbf{\acrfull{ttr}}.
  lambda calculus, phrase structure grammar, (DRT), (situation semantics) (what are the latter)?
 It has been employed to model natural language in the context of dialogue, situated agents and spoken language.
+\cite{Barwisesituationlogic1989}
+
+["In the paper we argue it can be used as a knowledge representation system in situated agents since it combines differene modalities. Hence, it connects perception with higher-level reasoning." SD]
+
+Parsing natural language to TTR has been addressed in \cite{CooperRecordsRecordTypes2005}, \cite{RobinCooperAustiniantruthattitudes2005}, \cite{CooperTypetheorysemantics2012}, \cite{CooperTypetheorylanguage2016}.
+...
+
+
+
+
+\subsubsection{Overview of \gls{ttr} syntax}
 
 [brief summary of TTR syntax?]
 
 
 
-\subsubsection{Perceptual semantics in \gls{ttr}}
+\subsection{[Perceptual semantics in] \acrfull{ttr}}
 
 \cite{LarssonDialoguesHaveContent2011}
 
@@ -118,11 +136,9 @@ It has been employed to model natural language in the context of dialogue, situa
 
 \cite{LarssonFormalsemanticsperceptual2015}
 
-Parsing: \cite{CooperRecordsRecordTypes2005}, \cite{RobinCooperAustiniantruthattitudes2005}, \cite{CooperTypetheorysemantics2012}, \cite{CooperTypetheorylanguage2016}
 
 
-
-\subsubsection{PyTTR}
+\subsection{Programming \acrshort{ttr} in Python: PyTTR}
 
 \cite{pyttr} is a Python implementation of \gls{ttr}.
 It supports modeling records, record types, ptypes, functions and other TTR objects.
@@ -138,7 +154,7 @@ Another motivation for implementation is to compete with existing, less theoreti
 
 
 
-\subsection{Image recognition}
+\subsection{Image recognition and object detection}
 
 In image recognition, objects are detected and classified in visual data.
 A wide range of models have been developed to solve this task.
@@ -164,3 +180,7 @@ The full image is often first divided into same-size overlapping segments, thus 
 The initiative includes a dataset and a series of annual competitions since 2016.
 
 \cite{AndreasLearningComposeNeural2016}
+
+\cite{SchlangenResolvingReferencesObjects2015}
+
+[example questions/answers]

@@ -8,7 +8,7 @@ This application will feature:
 \begin{enumerate}
 \item Sensory input in the form of 2D images
 \item Utilizing an external object recognition system
-\item Basic apprehension of spatial relations
+\item Detection of geometric spatial relations
 \item Basic natural language understanding
 \end{enumerate}
 
@@ -16,9 +16,11 @@ While operational functionality and the overall procedural code is written in Py
 As such, \gls{ttr} serves as a formal specification language.
 The additional layer provides formal transparency and type robustness.
 
+This section will describe some reasoning around the decisions taken, regarding the design of the \gls{ttr} model as well as its implementation.
 
 
-\subsection{Image recognition with YOLO}
+
+\subsection{Object detection with YOLO}
 
 You only look once (YOLO) \citep{RedmonYouOnlyLook2015} is a neural network model for image recognition.
 It is trained using a loss function which takes detection as well as classification into account.
@@ -26,6 +28,8 @@ In other words, it simultaneously predicts bounding boxes and classifies the con
 Unlike \cite{HeMaskRCNN2017} and others, it does not contain any recurrent layers.
 The joint, recurrence-free model makes for a rather small network size, which in turn means a favorable evaluation speed.
 However, compared to state of the art, it lags behind in accuracy.
+
+[training]
 
 \begin{figure}[h]
 \label{fig:dogbike_annotated}
@@ -37,8 +41,8 @@ However, compared to state of the art, it lags behind in accuracy.
 YOLO is written in C, using the Darknet neural network library \citep{darknet13}.
 It can be used in Python with the TensorFlow machine learning library and the Darkflow library which translates a Darknet model to TensorFlow.
 
-When invoked from Python, the return value is a collection of dict objects, each containing a label, coordinates and a confidence score.
-This data is cast into a TTR record as described in \autoref{ssec:python}.
+When invoked from Python, the return value is a collection of dict objects, each containing a label, coordinates and a confidence score, as exemplified in \autoref{lst:yolo_out}.
+Results with confidence over a certain threshold are cast into \gls{ttr} records as described in \autoref{ssec:python}.
 
 \begin{lstlisting}[label=lst:yolo_out, caption=Example output of YOLO invocation]
 [
@@ -60,11 +64,16 @@ This data is cast into a TTR record as described in \autoref{ssec:python}.
 
 
 
-\subsection{Objects}
+\subsection{Objects and perception}
 
-The perception of objects is largely based on \cite{lspc}.
-There, the input space is a 3D point space rather than 2D images.
-This difference necessitates other types for the perceptual input and the locations of perceived objects.
+Our model of the perception of objects is largely based on \cite{lspc}.
+In short, a \textit{perceptual object} (a record) is used to generate an \textit{individuated object} (a record type) as well as a witness for the situation described by the individuated object. [rewrite, some more detail?]
+More on this in \autoref{ssec:ttrmodel}.
+
+In \cite{lspc}, however, the input space is a 3D point space rather than 2D images.
+This necessitates different types for the perceptual input and the locations of perceived objects.
+In the point space case, the $PointMap$ set type is used for the full ``world'', and any part of the world is simply a subset of it, so it is also a $PointMap$.
+In our case, $Image$ is used for the full image but we use $Segment$ to refer to parts of it.
 
 [propositions as types, true if there is an object of the type, situation semantics? \cite{BarwiseSituationsAttitudes1981}]
 A record of a situation type then serves as a witness for the situation.
@@ -81,18 +90,29 @@ First, it assumes a 3D point space as visual input, in contrast to the 2D image 
 Spatial relations in 3D crucially involves adapting the reference frame according to the viewpoint, while those are trivially fixed in the 2D case.
 Second, it accounts for the functional aspect of spatial relationship, as detailed by \cite{CoventryClassificationExtrageometricInfluences2004}.
 
-Spatial classifiers $\kappa$ take two locations and return a boolean result.
-I have implemented them as Python functions.
+A spatial classifier $\kappa$ takes two locations and returns a boolean result.
+We have implemented spatial classifiers as Python functions.
 For the purpose of this thesis, no sophisticated spatial classification has been considered.
 Instead, a naive comparison between centers of bounding boxes was implemented.
-This was done for the four relations "left", "right", "above" and "below".
+This was done for the four relations ``left'', ``right'', ``above'' and ``below''.
 
 
 
-\subsection{Language}
-% Why connect language? Is it VQA? Parsing. Classification before or after question.
+\subsection{Language and \gls{vqa}}
+\label{ssec:languagevqa}
 
-[highlight how TTR makes it easy to answer a yes/no question]
+We focus on validating declarative utterances, which corresponds to answering a yes/no questions.
+Other question types are not considered.
+
+The utterance is parsed.
+The resulting type is compared to that of the scene.
+This is multimodality.
+
+The existing research on \gls{ttr}-based approaches to textual or phonetic parsing, overviewed in \autoref{ssec:ttnlp}, would surely cover the kind of utterances considered here.
+However, there is currently no implementation available and ready to use, and parsing is not within the main focus of this thesis.
+Therefore, the natural-language parsing implemented for this thesis is instead a simplistic one.
+It uses feature structure context-free grammar (FCFG) tools available in NLTK \cite{BirdNaturalLanguageProcessing2009} to parse text into \gls{fol} expressions.
+With a custom function {\tt fopc\_to\_pyttr}, the \gls{fol} expressions are transformed to a TTR record type.
 
 A dog is to the left of a car
 \begin{equation}\left[\begin{array}{rcl}
@@ -103,22 +123,14 @@ A dog is to the left of a car
 \text{c}_\text{left} &:& \text{left}(x, y)\\
 \end{array}\right]\end{equation}
 
+The fact that the natural-language utterance is given a representation in the same formal framework as the image allows comparing them to each other.
+Essentially, we would like to check if the situation observed is a subtype of the situation described by the question: whether $Q \sqsupseteq A$.
+However, we need not to impose the requirement that field labels should match, which is a necessity for the subtype relation to hold.
+Thus, the condition is reformulated to allow relabeling \citep[pp. 133–135]{CooperTypetheorylanguage2016}:
 
-Essentially, we would like to check if the situation observed is a subtype of the situation described by the text/question, whether $Q \sqsupseteq A$. A new problem here is that field labels do not match, even if the field values (the types) match. We thus need to consider all (?) relabelings of $Q$:
-
-A record type $T_1$ is a \textbf{relabel-subtype} of $T_2$, or $T_1 \sqsubseteq_{rlb} T_2$,  iff there is a relabeling of $T_1$, $T_{1_{rlb}}$ where $T_{1_{rlb}} \sqsubseteq T_2$.
-
-(Or: iff $T_1$ is $\Sigma$-equivalent to a subtype of $T_2$?)
-
-Could we forget field labels and just look at the two sets of field values? Not really, because we have dependent types, so $\text{dog}(x_1) ≠ \text{dog}(x_2)$. We need to carry out each candidate \textit{relabeling} and check subtypeness. In practice, and in this case, relabeling the basic-type ($Ind$) fields is enough, because those are the only ones whose labels appear in dependent fields. For each basic-field relabeling, we can then kind of forget labels and just find subtypeness of field values.
+If $Q$ is the type of a polar question utterance and $A$ is the type of the scene, the answer is YES if there is a relabeling $\eta$ such that $A \sqsubseteq Q_\eta$, and otherwise it is NO.
 
 [classification before/after question]
-
-Parsing natural language to TTR has been addressed in \cite{CooperRecordsRecordTypes2005}, \cite{RobinCooperAustiniantruthattitudes2005}, \cite{CooperTypetheorysemantics2012}, \cite{CooperTypetheorylanguage2016}.
-These accounts cover basic grammar, and are likely enough for the kind of utterances considered here.
-It would have been interesting to see also those implemented here.
-However, to save time I went for a simpler approach using NLTK's feature structure CFG.
-With a custom Python function, the FOPC output is transformed to a TTR record type.
 
 
 

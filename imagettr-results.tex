@@ -10,6 +10,7 @@ The implementation necessitated some extensions to PyTTR which are also presente
 
 
 \subsection{\Gls{ttr} model}
+\label{ssec:ttrmodel}
 
 Three basic types exist in the model.
 
@@ -35,11 +36,15 @@ Segment = \left[\begin{array}{rcl}
 \begin{equation}\label{eq:ppty}
 Ppty = (Ind \rightarrow Type)\end{equation}
 
+[PTy?]
+
 A perceptual object is a record of the type $Obj$ (\autoref{eq:obj}).
 An example record is given in \autoref{eq:objrec}.
 %$Obj$ records are the result of performing \textit{object detection}.
 %This fact is expressed in TTR as the function type $ObjDetector$ (\autoref{eq:objdetector}).
 An object detector is a function from an image to a set of perceptual objects, as captured by the $ObjDetector$ function type (\autoref{eq:objdetector}).
+
+[differences/similarites LSPC and others]
 
 \begin{equation}\label{eq:obj}
 Obj = \left[\begin{array}{rcl}
@@ -109,8 +114,8 @@ The definition uses manifest fields to denote the \textit{fully specified} recor
 \begin{equation}\label{eq:indfundef}
 Individuate = \lambda r : Obj\ . \left[\begin{array}{lcl}
     \text{x} = a_{new} &:& Ind \\
-    \text{cp} = e_{new} &:& r.\text{pfun}(\text{x}) \\
-    \text{cl} = e_{new} &:& \text{location}(\text{x}, \text{loc}) \\
+    \text{cp} = e_{new_1} &:& r.\text{pfun}(\text{x}) \\
+    \text{cl} = e_{new_2} &:& \text{location}(\text{x}, \text{loc}) \\
     \text{loc} = r.\text{seg} &:& Segment\\
 \end{array}\right]
 \end{equation}
@@ -181,7 +186,10 @@ Of course, the requirement that the individual $r.\text{lo}.\text{x}$ is actuall
 \subsubsection{Agent}
 
 Now, the perceptual-conceptual pieces described above are combined.
-We are building an agent who receives classified and located objects of an image, apprehends their basic status and spatial relations, and answers natural-language questions about the image.
+We are building an agent who receives information on classified and located objects of an image, and apprehends their basic status and spatial relations.
+It also receives the result of parsing a natural-language utterance.
+The information is in \gls{ttr} form, which finally allows the agent to connect the two modes.
+This provides a means to answer to natural-language questions about the image.
 
 \begin{equation}\label{eq:agent}
 Agent = \left[\begin{array}{rcl}
@@ -219,7 +227,7 @@ For an agent $agt : Agent$, the perception and question-answering procedure is c
 	\end{enumerate}
 	For example, the \textit{left} classifier in \autoref{eq:leftclfdef} is applied to each pair of $IndObj$ after instantiating and combining records into a $LocTup$.
 \item Any language input is parsed and the resulting record type assigned to $agt.\text{state.utt}$.
-\item The record types in $agt.\text{state.bel}$ are combined/concatenated. If the resulting record type is a relabel-subtype of $agt.\text{state.utt}$, a positive answer is emitted; otherwise a negative answer is emitted.
+\item The record types in $agt.\text{state.bel}$ are combined. If the resulting record type is a relabel-subtype of $agt.\text{state.utt}$, the answer ``yes'' is emitted; otherwise ``no''.
 \end{enumerate}
 
 An example state of an agent $agt$ is shown in \autoref{eq:agt}.
@@ -229,7 +237,7 @@ An example state of an agent $agt$ is shown in \autoref{eq:agt}.
 \renewcommand{\arraystretch}{1.2}
 agt = \left[\begin{array}{rcl}
     \text{objdetector} &=& \mathtt{yolo\_detector} \\
-    \text{indfun} &=& \mathtt{individualize} \\
+    \text{indfun} &=& \mathtt{individuate} \\
     \text{appr} &=& [Clf_{left}, Clf_{right}, Clf_{above}, Clf_{below}] \\
     \text{state} &=& \left[\begin{array}{rcl}
 		\text{img} &=& \mathtt{dogride.jpg} \\
@@ -354,7 +362,7 @@ def create_fun(pred_name, vars=['a']):
     return fun
 \end{lstlisting}
 
-\subsubsection{Necessary extensions to PyTTR}
+\subsubsection{Extensions to PyTTR}
 
 \begin{lstlisting}[label={lst:mergeunconflict},caption={merge\_unconflict()}]
 def unique_labels(T):
@@ -395,7 +403,54 @@ def unsingleton(T):
     return T2
 \end{lstlisting}
 
-\subsubsection{YOLO}
+The condition described in \autoref{ssec:languagevqa} necessitated the ability to find a relabeling $\eta$ that would fulfill a subtype relation $A \sqsubseteq Q_\eta$.
+A simple approach to finding such a relabeling is to list every possible combination and one-by-one perform relabeling and check subtypeness.
+However, that is computationally very expensive, and not very interesting even if speed is not a priority.
+
+Another quicker approach is to not perform the relabeling in all steps.
+Subtypeness can instead be checked field-wise:
+For every field $\langle\ell_Q, T_Q\rangle$ in $Q$, if there is a field $\langle\ell_A, T_A\rangle$ in $A$ such that $T_A \sqsubseteq T_Q$, then let $\eta(\ell_Q) = \ell_A$.
+If $\eta$ covers all fields in $Q$, then it follows that $A \sqsubseteq Q_\eta$.
+
+However, we need to mind the types that are dependent on other fields.
+For example, $\text{dog}(\text{x}) \cancel{\sqsubseteq} \text{dog}(\text{y})$ even if both $\text{x}:Ind$ and $\text{y}:Ind$ are fields in the respective record types.
+To remedy this, the simple approach mentioned above is carried out as a first step, but for basic-type fields only.
+Then, for every basic-field relabeling, the second approach is carried out.
+In the example case, some of the basic-type relabelings will then have relabeled $\text{y}$ to $\text{x}$ so that the field-wise check becomes $\text{dog}(\text{x}) \sqsubseteq \text{dog}(\text{x})$.
+
+\begin{lstlisting}[label=lst:subtyperlb, caption=Implementation of the relabel-subtype relation.]
+from itertools import permutations, combinations
+
+def find_subtype_relabeling(T, U):
+    '''Could record type T be a sub type of record type U if relabeling in T is allowed?'''
+    # Find possible relabelings for basic-type fields
+    basic_label_permutations = set(ps[:len(basic_fields(U))] for ps in permutations(basic_fields(T)))
+    
+    for tks in basic_label_permutations:
+        # Copy U and try a basic-fields relabeling
+        U2 = copy_rectype(U)
+        rlb = dict(zip(basic_fields(U), tks))
+        rectype_relabels(U2, rlb)
+        
+        # For each U field, find a T field that is a subtype
+        match = dict()
+        for uk in nonbasic_fields(U2):
+            for tk in nonbasic_fields(T):
+                if T.comps.__dict__[tk].subtype_of(U2.comps.__dict__[uk]):
+                    match[uk] = tk
+                    break
+            if uk not in match:
+                break
+
+        # Successful if all non-basic fields match.
+        if len(match) == len(nonbasic_fields(U2)):
+            return dict(**rlb, **match)
+    return None
+\end{lstlisting}
+
+
+
+\subsubsection{YOLO usage}
 
 \begin{lstlisting}[label=lst:yolo, caption=Invoking YOLO]
 from darkflow.net.build import TFNet
@@ -410,7 +465,67 @@ def yolo(img):
     if str(img) not in yolo_out:
         yolo_out[str(img)] = tfnet.return_predict(np.array(img))
     return yolo_out[str(img)]
+
+def yolo_coords(o):
+    """Extract the coordinates from a YOLO output item as ((x0,y0), (x1,y1))."""
+    return (o['topleft']['x'], o['topleft']['y']), (o['bottomright']['x'], o['bottomright']['y'])
+
+def xy1xy2_to_cwh(x1, y1, x2, y2):
+    '''Transform to center, width and height.'''
+    return {'cx': int(x1/2 + x2/2), 'cy': int(y1/2 + y2/2), 'w': x2 - x1, 'h': y2 - y1}
 \end{lstlisting}
+
+
+
+\subsubsection{Language parsing}
+
+[...]
+ Parsing to PyTTR cannot really be done directly. NLTK feature grammars support strings and FOPC. Variable substitution is only allowed in FOPC. We produce a FOPC conjunction of ptypes, for each of which we create a new field.
+
+\begin{lstlisting}[label=lst:grammar, caption=Basic parsing of natural language into PyTTR object.]
+import nltk
+
+grammar = nltk.grammar.FeatureGrammar.fromstring(r'''
+%start S
+S[SEM=<?s(x) & ?vp(x, y)>] -> NP[SEM=?s] VP[SEM=?vp]
+NP[SEM=<?det(?n)>] -> Det[SEM=?det] N[SEM=?n]
+Det[SEM=<\P a.P(a)>] -> 'a' | 'an'
+N[SEM=<dog>] -> 'dog'
+N[SEM=<car>] -> 'car'
+N[SEM=<person>] -> 'person'
+N[SEM=<bicycle>] -> 'bicycle'
+N[SEM=<backpack>] -> 'backpack'
+VP[SEM=?pp] -> 'is' PP[SEM=?pp]
+PP[SEM=<\a b.(?prep(a, b) & ?o(b))>] -> Prep[SEM=?prep] NP[SEM=?o]
+Prep[SEM=<left>] -> 'to' 'the' 'left' 'of'
+Prep[SEM=<right>] -> 'to' 'the' 'right' 'of'
+Prep[SEM=<above>] -> 'above'
+Prep[SEM=<under>] -> 'under'
+''')
+parser = nltk.FeatureChartParser(grammar)
+
+def fopc_to_pyttr(expr, T=RecType()):
+    """Turns a FOPC object into a RecType."""
+    from nltk.sem.logic import ApplicationExpression, AndExpression
+    if isinstance(expr, ApplicationExpression):
+        pred, args = expr.uncurry()
+        T.addfield(gensym('c'), mkptype(str(pred), vars=[str(a) for a in args]))
+        for x in args:
+            if str(x) not in T.comps.__dict__:
+                T.addfield(str(x), Ind)
+    if isinstance(expr, AndExpression):
+        fopc_to_pyttr(expr.first, T)
+        fopc_to_pyttr(expr.second, T)
+    return T
+
+def eng_to_pyttr(text):
+    trees = parser.parse(text.lower().split())
+    sem = nltk.sem.root_semrep(list(trees)[0])
+    T = fopc_to_pyttr(sem)
+    return T
+\end{lstlisting}
+
+
 
 \subsubsection{PyTTR implementation}
 
@@ -434,14 +549,6 @@ ObjDetector = FunType(Image, Objs)
 [something about the object detector]
 
 \begin{lstlisting}[label=lst:pyttr_yolo, caption=Connecting YOLO output to PyTTR]
-def yolo_coords(o):
-    """Extract the coordinates from a YOLO output item as ((x0,y0), (x1,y1))."""
-    return (o['topleft']['x'], o['topleft']['y']), (o['bottomright']['x'], o['bottomright']['y'])
-
-def xy1xy2_to_cwh(x1, y1, x2, y2):
-    '''Transform to center, width and height.'''
-    return {'cx': int(x1/2 + x2/2), 'cy': int(y1/2 + y2/2), 'w': x2 - x1, 'h': y2 - y1}
-
 def yolo_detector(i):
     """Creates IndObj records for YOLO results."""
     return [Rec({
@@ -530,82 +637,6 @@ bel_comb = combine_beliefs(bel)
 \end{lstlisting}
 
 [...]
- Parsing to PyTTR cannot really be done directly. NLTK feature grammars support strings and FOPC. Variable substitution is only allowed in FOPC. We produce a FOPC conjunction of ptypes, for each of which we create a new field.
-
-\begin{lstlisting}[label=lst:grammar, caption=Basic parsing of natural language into PyTTR object.]
-import nltk
-
-grammar = nltk.grammar.FeatureGrammar.fromstring(r'''
-%start S
-S[SEM=<?s(x) & ?vp(x, y)>] -> NP[SEM=?s] VP[SEM=?vp]
-NP[SEM=<?det(?n)>] -> Det[SEM=?det] N[SEM=?n]
-Det[SEM=<\P a.P(a)>] -> 'a' | 'an'
-N[SEM=<dog>] -> 'dog'
-N[SEM=<car>] -> 'car'
-N[SEM=<person>] -> 'person'
-N[SEM=<bicycle>] -> 'bicycle'
-N[SEM=<backpack>] -> 'backpack'
-VP[SEM=?pp] -> 'is' PP[SEM=?pp]
-PP[SEM=<\a b.(?prep(a, b) & ?o(b))>] -> Prep[SEM=?prep] NP[SEM=?o]
-Prep[SEM=<left>] -> 'to' 'the' 'left' 'of'
-Prep[SEM=<right>] -> 'to' 'the' 'right' 'of'
-Prep[SEM=<above>] -> 'above'
-Prep[SEM=<under>] -> 'under'
-''')
-parser = nltk.FeatureChartParser(grammar)
-
-def fopc_to_pyttr(expr, T=RecType()):
-    """Turns a FOPC object into a RecType."""
-    from nltk.sem.logic import ApplicationExpression, AndExpression
-    if isinstance(expr, ApplicationExpression):
-        pred, args = expr.uncurry()
-        T.addfield(gensym('c'), mkptype(str(pred), vars=[str(a) for a in args]))
-        for x in args:
-            if str(x) not in T.comps.__dict__:
-                T.addfield(str(x), Ind)
-    if isinstance(expr, AndExpression):
-        fopc_to_pyttr(expr.first, T)
-        fopc_to_pyttr(expr.second, T)
-    return T
-
-def eng_to_pyttr(text):
-    trees = parser.parse(text.lower().split())
-    sem = nltk.sem.root_semrep(list(trees)[0])
-    T = fopc_to_pyttr(sem)
-    return T
-\end{lstlisting}
-
-[...]
-
-\begin{lstlisting}[label=lst:subtyperlb, caption=Implementation of the relabel-subtype relation.]
-from itertools import permutations, combinations
-
-def find_subtype_relabeling(T, U):
-    '''Could record type T be a sub type of record type U if relabeling in T is allowed?'''
-    # Find possible relabelings for basic-type fields
-    basic_label_permutations = set(ps[:len(basic_fields(U))] for ps in permutations(basic_fields(T)))
-    
-    for tks in basic_label_permutations:
-        # Copy U and try a basic-fields relabeling
-        U2 = copy_rectype(U)
-        rlb = dict(zip(basic_fields(U), tks))
-        rectype_relabels(U2, rlb)
-        
-        # For each U field, find a T field that is a subtype
-        match = dict()
-        for uk in nonbasic_fields(U2):
-            for tk in nonbasic_fields(T):
-                if T.comps.__dict__[tk].subtype_of(U2.comps.__dict__[uk]):
-                    match[uk] = tk
-                    break
-            if uk not in match:
-                break
-
-        # Successful if all non-basic fields match.
-        if len(match) == len(nonbasic_fields(U2)):
-            return dict(**rlb, **match)
-    return None
-\end{lstlisting}
 
 \begin{lstlisting}
 def validate_utt(utt, bel):
@@ -624,6 +655,7 @@ def relabel_utt(utt, bel_comb):
 \label{sec:discussion}
 
 Contradiction of Logan \& Sadler's "evidence" for their "theory of apprehension" (which is different from mine)? (Already Regier \& Carlson did.)
+[no difference -sd]
 
 Not a full VQA solution.
 It can only answer one question type, and only in the form "A P is R a Q", which is not even a question.
