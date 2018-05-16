@@ -298,7 +298,11 @@ agt = \left[\begin{array}{rcl}
 \label{ssec:python}
 
 This section presents the Python implementation of the model described above.
+Aside from some explaining paragraphs between code listings, the comments within the code also provide some basic descriptions.
 The full code, including visualization and more comments, is published as a Jupyter Notebook at \url{https://github.com/arildm/imagettr}.
+
+The section contains, in this order, a few functions for extended PyTTR-related functionality, YOLO usage, natural-language parsing and finally the implementation of the \gls{ttr} model.
+
 
 \subsubsection{Utility functions}
 
@@ -364,7 +368,10 @@ def create_fun(pred_name, vars=['a']):
 
 \subsubsection{Extensions to PyTTR}
 
-\begin{lstlisting}[label={lst:mergeunconflict},caption={merge\_unconflict()}]
+\autoref{lst:mergeunconflict} provides a function for combining multiple record types to one.
+For example, if $T_1 = T_2 = [x:Ind]$, then $\mathtt{merge\_unconflict}(T_1, T_2)$ evaluates to $\left[\begin{array}{rcl} x_0&:&Ind \\ x_1&:&Ind \end{array}\right]$ (or a similar record type with different subscript indices).
+
+\begin{lstlisting}[label={lst:mergeunconflict},caption={merge\_unconflict}]
 def unique_labels(T):
     """Relabel a RecType so each field label is unique over all RecTypes."""
     for l, v in T.comps.__dict__.items():
@@ -379,9 +386,11 @@ def merge_unconflict(T1, T2):
     return T1c.merge(T2c)
 \end{lstlisting}
 
-For example, if $T_1 = T_2 = [x:Ind]$, then $\mathtt{merge\_unconflict}(T_1, T_2)$ evaluates to $\left[\begin{array}{rcl} x_0&:&Ind \\ x_1&:&Ind \end{array}\right]$ (or a similar record type with different subscript indices).
+When it comes to dependent types, a custom in \gls{ttr} literature is to include the dependum as a field and use the field label in the dependent type.
+In our implementation, spatial classifiers return record types where dependums are instead specified as individuals.
+The function in \autoref{lst:useindfieldlabels} helps when those record types are combined with others.
 
-\begin{lstlisting}[label={lst:useindfieldlabels},caption={use\_ind\_field\_labels()}]
+\begin{lstlisting}[label={lst:useindfieldlabels},caption={use\_ind\_field\_labels}]
 def use_ind_field_labels(T):
     """c:foo(a) becomes c:foo(x) if x=a:Ind is present."""
     T = copy_rectype(T)
@@ -394,7 +403,7 @@ def use_ind_field_labels(T):
     return T
 \end{lstlisting}
 
-\begin{lstlisting}[label={lst:unsingleton},caption={unsingleton()}]
+\begin{lstlisting}[label={lst:unsingleton},caption={unsingleton}]
 def unsingleton(T):
     """Remove singleton specifications of a type: x=a:Ind becomes x:Ind."""
     T2 = RecType()
@@ -402,6 +411,8 @@ def unsingleton(T):
         T2.addfield(l, v if not isinstance(v, SingletonType) else v.comps.base_type)
     return T2
 \end{lstlisting}
+
+\paragraph{Subtype-relabeling}
 
 The condition described in \autoref{ssec:languagevqa} necessitated the ability to find a relabeling $\eta$ that would fulfill a subtype relation $A \sqsubseteq Q_\eta$.
 A simple approach to finding such a relabeling is to list every possible combination and one-by-one perform relabeling and check subtypeness.
@@ -418,7 +429,7 @@ To remedy this, the simple approach mentioned above is carried out as a first st
 Then, for every basic-field relabeling, the second approach is carried out.
 In the example case, some of the basic-type relabelings will then have relabeled $\text{y}$ to $\text{x}$ so that the field-wise check becomes $\text{dog}(\text{x}) \sqsubseteq \text{dog}(\text{x})$.
 
-\begin{lstlisting}[label=lst:subtyperlb, caption=Implementation of the relabel-subtype relation.]
+\begin{lstlisting}[label=lst:subtyperlb, caption=Subtype-relabeling.]
 from itertools import permutations, combinations
 
 def find_subtype_relabeling(T, U):
@@ -452,6 +463,8 @@ def find_subtype_relabeling(T, U):
 
 \subsubsection{YOLO usage}
 
+Darnet, Darkflow and TensorFlow are necessary dependencies for this part. The {\tt yolo.weights} and {\tt yolo.cfg} files are attainable from the YOLO website: \url{https://pjreddie.com/darknet/yolo/}.
+
 \begin{lstlisting}[label=lst:yolo, caption=Invoking YOLO]
 from darkflow.net.build import TFNet
 import numpy as np
@@ -473,21 +486,30 @@ def yolo_coords(o):
 def xy1xy2_to_cwh(x1, y1, x2, y2):
     '''Transform to center, width and height.'''
     return {'cx': int(x1/2 + x2/2), 'cy': int(y1/2 + y2/2), 'w': x2 - x1, 'h': y2 - y1}
+
+def yolo_reformat(o):
+    """Discards the confidence item and reformats the coordinates."""
+    return {'label': o['label'],
+        'loc': xy1xy2_to_cwh(*sum(yolo_coords(o), ()))}
 \end{lstlisting}
 
 
 
 \subsubsection{Language parsing}
 
-[...]
- Parsing to PyTTR cannot really be done directly. NLTK feature grammars support strings and FOPC. Variable substitution is only allowed in FOPC. We produce a FOPC conjunction of ptypes, for each of which we create a new field.
+Parsing to PyTTR cannot be done directly.
+The output of NLTK feature grammars is either strings or \gls{fol} expressions.
+For the need of variable substitution, we choose the latter.
+The resulting \gls{fol} conjunction expression is then translated to PyTTR ptypes, and $Ind$ fields are created from the arguments of the predicates.
 
-\begin{lstlisting}[label=lst:grammar, caption=Basic parsing of natural language into PyTTR object.]
+\begin{lstlisting}[label=lst:grammar, caption=Basic parsing of natural language into PyTTR object]
 import nltk
 
 grammar = nltk.grammar.FeatureGrammar.fromstring(r'''
 %start S
 S[SEM=<?s(x) & ?vp(x, y)>] -> NP[SEM=?s] VP[SEM=?vp]
+S[SEM=?q] -> QS[SEM=?q]
+QS[SEM=<?s(x) & ?vp(x, y)>] -> 'is' 'there' NP[SEM=?s] PP[SEM=?vp]
 NP[SEM=<?det(?n)>] -> Det[SEM=?det] N[SEM=?n]
 Det[SEM=<\P a.P(a)>] -> 'a' | 'an'
 N[SEM=<dog>] -> 'dog'
@@ -519,7 +541,7 @@ def fopc_to_pyttr(expr, T=RecType()):
     return T
 
 def eng_to_pyttr(text):
-    trees = parser.parse(text.lower().split())
+    trees = parser.parse(text.lower().strip('.?!').split())
     sem = nltk.sem.root_semrep(list(trees)[0])
     T = fopc_to_pyttr(sem)
     return T
@@ -529,9 +551,10 @@ def eng_to_pyttr(text):
 
 \subsubsection{PyTTR implementation}
 
-The basic type $Ind$ was defined along with the utility functions in \autoref{lst:utility}.
+\autoref{lst:pyttrbasic} defines a few more or less basic \gls{ttr} types.
+Note that $Ind$ was defined earlier, along with the utility functions in \autoref{lst:utility}.
 
-\begin{lstlisting}[label={lst:pyttrbasic}]
+\begin{lstlisting}[label={lst:pyttrbasic}, caption=Basic TTR type definitions]
 Int = BType('Int')
 Int.learn_witness_condition(lambda x: isinstance(x, int))
 
@@ -546,25 +569,25 @@ Objs = ListType(Obj)
 ObjDetector = FunType(Image, Objs)
 \end{lstlisting}
 
-[something about the object detector]
-
 \begin{lstlisting}[label=lst:pyttr_yolo, caption=Connecting YOLO output to PyTTR]
 def yolo_detector(i):
     """Creates IndObj records for YOLO results."""
-    return [Rec({
-        'seg': Rec(xy1xy2_to_cwh(*yolo_coords(o)[0], *yolo_coords(o)[1])),
-        'pfun': create_fun(o['label'].replace(' ', '_')),
-    }) for o in yolo(i)] # @todo RBG/BGR?
+    for o in yolo(i):
+        o = yolo_reformat(o)
+        yield Rec({
+            'seg': Rec(o['loc']),
+            'pfun': create_fun(o['label'].replace(' ', '_')),
+        })
 ObjDetector.witness_cache.append(yolo_detector)
 
-objs = yolo_detector(img)
+objs = list(yolo_detector(img))
 \end{lstlisting}
 
-PyTTR includes a class $Fun$ which models TTR functions.
-It does not, however, support usage of the argument within the function body.
+The PyTTR implementation of \gls{ttr} functions does not support usage of the argument within the function body.
 The individuation function was therefore implemented in Python.
+To keep the connection to \gls{ttr} tight, the argument and the result are checked against their \gls{ttr} types.
 
-\begin{lstlisting}[label={lst:individuate},caption={individuate()}]
+\begin{lstlisting}[label={lst:individuate},caption={Individuation function}]
 PTy = Type('PTy')
 PTy.learn_witness_condition(lambda p: isinstance(p, HypObj) \
     and forsome(p.types, lambda t: isinstance(t, PType)))
@@ -577,21 +600,26 @@ IndObj = RecType({
 })
 IndFun = FunType(Obj, RecTy)
 
-def individuate(r):
+def indfun(r):
+    if not Obj.query(r):
+        raise ValueError()
     cp = r.pfun.app('x')
     cl = create_fun('location', 'ab').app('x').app('loc')
-    return RecType({
+    indobj = RecType({
         'x': SingletonType(Ind, Ind.create()),
         'cp': SingletonType(cp, cp.create()),
         'loc': SingletonType(Segment, r.seg),
         'cl': SingletonType(cl, cl.create()),
     })
-IndFun.witness_cache.append(individuate)
+    if not unsingleton(indobj).subtype_of(IndObj):
+        raise ValueError()
+    return indobj
+IndFun.witness_cache.append(indfun)
 
-indobjs = [individuate(r) for r in objs]
+indobjs = [indfun(r) for r in objs]
 \end{lstlisting}
 
-[something about spatial relation classifiers]
+In \autoref{lst:relclf}, each pair of $IndObj$ types is tested for each spatial relation classifier.
 
 \begin{lstlisting}[label=lst:relclf, caption=Spatial relation classifiers]
 from itertools import product
@@ -627,6 +655,8 @@ def find_all_rels(indobjs):
 rels = list(find_all_rels(indobjs))
 \end{lstlisting}
 
+The types generated by object detection and spatial classification are combined into a single type describing the visual scene.
+
 \begin{lstlisting}[label=lst:bel, caption=Combining beliefs.]
 def combine_beliefs(bel):
     """Combine a list of belief record types into one."""
@@ -636,9 +666,9 @@ bel = indobjs + rels
 bel_comb = combine_beliefs(bel)
 \end{lstlisting}
 
-[...]
+Finally, a polar question utterance is validated against the scene.
 
-\begin{lstlisting}
+\begin{lstlisting}[label=lst:utt, caption=Validating an utterance against the scene]
 def validate_utt(utt, bel):
     return bool(find_subtype_relabeling(combine_beliefs(bel), utt))
 
@@ -654,18 +684,18 @@ def relabel_utt(utt, bel_comb):
 \subsection{Discussion}
 \label{sec:discussion}
 
-Contradiction of Logan \& Sadler's "evidence" for their "theory of apprehension" (which is different from mine)? (Already Regier \& Carlson did.)
-[no difference -sd]
+As discussed in \autoref{sec:method-spatrel}, our treatment of spatial relations excludes the intrinsical meaning and functional aspects, in favor of model simplicity and easy implementation.
+...
 
+Question types.
 Not a full VQA solution.
-It can only answer one question type, and only in the form "A P is R a Q", which is not even a question.
+It can only answer one question type.
 With only the extension of parsing, it could understand (= educe situation record types) more complex forms like "A R1 B1 and R2 B2", "A1 R1 B1 and A2 R2 B2".
 "What is R B?"
 "What color is the A?"
 "How many A are there?" etc.
 
-...
 
-PyTTR extensions (here or Conclusions?)
 
-Functional aspect (Coventry).
+%Contradiction of Logan \& Sadler's "evidence" for their "theory of apprehension" (which is different from mine)? (Already Regier \& Carlson did.)
+%[no difference -sd]

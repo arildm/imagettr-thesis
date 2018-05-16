@@ -28,8 +28,7 @@ In other words, it simultaneously predicts bounding boxes and classifies the con
 Unlike \cite{HeMaskRCNN2017} and others, it does not contain any recurrent layers.
 The joint, recurrence-free model makes for a rather small network size, which in turn means a favorable evaluation speed.
 However, compared to state of the art, it lags behind in accuracy.
-
-[training]
+The network is pretrained on the COCO dataset \cite{LinMicrosoftCOCOCommon2014}.
 
 \begin{figure}[h]
 \label{fig:dogbike_annotated}
@@ -43,6 +42,7 @@ It can be used in Python with the TensorFlow machine learning library and the Da
 
 When invoked from Python, the return value is a collection of dict objects, each containing a label, coordinates and a confidence score, as exemplified in \autoref{lst:yolo_out}.
 Results with confidence over a certain threshold are cast into \gls{ttr} records as described in \autoref{ssec:python}.
+In this process, the bounding box coordinates are cast from a top-left and bottom-right tuple $\langle\langle x_1, y_1\rangle, \langle x_2, y_2\rangle\rangle$ to a center-width-height tuple $\langle x_c, y_c, w, h\rangle$, as the latter is more adequate for spatial classification.
 
 \begin{lstlisting}[label=lst:yolo_out, caption=Example output of YOLO invocation]
 [
@@ -67,30 +67,33 @@ Results with confidence over a certain threshold are cast into \gls{ttr} records
 \subsection{Objects and perception}
 
 Our model of the perception of objects is largely based on \cite{lspc}.
-In short, a \textit{perceptual object} (a record) is used to generate an \textit{individuated object} (a record type) as well as a witness for the situation described by the individuated object. [rewrite, some more detail?]
-More on this in \autoref{ssec:ttrmodel}.
+First, the object detection algorithm returns a set of \textit{perceptual objects}.
+Each of them is evidence that a certain location is associated with a certain property (such as being a dog), but it does not constrain any individual to this association.
+Second, an \textit{individuated object} is generated for each perceptual object.
+This describes the situation that there is an individual, which has the given property, at the given location.
+In the \gls{ttr} implementation (presented in full in \autoref{ssec:ttrmodel}), the individuated object is a type.
+%[what's so good about it being a type?] \cite{BarwiseSituationsAttitudes1981}
 
-In \cite{lspc}, however, the input space is a 3D point space rather than 2D images.
+In \cite{lspc}, the world has the form of a 3D point space rather than a 2D image.
 This necessitates different types for the perceptual input and the locations of perceived objects.
 In the point space case, the $PointMap$ set type is used for the full ``world'', and any part of the world is simply a subset of it, so it is also a $PointMap$.
 In our case, $Image$ is used for the full image but we use $Segment$ to refer to parts of it.
 
-[propositions as types, true if there is an object of the type, situation semantics? \cite{BarwiseSituationsAttitudes1981}]
-A record of a situation type then serves as a witness for the situation.
-
 
 
 \subsection{Spatial relations}
+\label{sec:method-spatrel}
 % Classification algorithm non-TTR. Simplistic, compare to sophisitcated alternatives.
 
-Spatial relation classification is mostly based on \cite{ttrspat}, but more simplistic.
+Our method of spatial relation classification is inspired by \cite{ttrspat} but more simplistic.
+One simplification is that the reference frame is fixed.
+This means we only consider the deictic meaning of spatial relation terms, and not the intrinsic.
+``Left'' will mean to the left in the plane of the image, even if the reference object is turned on the side or toward the viewer.
 
-\cite{ttrspat} includes two important aspects that are not covered here.
-First, it assumes a 3D point space as visual input, in contrast to the 2D image considered here.
-Spatial relations in 3D crucially involves adapting the reference frame according to the viewpoint, while those are trivially fixed in the 2D case.
-Second, it accounts for the functional aspect of spatial relationship, as detailed by \cite{CoventryClassificationExtrageometricInfluences2004}.
+Another simplification is the neglection of the \textit{functional} aspect of spatial relations.
+To illustrate this aspect, an umbrella may be well said to be \textit{above} a man, but less clearly \textit{over} him, if it does not protect him from rain falling sideways in hard wind \citep{CoventryInterplayGeometryFunction2001}.
 
-A spatial classifier $\kappa$ takes two locations and returns a boolean result.
+In our model, a spatial classifier $\kappa$ takes two locations and returns a boolean result.
 We have implemented spatial classifiers as Python functions.
 For the purpose of this thesis, no sophisticated spatial classification has been considered.
 Instead, a naive comparison between centers of bounding boxes was implemented.
@@ -101,21 +104,20 @@ This was done for the four relations ``left'', ``right'', ``above'' and ``below'
 \subsection{Language and \gls{vqa}}
 \label{ssec:languagevqa}
 
-We focus on validating declarative utterances, which corresponds to answering a yes/no questions.
-Other question types are not considered.
-
-The utterance is parsed.
-The resulting type is compared to that of the scene.
-This is multimodality.
+In contrast to full \gls{vqa} systems, the model presented in this thesis will be restricted to a limited type of questions, namely polar questions on the location of one object in relation to another.
+For example: ``Is the bicycle below the tree?''
+A \textit{scene type} describing the visual scene is created by combining the types generated by the perceptual classification outlined above.
+It serves as the context in which questions are evaluated.
 
 The existing research on \gls{ttr}-based approaches to textual or phonetic parsing, overviewed in \autoref{ssec:ttnlp}, would surely cover the kind of utterances considered here.
 However, there is currently no implementation available and ready to use, and parsing is not within the main focus of this thesis.
 Therefore, the natural-language parsing implemented for this thesis is instead a simplistic one.
 It uses feature structure context-free grammar (FCFG) tools available in NLTK \cite{BirdNaturalLanguageProcessing2009} to parse text into \gls{fol} expressions.
 With a custom function {\tt fopc\_to\_pyttr}, the \gls{fol} expressions are transformed to a TTR record type.
+As an example, the question ``Is there a dog to the left of a car?'' is parsed into the type in \autoref{eq:uttex}.
 
-A dog is to the left of a car
-\begin{equation}\left[\begin{array}{rcl}
+\begin{equation}\label{eq:uttex}
+\left[\begin{array}{rcl}
 \text{x} &:& Ind\\
 \text{y} &:& Ind\\
 \text{c}_\text{dog} &:& \text{dog}(x)\\
@@ -124,17 +126,21 @@ A dog is to the left of a car
 \end{array}\right]\end{equation}
 
 The fact that the natural-language utterance is given a representation in the same formal framework as the image allows comparing them to each other.
-Essentially, we would like to check if the situation observed is a subtype of the situation described by the question: whether $Q \sqsupseteq A$.
-However, we need not to impose the requirement that field labels should match, which is a necessity for the subtype relation to hold.
+The situation described by the question type will be true if there is a witness of that type \cite{BarwiseSituationsAttitudes1981,CooperAustiniantruthattitudes2005}.
+The scene type, on the other hand, is considered true by virtue of being generated by perceptual classification.
+It follows that the question type is true if it is a supertype of the scene type.
+
+So rather than looking for a witness to the question type, we formulate the problem as subtype/supertype checking.
+However, the subtype relation requires matching field labels, which will not be the case here, as labels are generated on the fly.
 Thus, the condition is reformulated to allow relabeling \citep[pp. 133–135]{CooperTypetheorylanguage2016}:
 
 If $Q$ is the type of a polar question utterance and $A$ is the type of the scene, the answer is YES if there is a relabeling $\eta$ such that $A \sqsubseteq Q_\eta$, and otherwise it is NO.
 
-[classification before/after question]
+%[classification before/after question]
 
 
 
-\subsection{Evaluation}
+%\subsection{Evaluation}
 
-The system is tested on a few sentences for a few images.
-...
+%The system is tested on a few sentences for a few images.
+%...

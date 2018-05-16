@@ -95,6 +95,8 @@ Type theory is a logic system developed by \cite{WhiteheadPrincipiamathematica19
 In \cite{RantaTypetheoreticalGrammar1995}, it is used as a method of syntactic parsing.
 \cite{KohlhaseTypeTheoreticSemanticslDRT1996} combines type theory with discourse representation theory (DRT).
 
+[a hint of what tt provides]
+
 \cite{CooperRecordsRecordTypes2005} combines several theories from logic, semantics and linguistics in a single type-theoretic framework known as \acrfull{ttr}.
 It has been employed to model natural language in the context of
 syntax \citep{CooperRecordsRecordTypes2005,RobinCooperAustiniantruthattitudes2005, CooperTypetheorysemantics2012, CooperTypetheorylanguage2016},
@@ -123,22 +125,19 @@ spoken language \citep{CooperTypetheorylanguage2016}.
 \Gls{ttr} is mainly used to model the transition from the perceptual to the cognitive domain as well as 
  throughout the model, accounting for perception and cognition.
 
-
 \cite{LarssonFormalsemanticsperceptual2015}
 
 
 
 \subsection{Programming \acrshort{ttr} in Python: PyTTR}
 
-\cite{pyttr} is a Python implementation of \gls{ttr}.
-It supports modeling records, record types, ptypes, functions and other TTR objects.
-Additionally, it allows operations such as judgement, type checking and subtype checking.
+\cite{pyttr} provides a Python implementation of \gls{ttr}, known as PyTTR.
+It supports the modeling of \gls{ttr} types and operations such as judgement and type checking.
 As a Python library it also enables other features and peripheral procedures to be written in Python.
 
-[the advantage of implementing a theoretical model]
-PyTTR, itself being an implementation of TTR, allows, in turn, the implementation of models and theories that build on TTR.
+PyTTR allows, in turn, the implementation of \gls{ttr} models.
 By implementing a theoretical model as a computer program, it can ``come alive'' and be tested on real problems and data.
-Another motivation for implementation is to compete with existing, less theoretically strong techniques to solve a given task, but it is possibly secondary to the former reason.
+When implemented, the model can be evaluated and compared in practical settings it to other models.
 
 %[What has been written in PyTTR so far? nu, animat]
 
@@ -146,31 +145,31 @@ Another motivation for implementation is to compete with existing, less theoreti
 
 \subsection{Image recognition and object detection}
 
-In image recognition, objects are detected and classified in visual data.
+In image recognition, visual data is analyzed in order to detect and classify objects.
 A wide range of models have been developed to solve this task.
 Some focus only on the detection of objects \citep{BlaschkoLearningLocalizeObjects2008}, some only on classification \citep[ResNet,][]{HeDeepResidualLearning2015}, and others attempt to solve the full problem in an integrated fashion \citep{RedmonYouOnlyLook2015,HeMaskRCNN2017}.
 
-Some models include a feature extraction stage, where the image is converted to .
-In SIFT, keypoints are extracted at significant locations of an image, so that a group of keys can be compared to a group of keys in a database for an object, in order to do classification.
+There are different strategies for encoding the image into features.
+For one, SIFT is a technique where significant locations of an image are used to extract \textit{keypoints} \citep{LoweObjectrecognitionlocal1999}.
+Classification can then be performed by comparing the keypoints of a target image to those in a database.
 
-Convolutional neural networks are a commonly applied technique \citep{HeDeepResidualLearning2015} [more citations?].
+With \textit{convolutional neural networks}, however, the need for prior feature extraction is generally eliminated \citep{HeDeepResidualLearning2015, HeMaskRCNN2017}.
 Color image data is highly dimensional: it is typically represented digitally as a 2D matrix of pixels, where each pixel itself specifies a quantity of each of three basic colors.
-Convolutional layers reduces the dimensionality so that a single (one-dimensional) vector can encode an image.
+Convolutional layers reduces the dimensionality so that an image can be encoded in a single (one-dimensional) vector.
 The full image is often first divided into same-size overlapping segments, thus capturing locational aspects of the data.
-
-%Among the most recent contributions to computer vision, Facebook's \textit{Detectron} \citep{Detectron2018} features outlining of identified objects and classification with impressive accuracy.
-
 
 
 
 \subsection{\Acrfull{vqa}}
 
-\cite{AgrawalVQAVisualQuestion2015} suggest \acrfull{vqa} as a [complete] challenge in AI-completeness.
-``A VQA system takes as input an image and a free-form, open-ended, natural-language question about the image and produces a natural-language answer as the output''.
-The initiative includes a dataset and a series of annual competitions since 2016.
+\cite{AgrawalVQAVisualQuestion2015} suggest \acrfull{vqa} as a challenge for multi-modal semantic systems.
+A \gls{vqa} system is presented an image and a natural-language question about the image, and is expected to produce a natural-language answer.
+The initiative includes datasets and a series of annual competitions since 2016.
 
-\cite{AndreasLearningComposeNeural2016}
+A neural-network approach to question answering tasks in general is proposed by \cite{AndreasLearningComposeNeural2016}, where multiple neural-network modules are assembled like constituents in a syntax tree.
+For example, for the \gls{vqa} question \textit{What color is the bird?}, a network that detects objects of a given class is connected to one which classifies the color at the indicated location.
+The method of assembly is trained jointly with the module networks.
 
-\cite{SchlangenResolvingReferencesObjects2015}
+%\cite{SchlangenResolvingReferencesObjects2015}
 
-[example questions/answers]
+%[example questions/answers]
