@@ -112,7 +112,7 @@ The individuation function is defined in \autoref{eq:indfundef}, with an example
 The definition uses manifest fields to denote the \textit{fully specified} record type, or singleton record type.
 
 \begin{equation}\label{eq:indfundef}
-Individuate = \lambda r : Obj\ . \left[\begin{array}{lcl}
+f_{IndFun} = \lambda r : Obj\ . \left[\begin{array}{lcl}
     \text{x} = a_{new} &:& Ind \\
     \text{cp} = e_{new_1} &:& r.\text{pfun}(\text{x}) \\
     \text{cl} = e_{new_2} &:& \text{location}(\text{x}, \text{loc}) \\
@@ -121,7 +121,7 @@ Individuate = \lambda r : Obj\ . \left[\begin{array}{lcl}
 \end{equation}
 
 \begin{equation}\label{eq:indfunrec}
-Individuate(
+f_{IndFun}(
 \left[\begin{array}{rcl}
 \text{seg} &=& \left[\begin{array}{rcl}
 \text{cx} &=& 138\\
@@ -531,7 +531,7 @@ def eng_to_pyttr(text):
 
 The basic type $Ind$ was defined along with the utility functions in \autoref{lst:utility}.
 
-\begin{lstlisting}[label={lst:pyttrbasic},caption={individuate()}]
+\begin{lstlisting}[label={lst:pyttrbasic}]
 Int = BType('Int')
 Int.learn_witness_condition(lambda x: isinstance(x, int))
 

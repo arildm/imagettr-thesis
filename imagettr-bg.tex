@@ -6,18 +6,11 @@ This section will highlight some important pieces of the history of past researc
 
 \subsection{Computational semantics}
 
-[semantics]
-Philosophers have long been interested in the study of meaning.
-Frege.
-[Frege?, formal semantics, Montague ...]
+Semantics is the study of meaning.
+Computational semantics is concerned with how to represent meaning digitally, and then use it to perform semantic parsing, inference and other tasks \citep{BlackburnComputationalsemantics2003}.
+A well-established and largely capable formalism for expressing and operating on propositions is \gls{fol}.
 
-A well-established and largely capable formalism for expressing and operating on propositions is first-order logic (FOL).
-["classical" computational semantics]
-Computational accounts of meaning emerged [how].
-They are/were characterized by [what].
-[Montague, ...]
-[FOL/FOPC]
-\citep{BlackburnComputationalsemantics2003}
+\cite{MontagueFormalPhilosophySelected1974}
 [SD Computational Semantics]
 
 [modern methodologies]
@@ -40,13 +33,15 @@ FOPC for the win, but ``other approaches are both possible and interesting''.
 \subsection{Perceptual semantics}
 % ... in general, and spatial relations in particular
 
-\cite{Garnhamunifiedtheorymeaning1989}:
-Left/right/above/below/front/behind.
-Basic meaning (of spatial relational terms).
-Framework vertical constraint.
-Gravitation. NESW.
-Clark: canonical encounter? (left of cabinet, left of chair.)
-(Ships and outer space.)
+An artificial device perceiving its environment will make internal, symbolic representations of the real world outside \citep{PustejovskyPerceptualsemanticsconstruction1990}.
+According to Frege, these symbols will have \textit{sense} as well as \textit{reference}.
+A symbol with the sense ``the dog'' may have a certain dog in the environment as reference.
+Later, the same symbol and sense may refer to another dog.
+
+\cite{Garnhamunifiedtheorymeaning1989} explores terms of spatial relations (``left'', ``right'', ``above'', etc.).
+They claim that there are three types of meanings for each term: basic, deictic and intrinsic.
+The vertical (or gravitational) axis is special, so the terms ``above'' and ``below'' work differently than expected when the related object is, for example, upside down.
+\cite{Leveltperceptuallimitationstalking1984} and \citeauthor{Garnhamunifiedtheorymeaning1989} present different explanations to this.
 
 \cite{LoganComputationalAnalysisApprehension1996} account for the state of 
 Basic–deictic(–intrinsic) relations.
@@ -95,44 +90,39 @@ Using experiments where a number of agents participate in a language game where 
 \subsection{Type theory in natural language processing}
 \label{ssec:ttnlp}
 
-Type theory was developed as an alternative to set theory, responding to paradoxes [explain/leave out] found in the latter.
-With set theory widely serving as a \textit{foundation of mathematics}, the development of this new theory was [important].
-Several different type theories have been created, of which Church's \textit{simply typed \textlambda-calculus} \cite{church40} and Martin-Löf's \textit{intuitionistic type theory} \citep{martinlof84} are some prominent examples.
-\citep{CoquandTypeTheory2015} [too detailed?]
+Type theory is a logic system developed by \cite{WhiteheadPrincipiamathematica1910}, \cite{church40}, \cite{martinlof84} among others \citep{CoquandTypeTheory2015}.
+%Several different type theories have been created, of which Church's \textit{simply typed \textlambda-calculus} \cite{church40} and Martin-Löf's \textit{intuitionistic type theory} \citep{martinlof84} are some prominent examples.
+In \cite{RantaTypetheoreticalGrammar1995}, it is used as a method of syntactic parsing.
+\cite{KohlhaseTypeTheoreticSemanticslDRT1996} combines type theory with discourse representation theory (DRT).
 
-[use of type theory in nlp]
-
-\cite{CooperRecordsRecordTypes2005} combines several theories from logic, semantics and linguistics in a single framework called \textbf{\acrfull{ttr}}.
- lambda calculus, phrase structure grammar, (DRT), (situation semantics) (what are the latter)?
-It has been employed to model natural language in the context of dialogue, situated agents and spoken language.
-\cite{Barwisesituationlogic1989}
-
-["In the paper we argue it can be used as a knowledge representation system in situated agents since it combines differene modalities. Hence, it connects perception with higher-level reasoning." SD]
-
-Parsing natural language to TTR has been addressed in \cite{CooperRecordsRecordTypes2005}, \cite{RobinCooperAustiniantruthattitudes2005}, \cite{CooperTypetheorysemantics2012}, \cite{CooperTypetheorylanguage2016}.
-...
+\cite{CooperRecordsRecordTypes2005} combines several theories from logic, semantics and linguistics in a single type-theoretic framework known as \acrfull{ttr}.
+It has been employed to model natural language in the context of
+syntax \citep{CooperRecordsRecordTypes2005,RobinCooperAustiniantruthattitudes2005, CooperTypetheorysemantics2012, CooperTypetheorylanguage2016},
+dialogue \citep{Larssonformalviewcorrective2009, CooperTypetheorylanguage2016, LarssonDialoguesHaveContent2011},
+situated agents \citep{DobnikModellinglanguageaction2012, ttrspat,lspc} and
+spoken language \citep{CooperTypetheorylanguage2016}.
 
 
 
+%\subsubsection{Overview of \gls{ttr} syntax}
 
-\subsubsection{Overview of \gls{ttr} syntax}
-
-[brief summary of TTR syntax?]
+%[brief summary of TTR syntax?]
 
 
 
 \subsection{[Perceptual semantics in] \acrfull{ttr}}
 
-\cite{LarssonDialoguesHaveContent2011}
 
-\cite{DobnikModellinglanguageaction2012}
+\cite{DobnikModellinglanguageaction2012} advocates the use of \gls{ttr} for classification of spatial relations.
+
+\cite{ttrspat} model a situated agent 
+ focusing especially on spatial relations.
 
 \cite{lspc} model the point space perception of a mobile robot equipped with a rangefinder.
  that would move around and use laser range scanner or similar to collect points in space, group them into objects and detect spatial relations between them.
 \Gls{ttr} is mainly used to model the transition from the perceptual to the cognitive domain as well as 
  throughout the model, accounting for perception and cognition.
 
-\cite{ttrspat} develop this further, focusing especially on spatial relations.
 
 \cite{LarssonFormalsemanticsperceptual2015}
 

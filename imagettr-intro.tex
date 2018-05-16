@@ -2,30 +2,35 @@
 \section{Introduction}
 \label{sec:intro}
 
-Having computers ``understand'' images is desirable in several areas.
-In this context, understanding means to process visual input on a cognitive level.
-Sub-cognitive image processing may include tasks such as prominent color extraction, edge detection and visual pattern recognition.
-Cognitive processing, however, includes identifying objects, their properties and their relations to each other, as well as including this information in further cognitive processes, such as reasoning and prediction [sources?].
-Making the connection between sensory (such as visual) input and cognitive categories is what concerns the field of \textit{perceptual semantics}.
+Having computers understand visual input is desirable in several areas.
+A domestic assistant robot may use a camera to navigate and identify useful objects in a home.
+Driver-less cars need to be able to read road signs and track other moving vehicles.
+Web crawlers may extract information from images alongside text on the web.
 
-[``Image understanding''] is interesting in various applications.
-It is required in domestic assistant, driver-less cars and other camera-equipped (often mobile) robots, in order to obtain knowledge (or beliefs) and select appropriate actions.
-The same kind of processing can also be used outside situated agents, for automatic processing of large sets of visual data [?].
+This kind of understanding involves processing sensory (such as visual) input on a cognitive level.
+Low-level image processing may include tasks such as prominent color extraction, edge detection and visual pattern recognition.
+Higher-level processing, however, includes identifying objects, their properties and their relations to each other.
+This information can then be used for language understanding, reasoning, prediction and other cognitive processes.
+Making the connection between sensory input and cognitive categories is what concerns the field of \textit{perceptual semantics} \citep{PustejovskyPerceptualsemanticsconstruction1990}.
 
-[language, image captions, vqa]
+Humans use language to communicate information.
+Thus it is useful to add linguistic capacities to a perceptual system.
+With vision and language connected, a robot can talk about what it sees, and descriptions can be automatically generated for images found on the web.
+Image caption generation is indeed a popular task for evaluating computer vision systems.
+Another one is \textit{\gls{vqa}}, where the system is expected to generate answers to natural-language questions in the context of a given image.
 
-[the creation of ttr]
+The connection between different modes of information, such as vision and language, requires a model of semantic representation.
+Formal models such as \gls{fol} have long been of choice, but recent developments have seen data-driven approaches excel in some cases.
+Briefly put, the former kind tends to deliver deep structures of information in narrow domains, while the latter more easily covers wide domains, but with shallow information content \citep{SimonDobnikModularmechanisticnetworks2017}.
+A recent contribution that combines several branches in formal systems is \textit{\gls{ttr}} \citep{CooperAustiniantruthattitudes2005,CooperTypetheorylanguage2016}.
 
-[research question]
-The goal of this thesis is to implement visual perception, cognition of spatial relations and basic natural language understanding in \gls{ttr}.
-The implementation shall build on past relevant \gls{ttr} model proposals and focus on high-level completeness, meaning connecting vision and language through a cognitive model using \gls{ttr} as far as possible.
-These are the points on which the result is finally qualitatively evaluated.
-Lower level parts shall use existing solutions or basic placeholder implementations.
+The goal of this thesis is to provide a Python implementation of perception and classification of objects, recognition of spatial relations and basic natural language understanding in \gls{ttr}.
+The purpose of this task is to use \gls{ttr} as a multi-modal knowledge representation system, providing formal transparency.
+The implementation shall build on past proposals and focus on high-level cognition, meaning connecting vision and language through a cognitive model using \gls{ttr} as far as possible.
+Lower-level parts shall use existing solutions or basic placeholder implementations.
+The result shall function as a basic \gls{vqa} application, meaning it is able to answer questions given with an image as context.
+The extensive use of \gls{ttr} in the application, as well as its \gls{vqa} abilities, are the points on which the result is finally qualitatively evaluated.
 
-[the purpose of this model: connect perception to formal semantics]
-
-The theoretical background for this thesis is summarized in \textit{Background}.
-In the \textit{Method} section, a model is defined and its implementation in Python and PyTTR described.
-Then follows an account of the \textit{Results} with discussion, and finally some \textit{Conclusions}.
-
-"[vqa] is our use-case scenario"
+The theoretical background for this thesis is summarized in \autoref{sec:background}.
+The work put forward is outlined in \autoref{sec:method}, and presented in its entirety in \autoref{sec:results}, including a \gls{ttr} model formulation and Python source code.
+A discussion follows, before an account of conclusions in \autoref{sec:conclusions}.
