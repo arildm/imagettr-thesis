@@ -137,11 +137,11 @@ f_{IndFun}(
     \text{cp} = e_0 &:& \text{person}(\text{x}) \\
     \text{cl} = e_1 &:& \text{location}(\text{x}, \text{loc}) \\
     \text{loc} = \left[\begin{array}{rcl}
-\text{cx} &=& 138\\
-\text{w} &=& 276\\
-\text{cy} &=& 654\\
-\text{h} &=& 809
-\end{array}\right] &:& Segment\\
+		\text{cx} &=& 138\\
+		\text{w} &=& 276\\
+		\text{cy} &=& 654\\
+		\text{h} &=& 809
+		\end{array}\right] &:& Segment\\
 \end{array}\right]
 \end{equation}
 
@@ -183,10 +183,24 @@ Of course, the requirement that the individual $r.\text{lo}.\text{x}$ is actuall
 
 
 
+\subsubsection{Combining beliefs}
+
+The hitherto generated types are considered our beliefs.
+As described in \autoref{ssec:languagevqa}, we can answer to a polar question if we \textit{combine} the beliefs to a scene type and check whether it is a subtype of the question type, $S \sqsubseteq Q$.
+How is this combining carried out?
+A direct application of the \textit{merge} operation is not suitable for this, as we have labels reocurring in multiple record types.
+Instead, all record types are relabeled with new, unique labels, before being merged.
+
+If $T_1$ and $T_2$ are record types, then the \textbf{conflict-free merge} $T_1 \underset{u}{\wedge} T_2$ is a merge of the record types relabeled such that they do not share any labels.
+
+If the belief types are $T_1, T_2, ..., T_n$, they are combined to $T_1 \underset{u}{\wedge} T_2 \underset{u}{\wedge} ... \underset{u}{\wedge} T_n$.
+
+
+
 \subsubsection{Agent}
 
-Now, the perceptual-conceptual pieces described above are combined.
-We are building an agent who receives information on classified and located objects of an image, and apprehends their basic status and spatial relations.
+We are now connecting the perceptual-conceptuel pieces described above, by building an agent.
+It receives information on classified and located objects of an image, and apprehends their basic status and spatial relations.
 It also receives the result of parsing a natural-language utterance.
 The information is in \gls{ttr} form, which finally allows the agent to connect the two modes.
 This provides a means to answer to natural-language questions about the image.
@@ -237,7 +251,7 @@ An example state of an agent $agt$ is shown in \autoref{eq:agt}.
 \renewcommand{\arraystretch}{1.2}
 agt = \left[\begin{array}{rcl}
     \text{objdetector} &=& \mathtt{yolo\_detector} \\
-    \text{indfun} &=& \mathtt{individuate} \\
+    \text{indfun} &=& \mathtt{indfund} \\
     \text{appr} &=& [Clf_{left}, Clf_{right}, Clf_{above}, Clf_{below}] \\
     \text{state} &=& \left[\begin{array}{rcl}
 		\text{img} &=& \mathtt{dogride.jpg} \\
@@ -587,7 +601,7 @@ The PyTTR implementation of \gls{ttr} functions does not support usage of the ar
 The individuation function was therefore implemented in Python.
 To keep the connection to \gls{ttr} tight, the argument and the result are checked against their \gls{ttr} types.
 
-\begin{lstlisting}[label={lst:individuate},caption={Individuation function}]
+\begin{lstlisting}[label={lst:indfun},caption={Individuation function}]
 PTy = Type('PTy')
 PTy.learn_witness_condition(lambda p: isinstance(p, HypObj) \
     and forsome(p.types, lambda t: isinstance(t, PType)))
@@ -684,16 +698,34 @@ def relabel_utt(utt, bel_comb):
 \subsection{Discussion}
 \label{sec:discussion}
 
+A \gls{ttr} model was developed, combining perception and language in a \gls{vqa} setting.
+The model was then implemented in Python using PyTTR.
+External systems and basic implementations were used for object detection, spatial classification and natural-language parsing.
+The semantic representation framework, constituted by the \gls{ttr} model, then functions as a bridge between the perceptual systems.
+With this, the aims formulated in the introduction were reached.
+
+% Model
+
 As discussed in \autoref{sec:method-spatrel}, our treatment of spatial relations excludes the intrinsical meaning and functional aspects, in favor of model simplicity and easy implementation.
 ...
 
+The model is restricted to a limited type of polar questions.
+Questions such as ``Is the dog brown?'' or ``What is to the left of the car?''
 Question types.
 Not a full VQA solution.
 It can only answer one question type.
-With only the extension of parsing, it could understand (= educe situation record types) more complex forms like "A R1 B1 and R2 B2", "A1 R1 B1 and A2 R2 B2".
+With only the extension of parsing, it could understand (= educe situation record types) more complex forms like "A R1 B1 and R2 B2", "A1 R1 B1 and A2 R2 B2". "A is between B1 and B2"
 "What is R B?"
 "What color is the A?"
 "How many A are there?" etc.
+
+%The agent is vaguely formulated?
+
+% Implementation
+
+
+The implementation lacks coverage of the enclosing agent structure.
+...
 
 
 
