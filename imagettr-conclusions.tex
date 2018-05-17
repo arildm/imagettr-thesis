@@ -13,32 +13,22 @@ Our model is a framework for detecting objects and relations in visual data, and
 It provides a \gls{vqa} system based on formal semantics.
 
 The model is one of few applications of the recently developed PyTTR library, which allows TTR to be used in executable programs.
-[extension with unsingleton, relabel-subtype. also check changes in pyttr itself (relabel(), ?)]
-
-%- What we have contributed to (1) semantic representations of grounded language in TTR; (ii) their implementation in pyTTR; (iii) in the domain of visual question answering? 
-
-%It works and it's nice because...
-robustness, type checking, verifiable (?)
+\gls{ttr} operations such as combining beliefs and subtype relabeling were implemented, and the source code is released freely so that it can be reused by anyone if desired.
 
 
 
 \subsection{Future work}
 
+\cite{ttrspat} features \gls{ttr} accounts of the intrinsical meaning and the functional aspect of spatial relations, but they have hitherto not been implemented.
+
+Spatial classification and language parsing were achieved using minimal and simplistic implementations.
+Substituting them with sophisticated systems would make for wider question coverage and higher question answering scores.
+For instance, \cite{LoganComputationalAnalysisApprehension1996} proposes spatial templates, regions of acceptability and compound relations (like ``above to the right of'').
+
+There are still some features of \gls{ttr} not implemented in PyTTR.
+One that was relevant in this project was the ability to reference an argument in a function ({\tt Fun}) body.
+This lack required non-PyTTR Python usage where PyTTR should suffice.
+
 %(b) left for future work in terms of (1) semantic representations of grounded language in TTR; (ii) their implementation in pyTTR; (iii) in the domain of visual question answering? 
 
-Spatial templates \& regions of acceptability. Compound relations (above right) finer (directly). Functional aspect.  \cite{LoganComputationalAnalysisApprehension1996} (also Dobnik etc)
-
-Basic->Deictic->Intrinsic relations  \cite{LoganComputationalAnalysisApprehension1996}.
-
-4 question types.
-Moar question types (tasks/programs/routines in L\&S).
-
-%Dialogue.
-
-Classification after Q.
-
-Probabilistic TTR for ``good fit'' (is is more to the left or more above?).
-
-Negation.
-
-Extend PyTTR: arg usage in Fun. Relabel-subtype. Unsingleton?]
+%Classification after Q.

@@ -3,9 +3,7 @@
 
 In this section, the model is defined.
 First formally, in \gls{ttr}.
-Then in Python, using PyTTR but also with some passages of non-PyTTR Python code.
-The implementation necessitated some extensions to PyTTR which are also presented.
-[The vqa application is presented? sd] [the problem is that currently there is no vqa application...]
+Then, parts of the Python source is presented, including PyTTR usage.
 
 
 
@@ -36,7 +34,7 @@ Segment = \left[\begin{array}{rcl}
 \begin{equation}\label{eq:ppty}
 Ppty = (Ind \rightarrow Type)\end{equation}
 
-[PTy?]
+%[PTy?]
 
 A perceptual object is a record of the type $Obj$ (\autoref{eq:obj}).
 An example record is given in \autoref{eq:objrec}.
@@ -44,7 +42,7 @@ An example record is given in \autoref{eq:objrec}.
 %This fact is expressed in TTR as the function type $ObjDetector$ (\autoref{eq:objdetector}).
 An object detector is a function from an image to a set of perceptual objects, as captured by the $ObjDetector$ function type (\autoref{eq:objdetector}).
 
-[differences/similarites LSPC and others]
+%[differences/similarites LSPC and others]
 
 \begin{equation}\label{eq:obj}
 Obj = \left[\begin{array}{rcl}
@@ -99,23 +97,22 @@ It is typed as $IndFun$ (\autoref{eq:indfun}).
 IndFun = ( Obj \rightarrow RecType )
 \end{equation}
 
-The record type resulting from applying an $IndFun$ function should be a subtype of $IndObj$.
+The record type resulting from applying an $IndFun$ function will be a subtype of $IndObj$.
+Furthermore, the $x$ and $loc$ fields will be specified using \textit{manifest fields}.
+The manifest field $\text{x} = a : Ind$ constrains the type so that any record of it must have $a$ as value for $\text{x}$.
+The $x$ field is specified as a newly instantiated $Ind$ object, $a_n$ (where $n$ is a number such that the new instatiation is unique).
+The $loc$ field is specified as the value of $seg$ in the $Obj$ record.
 
-For each record type returned by the individuation function, a record is simultaneously created.
-The $loc$ value of this record is naturally identical to the $seg$ value of the $Obj$ input record.
-Objects for the remaining fields need to be instantiated on the spot.
-Object creation is notated here as $A_{new}$, where the symbol $A$ may vary for the sake of readability.
 %For the $x$ field, we create a new individual object $a_{new} : Ind$.
 %For the ptype fields $cp$ and $cl$, we also create new objects $e_{new} : r.\text{pfun}(\text{x})$ and $e_{new} : \text{location}(\text{x}, \text{loc})$.
 
 The individuation function is defined in \autoref{eq:indfundef}, with an example application in \autoref{eq:indfunrec}.
-The definition uses manifest fields to denote the \textit{fully specified} record type, or singleton record type.
 
 \begin{equation}\label{eq:indfundef}
 f_{IndFun} = \lambda r : Obj\ . \left[\begin{array}{lcl}
-    \text{x} = a_{new} &:& Ind \\
-    \text{cp} = e_{new_1} &:& r.\text{pfun}(\text{x}) \\
-    \text{cl} = e_{new_2} &:& \text{location}(\text{x}, \text{loc}) \\
+    \text{x} = a_n &:& Ind \\
+    \text{cp} &:& r.\text{pfun}(\text{x}) \\
+    \text{cl} &:& \text{location}(\text{x}, \text{loc}) \\
     \text{loc} = r.\text{seg} &:& Segment\\
 \end{array}\right]
 \end{equation}
@@ -134,8 +131,8 @@ f_{IndFun}(
 ) =
 \left[\begin{array}{lcl}
     \text{x} = a_0 &:& Ind \\
-    \text{cp} = e_0 &:& \text{person}(\text{x}) \\
-    \text{cl} = e_1 &:& \text{location}(\text{x}, \text{loc}) \\
+    \text{cp} &:& \text{person}(\text{x}) \\
+    \text{cl} &:& \text{location}(\text{x}, \text{loc}) \\
     \text{loc} = \left[\begin{array}{rcl}
 		\text{cx} &=& 138\\
 		\text{w} &=& 276\\
@@ -200,7 +197,7 @@ If the belief types are $T_1, T_2, ..., T_n$, they are combined to $T_1 \underse
 
 \subsubsection{Agent}
 
-We are now connecting the perceptual-conceptuel pieces described above, by building an agent.
+We are now connecting the perceptual-conceptual pieces described above, by building an agent.
 It receives information on classified and located objects of an image, and apprehends their basic status and spatial relations.
 It also receives the result of parsing a natural-language utterance.
 The information is in \gls{ttr} form, which finally allows the agent to connect the two modes.
@@ -242,7 +239,7 @@ For an agent $agt : Agent$, the perception and question-answering procedure is c
 	\end{enumerate}
 	For example, the \textit{left} classifier in \autoref{eq:leftclfdef} is applied to each pair of $IndObj$ after instantiating and combining records into a $LocTup$.
 \item Any language input is parsed and the resulting record type assigned to $agt.\text{state.utt}$.
-\item The record types in $agt.\text{state.bel}$ are combined. If the resulting record type is a relabel-subtype of $agt.\text{state.utt}$, the answer ``yes'' is emitted; otherwise ``no''.
+\item The record types in $agt.\text{state.bel}$ are combined. If the resulting record type is a relabel-subtype of $agt.\text{state.utt}$, the answer YES is emitted; otherwise NO.
 \end{enumerate}
 
 An example state of an agent $agt$ is shown in \autoref{eq:agt}.
@@ -252,7 +249,7 @@ An example state of an agent $agt$ is shown in \autoref{eq:agt}.
 \renewcommand{\arraystretch}{1.2}
 agt = \left[\begin{array}{rcl}
     \text{objdetector} &=& \mathtt{yolo\_detector} \\
-    \text{indfun} &=& \mathtt{indfund} \\
+    \text{indfun} &=& \mathtt{indfun} \\
     \text{appr} &=& [Clf_{left}, Clf_{right}, Clf_{above}, Clf_{below}] \\
     \text{state} &=& \left[\begin{array}{rcl}
 		\text{img} &=& \mathtt{dogride.jpg} \\
@@ -280,8 +277,8 @@ agt = \left[\begin{array}{rcl}
 		\text{bel} &=& \begin{array}{l} [
 			\left[\begin{array}{rcl}
 				\text{x} = a_0 &:& Ind\\
-				\text{cp} = e_0 &:& \text{person}(x)\\
-				\text{cl} = e_{1} &:& \text{location}(x, loc)\\
+				\text{cp} &:& \text{person}(x)\\
+				\text{cl} &:& \text{location}(x, loc)\\
 				\text{loc} = \left[\begin{array}{rcl}
 					\text{w} &=& 197\\
 					\text{cx} &=& 452\\
@@ -291,7 +288,7 @@ agt = \left[\begin{array}{rcl}
 					&:& Segment \\
 				\end{array}\right],
 			{}{} \left[\begin{array}{rcl}
-				\text{cr}=e_6 &:& \text{above}(a_{0}, a_{1})
+				\text{cr} &:& \text{above}(a_{0}, a_{1})
 				\end{array}\right],
 			... ]
 			\end{array} \\
@@ -395,8 +392,6 @@ def indfun(r):
         raise ValueError()
     return indobj
 IndFun.witness_cache.append(indfun)
-
-indobjs = [indfun(r) for r in objs]
 \end{lstlisting}
 
 \paragraph{Spatial relation classification}
@@ -465,7 +460,7 @@ def merge_unconflict(T1, T2):
     return T1c.merge(T2c)
 \end{lstlisting}
 
-When it comes to dependent types, a custom in \gls{ttr} literature is to include the dependum as a field and use the field label in the dependent type.
+With dependent types, it is customary in \gls{ttr} literature to include the dependum as a field and use the field label in the dependent type.
 In our implementation, spatial classifiers return record types where dependums are instead specified as individuals directly.
 The function in \autoref{lst:useindfieldlabels} helps when those record types are combined with others.
 
@@ -598,34 +593,31 @@ def eng_to_pyttr(text):
 
 A \gls{ttr} model was developed, combining perception and language in a \gls{vqa} setting.
 The model was then implemented in Python using PyTTR.
-External systems and basic implementations were used for object detection, spatial classification and natural-language parsing.
+External systems or basic implementations were used for object detection, spatial classification and natural-language parsing.
 The semantic representation framework, constituted by the \gls{ttr} model, then functions as a bridge between the perceptual systems.
 With this, the aims formulated in the introduction were reached.
 
 % Model
 
 As discussed in \autoref{sec:method-spatrel}, our treatment of spatial relations excludes the intrinsical meaning and functional aspects, in favor of model simplicity and easy implementation.
-...
+Both features are treated in terms of \gls{ttr} by \cite{ttrspat}.
+The former requires a notion of the orientation of reference objects.
+Assuming an object classifier with this capability were available, implementing intrinsical spatial relations would not be a large step from the present model.
+Support for the functional aspect of spatial relations requires two things.
+Firstly, classifiers for functional relations (such as $\text{protects(o}_3\text{.a, o}_1\text{.a, o}_2\text{.a)}$ in \cite{ttrspat}, for an umbrella protecting a man from rain).
+Secondly, prediction from a set of functional relations to spatial classifiers that are sensitive to those functional relations.
+The second is needed to activate the appropriate spatial relation term depending on which functional relations are true according to the classifiers in the first.
 
-The model is restricted to a limited type of polar questions.
-Questions such as ``Is the dog brown?'' or ``What is to the left of the car?''
-Question types.
-Not a full VQA solution.
-It can only answer one question type.
-With only the extension of parsing, it could understand (= educe situation record types) more complex forms like "A R1 B1 and R2 B2", "A1 R1 B1 and A2 R2 B2". "A is between B1 and B2"
-"What is R B?"
-"What color is the A?"
-"How many A are there?" etc.
-
-%The agent is vaguely formulated?
+The model is restricted to a limited type of polar questions, far from the range of question types in the \gls{vqa} dataset \citep{AgrawalVQAVisualQuestion2015}.
+Vast extensions to the language parsing, the perceptual classification and the comparation of question and scene are possible and required in order to answer more advanced questions.
+Some examples are:
+further property classification (``Is the dog brown?''),
+wh-questions (``What is to the left of the car?''),
+quantities (``How many flowers are there?''),
+inference (``Does this person have 20/20 vision?'', for an image where a person is wearing glasses).
 
 % Implementation
 
-
-The implementation lacks coverage of the enclosing agent structure.
-...
-
-
-
-%Contradiction of Logan \& Sadler's "evidence" for their "theory of apprehension" (which is different from mine)? (Already Regier \& Carlson did.)
-%[no difference -sd]
+The implementation unfortunately lacks coverage of the $Agent$ record type.
+The agent serves to put the components together, and would enable modeling the \gls{vqa} procedure in \gls{ttr}.
+The present implementation instead uses a series of procedural Python function calls.

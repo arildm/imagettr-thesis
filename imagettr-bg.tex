@@ -9,24 +9,21 @@ This section will highlight some important pieces of the history of past researc
 Semantics is the study of meaning.
 Computational semantics is concerned with how to represent meaning digitally, and then use it to perform semantic parsing, inference and other tasks \citep{BlackburnComputationalsemantics2003}.
 A well-established and largely capable formalism for expressing and operating on propositions is \gls{fol}.
+\cite{MontagueFormalPhilosophySelected1974} used \gls{fol} with syntactic parsing for semantic parsing.
+Thus, a natural-language utterance can be translated to a logical representation.
 
-\cite{MontagueFormalPhilosophySelected1974}
-[SD Computational Semantics]
-
-[modern methodologies]
 With recent advancements in computer science, ambitious computational-semantic theories are now in abundance.
 As a competitor to formal systems, statistical methods have emerged which do well in various tasks within semantics.
 They utilize the performance of modern computers and leverage the large amounts of data that are available as a product of our largely digitalized society.
+Data-driven approaches are easily adapted for wide coverage (assuming enough data is available) but they often produce shallow knowledge.
+Formal approaches, on the other hand, require more or less precisely crafted rules and formulations, which is time-consuming, but it typically enables the result to be more structured and comprehensive \citep{Dobnik:2017ag}.
 
+\cite{BlackburnComputationalsemantics2003} claimed (at that time) that \gls{fol} is an adequate semantic representation in a majority of cases, but ``other approaches are both possible and interesting''.
 
-[formal systems]
-If statistical models of semantics do well in [empirical/data-driven/practical] tasks, formal theories of semantics [do what?]
-\cite{BlackburnComputationalsemantics2003}:
-FOPC for the win, but ``other approaches are both possible and interesting''.
-
-\cite{Dobnik:2017ag}
-
-
+\cite{SearleMindsbrainsprograms1980} disputes whether a computer really can \textit{understand} concepts, that is, whether it will be able operate on grounded symbols or just the (arbitrary) symbols themselves.
+\cite{HarnadSymbolGroundingProblem1990} names this the \textit{symbol grounding problem}.
+\cite{SteelsSymbolGroundingProblem2007} describes experiments where a number of agents participate in a language game, where they make up random words for preset concepts and manage to ``agree'' on which words to use for which concepts.
+With the success in these experiments, \citeauthor{SteelsSymbolGroundingProblem2007} concludes that the symbol grounding problem is solved.
 
 
 
@@ -34,56 +31,36 @@ FOPC for the win, but ``other approaches are both possible and interesting''.
 % ... in general, and spatial relations in particular
 
 An artificial device perceiving its environment will make internal, symbolic representations of the real world outside \citep{PustejovskyPerceptualsemanticsconstruction1990}.
-According to Frege, these symbols will have \textit{sense} as well as \textit{reference}.
+According to \cite{FregeUberSinnUnd1892}, these symbols will have \textit{sense} as well as \textit{reference}.
 A symbol with the sense ``the dog'' may have a certain dog in the environment as reference.
 Later, the same symbol and sense may refer to another dog.
 
-\cite{Garnhamunifiedtheorymeaning1989} explores terms of spatial relations (``left'', ``right'', ``above'', etc.).
-They claim that there are three types of meanings for each term: basic, deictic and intrinsic.
-The vertical (or gravitational) axis is special, so the terms ``above'' and ``below'' work differently than expected when the related object is, for example, upside down.
-\cite{Leveltperceptuallimitationstalking1984} and \citeauthor{Garnhamunifiedtheorymeaning1989} present different explanations to this.
+By using terms of spatial relations (``left'', ``right'', ``above'', etc.), the location of one object is specified in terms of the location and orientation of another.
+Different terminology have been used to refer to the two roles, but we will use \textit{located object} and \textit{reference object} \citep{DobnikModellinglanguageaction2012}.
 
-\cite{LoganComputationalAnalysisApprehension1996} account for the state of 
-Basic–deictic(–intrinsic) relations.
-Perceptual–conceptual representation.
-"Computational theory of apprehension": spatial indexing -> reference frame -> ... Instead, we move into the conceptual level, both in perception and language, and evaluate validity from there.
-(Drawbacks?)
-They present "evidence" for their theory, does that evidence contradict the present approach?
-
-Target/Landmark, Figure/Ground, Referent/Relatum, Located object (LO)/Reference object (REFO)
-
-Terms of spatial relations (\textit{behind}, \textit{to the left of}, etc.) have three types of meanings \citep{Garnhamunifiedtheorymeaning1989}: basic, deictic and intrinsical.
+\cite{Garnhamunifiedtheorymeaning1989} explores terms of spatial relations and claims that there are three types of meanings for each term: basic, deictic and intrinsic.
 The deictic and intrinsical meanings hold for relations between two objects.
 The deictic meaning is relative to the coordinate frame of the speaker, while the intrinsical is relative to that of the reference object.
-The basic meaning, introduced by \cite{Garnhamunifiedtheorymeaning1989}, is also relative to the speaker, but holds for a single object only.
-[and? (it is basic in the way that... what?) example?]
+The basic meaning, introduced by \citeauthor{Garnhamunifiedtheorymeaning1989}, is also relative to the speaker, but holds for a single object only.
 
-\cite{RegierGroundingspatiallanguage2001a}:
-Four models. AVS.
-Many experiments.
-Spatial term ratings influenced by: proximal \& center-of-mass orientations, grazing line, distance.
+%The vertical (or gravitational) axis is special, so the terms ``above'' and ``below'' work differently than expected when the related object is, for example, upside down.
+%\citeauthor{Garnhamunifiedtheorymeaning1989} uses a rule known as the \textit{framework vertical constraint} to explain this.
+%It says that ``above'' and ``below'' must be understood in the 
 
-\cite{CoventryClassificationExtrageometricInfluences2004}:
-Extra-geometric constraints on the meaning of spatial relational terms.
-Especially functional.
-Functional geometric framework.
-[functional aspect, Coventry?]
+\cite{LoganComputationalAnalysisApprehension1996} propose \textit{spatial templates} for the classification of spatial relations.
+A spatial template is a field of acceptability ratings for a certain spatial relation term.
+The center of the field is the location occupied by the reference object and each rating denotes the acceptability of using the term if the located object is at the location of that rating.
+The ratings in spatial templates are collected through experiments.
 
-\cite{HarnadSymbolGroundingProblem1990}:
-Can a computer really ``understand'' concepts, that is, will it operate on grounded symbols or just the (arbitrary) symbols themselves?
-Turing test.
+\cite{RegierGroundingspatiallanguage2001a} instead propose a computational classification model known as \textit{attentional vector-sum (AVS)}.
+The model considers distance between objects and the fact that they can have different shapes (especially elongated in some direction).
+This model is compared to three simpler alternatives in seven experiments, and AVS is found to perform best.
 
-"say something about recognitising objects as well and grounding in general. So I would add discussions of Roy" SD
+\cite{CoventryInterplayGeometryFunction2001} explores extra-geometric constraints on the meaning of spatial relational terms, especially functional ones.
+The functional relation between objects is significant for the acceptability of terms of spatial relations.
+For example, an umbrella may be well said to be \textit{above} a man, but less clearly \textit{over} him, if it does not protect him from rain falling sideways in hard wind \citep{CoventryInterplayGeometryFunction2001}.
 
-
-
-\cite{SteelsSymbolGroundingProblem2007}:
-Peirce: object, symbol, concept. Grounded with method.
-Searle and other claim that the Symbol grounding problem is insolvable.
-Steels concludes that it is solved.
-Using experiments where a number of agents participate in a language game where they make up random words for preset concepts and manage to ``agree'' on which words to use for which concepts.
-
-...
+%"say something about recognitising objects as well and grounding in general. So I would add discussions of Roy" SD
 
 
 
@@ -95,12 +72,12 @@ Type theory is a logic system developed by \cite{WhiteheadPrincipiamathematica19
 In \cite{RantaTypetheoreticalGrammar1995}, it is used as a method of syntactic parsing.
 \cite{KohlhaseTypeTheoreticSemanticslDRT1996} combines type theory with discourse representation theory (DRT).
 
-[a hint of what tt provides]
+%[a hint of what tt provides]
 
 \cite{CooperRecordsRecordTypes2005} combines several theories from logic, semantics and linguistics in a single type-theoretic framework known as \acrfull{ttr}.
 It has been employed to model natural language in the context of
-syntax \citep{CooperRecordsRecordTypes2005,RobinCooperAustiniantruthattitudes2005, CooperTypetheorysemantics2012, CooperTypetheorylanguage2016},
-dialogue \citep{Larssonformalviewcorrective2009, CooperTypetheorylanguage2016, LarssonDialoguesHaveContent2011},
+syntax \citep{CooperAustiniantruthattitudes2005, CooperRecordsRecordTypes2005, CooperTypetheorysemantics2012, CooperTypetheorylanguage2016},
+dialogue \citep{Larssonformalviewcorrective2009, LarssonDialoguesHaveContent2011, CooperTypetheorylanguage2016},
 situated agents \citep{DobnikModellinglanguageaction2012, ttrspat,lspc} and
 spoken language \citep{CooperTypetheorylanguage2016}.
 
@@ -112,26 +89,21 @@ spoken language \citep{CooperTypetheorylanguage2016}.
 
 
 
-\subsection{[Perceptual semantics in] \acrfull{ttr}}
+\subsection{Perceptual semantics in \acrfull{ttr}}
 
 
-\cite{DobnikModellinglanguageaction2012} advocates the use of \gls{ttr} for classification of spatial relations.
+\cite{DobnikModellinglanguageaction2012} presents how \gls{ttr} can be used to model a situated conversational agent.
+The agent moves around in a point-space world.
+Objects, detected as sub point-spaces are recognized, as are (geometric and extra-geometric) spatial relations between them.
+The work is followed up by \cite{ttrspat} and \cite{lspc}, which model similar situated agents
 
-\cite{ttrspat} model a situated agent 
- focusing especially on spatial relations.
-
-\cite{lspc} model the point space perception of a mobile robot equipped with a rangefinder.
- that would move around and use laser range scanner or similar to collect points in space, group them into objects and detect spatial relations between them.
-\Gls{ttr} is mainly used to model the transition from the perceptual to the cognitive domain as well as 
- throughout the model, accounting for perception and cognition.
-
-\cite{LarssonFormalsemanticsperceptual2015}
+%\cite{LarssonFormalsemanticsperceptual2015}
 
 
 
 \subsection{Programming \acrshort{ttr} in Python: PyTTR}
 
-\cite{pyttr} provides a Python implementation of \gls{ttr}, known as PyTTR.
+\cite{pyttr} provides a Python implementation of \gls{ttr} known as PyTTR.
 It supports the modeling of \gls{ttr} types and operations such as judgement and type checking.
 As a Python library it also enables other features and peripheral procedures to be written in Python.
 
@@ -162,7 +134,7 @@ The full image is often first divided into same-size overlapping segments, thus 
 
 \subsection{\Acrfull{vqa}}
 
-\cite{AgrawalVQAVisualQuestion2015} suggest \acrfull{vqa} as a challenge for multi-modal semantic systems.
+\cite{AgrawalVQAVisualQuestion2015} suggest \gls{vqa} as a challenge for multi-modal semantic systems.
 A \gls{vqa} system is presented an image and a natural-language question about the image, and is expected to produce a natural-language answer.
 The initiative includes datasets and a series of annual competitions since 2016.
 
