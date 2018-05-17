@@ -191,6 +191,7 @@ How is this combining carried out?
 A direct application of the \textit{merge} operation is not suitable for this, as we have labels reocurring in multiple record types.
 Instead, all record types are relabeled with new, unique labels, before being merged.
 
+\label{def:cfmerge}
 If $T_1$ and $T_2$ are record types, then the \textbf{conflict-free merge} $T_1 \underset{u}{\wedge} T_2$ is a merge of the record types relabeled such that they do not share any labels.
 
 If the belief types are $T_1, T_2, ..., T_n$, they are combined to $T_1 \underset{u}{\wedge} T_2 \underset{u}{\wedge} ... \underset{u}{\wedge} T_n$.
@@ -311,78 +312,142 @@ agt = \left[\begin{array}{rcl}
 \subsection{Python implementation}
 \label{ssec:python}
 
-This section presents the Python implementation of the model described above.
-Aside from some explaining paragraphs between code listings, the comments within the code also provide some basic descriptions.
+This section presents significant parts of the Python implementation of the model described above.
 The full code, including visualization and more comments, is published as a Jupyter Notebook at \url{https://github.com/arildm/imagettr}.
 
-The section contains, in this order, a few functions for extended PyTTR-related functionality, YOLO usage, natural-language parsing and finally the implementation of the \gls{ttr} model.
 
 
-\subsubsection{Utility functions}
+\subsubsection{PyTTR definitions}
 
-These are PyTTR-related functions that are used in later code.
-
-\begin{lstlisting}[label=lst:utility,caption=Utility functions]
-from pyttr.ttrtypes import *
-from pyttr.utils import *
-import PIL.Image
-from functools import reduce
-
-# The Ind TTR type is used by these utility functions so it needs defining here already.
+\begin{lstlisting}[label={lst:pyttrbasic}, caption=TTR type definitions]
 Ind = BType('Ind')
-    
-def copy_rectype(T):
-    """Make another copy of a record type."""
-    R = RecType()
-    for k, v in T.comps.__dict__.items():
-        R.addfield(k, v)
-    return R
 
-def rectype_relabels(T, rlbs):
-    """Relabel multiple fields, given a dict of from-to pairs."""
-    for k1, k2 in rlbs.items():
-        T.Relabel(k1, k2)
-    return T
+Int = BType('Int')
+Int.learn_witness_condition(lambda x: isinstance(x, int))
 
-def rectype_merges(Ts):
-    """Merge a list of RecTypes."""
-    return reduce((lambda T, U: T.merge(U)), Ts, RecType())
+Image = BType('Image')
+Image.learn_witness_condition(lambda x: isinstance(x, PIL.Image.Image))
 
-def is_basic_type(T):
-    """Whether a type is a "basic field", i.e. a BType or a SingletonType of a BType."""
-    tn = lambda T: type(T).__name__
-    return (tn(T) == 'BType') if tn(T) != 'SingletonType' else is_basic_type(T.comps.base_type)
+Segment = RecType({'cx': Int, 'cy': Int, 'w': Int, 'h': Int})
+Ppty = FunType(Ind, Ty)
+Obj = RecType({'seg': Segment, 'pfun': Ppty})
+Objs = ListType(Obj)
+ObjDetector = FunType(Image, Objs)
+ObjDetector.witness_cache.append(yolo_detector)
 
-def basic_fields(T):
-    """The labels of basic fields in a RecType."""
-    return [k for k, v in T.comps.__dict__.items() if is_basic_type(v)]
+PTy = Type('PTy')
+PTy.learn_witness_condition(lambda p: isinstance(p, HypObj) \
+    and forsome(p.types, lambda t: isinstance(t, PType)))
 
-def nonbasic_fields(T):
-    """The labels of non-basic fields in a RecType."""
-    return [k for k, v in T.comps.__dict__.items() if not is_basic_type(v)]
+IndObj = RecType({
+    'x' : Ind,
+    'loc' : Segment,
+    'cp' : PTy,
+    'cl' : create_fun('location', 'ab').app('x').app('loc'),
+})
+IndFun = FunType(Obj, RecTy)
 
-ptypes = dict()
-def mkptype(sym, types=[Ind], vars=['v']):
-    """Make preds and ptypes identifiable by their predicate names."""
-    id = '/'.join([sym, ','.join(show(type) for type in types), ','.join(vars)])
-    if id not in ptypes:
-        ptypes[id] = PType(Pred(sym, types), vars)
-    return ptypes[id]
-
-def create_fun(pred_name, vars=['a']):
-    """Create a function of a given number of Inds (length of vars).
-    
-    Example: create_fun('give', 'abc') --> \a. \b. \c. give(a, b, c)
-    """
-    fun = mkptype(pred_name, types=[Ind]*len(vars), vars=vars)
-    for v in reversed(vars):
-        fun = Fun(v, Ind, fun)
-    return fun
+LocTup = RecType({'lo': IndObj, 'refo': IndObj})
+ClfRes = RecType({'cr': PTy})
+RelClf = FunType(LocTup, ClfRes)
 \end{lstlisting}
+
+
+
+\subsubsection{Application procedure}
+
+No implementation has been done of the agent described above.
+Instead, the procedure for object detection, spatial classification and question answering is performed by the lines of code in \autoref{lst:procedure}.
+The functions used here are partially described in the following subsections.
+
+\begin{lstlisting}[label=lst:procedure, caption=Application procedure]
+objs = list(yolo_detector(img))
+indobjs = [indfun(r) for r in objs]
+rels = list(find_all_rels(indobjs))
+bel = indobjs + rels
+q = eng_to_pyttr(text)
+ans = bool(find_subtype_relabeling(combine_beliefs(bel), q))
+\end{lstlisting}
+
+
+
+\subsubsection{Outside PyTTR}
+
+\paragraph{Individuation function}
+
+The PyTTR implementation of \gls{ttr} functions does not support usage of the argument within the function body.
+The individuation function was therefore implemented in Python.
+To keep the connection to \gls{ttr} tight, the argument and the result are checked against their \gls{ttr} types.
+
+\begin{lstlisting}[label={lst:indfun},caption={Individuation function}]
+def indfun(r):
+    if not Obj.query(r):
+        raise ValueError()
+    cp = r.pfun.app('x')
+    cl = create_fun('location', 'ab').app('x').app('loc')
+    indobj = RecType({
+        'x': SingletonType(Ind, Ind.create()),
+        'cp': SingletonType(cp, cp.create()),
+        'loc': SingletonType(Segment, r.seg),
+        'cl': SingletonType(cl, cl.create()),
+    })
+    if not unsingleton(indobj).subtype_of(IndObj):
+        raise ValueError()
+    return indobj
+IndFun.witness_cache.append(indfun)
+
+indobjs = [indfun(r) for r in objs]
+\end{lstlisting}
+
+\paragraph{Spatial relation classification}
+
+In \autoref{lst:relclf}, each pair of $IndObj$ types is tested for each spatial relation classifier.
+A classifier is a tuple of a predicate identifier (e.g. {\tt left}) and a function from two $Segment$s to a boolean value.
+The return values of {\tt get\_relclfs} are functions of the same kind as the example in \autoref{eq:leftclfdef}.
+
+\begin{lstlisting}[label=lst:relclf, caption=Spatial relation classifiers]
+def get_relclfs():
+    for pred, f in location_relation_classifiers.items():
+        def relclf(r):
+            if f(r.lo.loc, r.refo.loc):
+                c = create_fun(pred, 'ab').app(r.lo.x).app(r.refo.x)
+                return RecType({'cr': SingletonType(c, c.create())})
+            return RecType()
+        RelClf.witness_cache.append(relclf)
+        yield relclf
+
+def find_all_rels(indobjs):
+    """Find all relations between IndObj records."""
+    for relclf in get_relclfs():
+        for loT, refoT in product(indobjs, indobjs):
+            loctup = Rec({'lo': loT.create(), 'refo': refoT.create()})
+            yield relclf(loctup)
+\end{lstlisting}
+
+\paragraph{YOLO}
+
+In \autoref{lst:yolo}, YOLO object detection is invoked on an image, and the result is converted to PyTTR records.
+
+\begin{lstlisting}[label=lst:yolo, caption=YOLO usage]
+def yolo_detector(i):
+    """Creates IndObj records for YOLO results."""
+    for o in yolo(i):
+        o = yolo_reformat(o)
+        yield Rec({
+            'seg': Rec(o['loc']),
+            'pfun': create_fun(o['label'].replace(' ', '_')),
+        })
+\end{lstlisting}
+
+
 
 \subsubsection{Extensions to PyTTR}
 
-\autoref{lst:mergeunconflict} provides a function for combining multiple record types to one.
+The combining of beliefs and the subtype relabeling require TTR operations that are not defined in PyTTR.
+
+\paragraph{Combining beliefs}
+
+The conflict-free merge operation defined in \autoref{def:cfmerge} is implemented in \autoref{lst:mergeunconflict}.
 For example, if $T_1 = T_2 = [x:Ind]$, then $\mathtt{merge\_unconflict}(T_1, T_2)$ evaluates to $\left[\begin{array}{rcl} x_0&:&Ind \\ x_1&:&Ind \end{array}\right]$ (or a similar record type with different subscript indices).
 
 \begin{lstlisting}[label={lst:mergeunconflict},caption={merge\_unconflict}]
@@ -401,7 +466,7 @@ def merge_unconflict(T1, T2):
 \end{lstlisting}
 
 When it comes to dependent types, a custom in \gls{ttr} literature is to include the dependum as a field and use the field label in the dependent type.
-In our implementation, spatial classifiers return record types where dependums are instead specified as individuals.
+In our implementation, spatial classifiers return record types where dependums are instead specified as individuals directly.
 The function in \autoref{lst:useindfieldlabels} helps when those record types are combined with others.
 
 \begin{lstlisting}[label={lst:useindfieldlabels},caption={use\_ind\_field\_labels}]
@@ -417,25 +482,24 @@ def use_ind_field_labels(T):
     return T
 \end{lstlisting}
 
-\begin{lstlisting}[label={lst:unsingleton},caption={unsingleton}]
-def unsingleton(T):
-    """Remove singleton specifications of a type: x=a:Ind becomes x:Ind."""
-    T2 = RecType()
-    for l, v in T.comps.__dict__.items():
-        T2.addfield(l, v if not isinstance(v, SingletonType) else v.comps.base_type)
-    return T2
+\autoref{lst:combine} defines the function for combining record types in the fashion required: conflict-free merging and subsequent dependum re-referencing.
+
+\begin{lstlisting}[label={lst:combine},caption={combine}]
+def combine_beliefs(bel):
+    """Combine a list of belief record types into one."""
+    return unsingleton(use_ind_field_labels(reduce(merge_unconflict, bel, RecType())))
 \end{lstlisting}
 
 \paragraph{Subtype-relabeling}
 
-The condition described in \autoref{ssec:languagevqa} necessitated the ability to find a relabeling $\eta$ that would fulfill a subtype relation $A \sqsubseteq Q_\eta$.
+The condition described in \autoref{ssec:languagevqa} necessitated the ability to find a relabeling $\eta$ that would fulfill a subtype relation $S \sqsubseteq Q_\eta$.
 A simple approach to finding such a relabeling is to list every possible combination and one-by-one perform relabeling and check subtypeness.
 However, that is computationally very expensive, and not very interesting even if speed is not a priority.
 
 Another quicker approach is to not perform the relabeling in all steps.
 Subtypeness can instead be checked field-wise:
-For every field $\langle\ell_Q, T_Q\rangle$ in $Q$, if there is a field $\langle\ell_A, T_A\rangle$ in $A$ such that $T_A \sqsubseteq T_Q$, then let $\eta(\ell_Q) = \ell_A$.
-If $\eta$ covers all fields in $Q$, then it follows that $A \sqsubseteq Q_\eta$.
+For every field $\langle\ell_Q, T_Q\rangle$ in $Q$, if there is a field $\langle\ell_S, T_S\rangle$ in $S$ such that $T_S \sqsubseteq T_Q$, then let $\eta(\ell_Q) = \ell_S$.
+If $\eta$ covers all fields in $Q$, then it follows that $S \sqsubseteq Q_\eta$.
 
 However, we need to mind the types that are dependent on other fields.
 For example, $\text{dog}(\text{x}) \cancel{\sqsubseteq} \text{dog}(\text{y})$ even if both $\text{x}:Ind$ and $\text{y}:Ind$ are fields in the respective record types.
@@ -471,40 +535,6 @@ def find_subtype_relabeling(T, U):
         if len(match) == len(nonbasic_fields(U2)):
             return dict(**rlb, **match)
     return None
-\end{lstlisting}
-
-
-
-\subsubsection{YOLO usage}
-
-Darnet, Darkflow and TensorFlow are necessary dependencies for this part. The {\tt yolo.weights} and {\tt yolo.cfg} files are attainable from the YOLO website: \url{https://pjreddie.com/darknet/yolo/}.
-
-\begin{lstlisting}[label=lst:yolo, caption=Invoking YOLO]
-from darkflow.net.build import TFNet
-import numpy as np
-
-tfnet = TFNet({"model": "yolo/yolo.cfg", "load": "yolo/yolo.weights",
-    'config': 'yolo', "threshold": 0.2})
-
-yolo_out = dict()
-def yolo(img):
-    """Invokes YOLO on a PIL image, caches and returns the result."""
-    if str(img) not in yolo_out:
-        yolo_out[str(img)] = tfnet.return_predict(np.array(img))
-    return yolo_out[str(img)]
-
-def yolo_coords(o):
-    """Extract the coordinates from a YOLO output item as ((x0,y0), (x1,y1))."""
-    return (o['topleft']['x'], o['topleft']['y']), (o['bottomright']['x'], o['bottomright']['y'])
-
-def xy1xy2_to_cwh(x1, y1, x2, y2):
-    '''Transform to center, width and height.'''
-    return {'cx': int(x1/2 + x2/2), 'cy': int(y1/2 + y2/2), 'w': x2 - x1, 'h': y2 - y1}
-
-def yolo_reformat(o):
-    """Discards the confidence item and reformats the coordinates."""
-    return {'label': o['label'],
-        'loc': xy1xy2_to_cwh(*sum(yolo_coords(o), ()))}
 \end{lstlisting}
 
 
@@ -562,138 +592,6 @@ def eng_to_pyttr(text):
 \end{lstlisting}
 
 
-
-\subsubsection{PyTTR implementation}
-
-\autoref{lst:pyttrbasic} defines a few more or less basic \gls{ttr} types.
-Note that $Ind$ was defined earlier, along with the utility functions in \autoref{lst:utility}.
-
-\begin{lstlisting}[label={lst:pyttrbasic}, caption=Basic TTR type definitions]
-Int = BType('Int')
-Int.learn_witness_condition(lambda x: isinstance(x, int))
-
-Image = BType('Image')
-Image.learn_witness_condition(lambda x: isinstance(x, PIL.Image.Image))
-
-Segment = RecType({'cx': Int, 'cy': Int, 'w': Int, 'h': Int})
-Ppty = FunType(Ind, Ty)
-Obj = RecType({'seg': Segment, 'pfun': Ppty})
-
-Objs = ListType(Obj)
-ObjDetector = FunType(Image, Objs)
-\end{lstlisting}
-
-\begin{lstlisting}[label=lst:pyttr_yolo, caption=Connecting YOLO output to PyTTR]
-def yolo_detector(i):
-    """Creates IndObj records for YOLO results."""
-    for o in yolo(i):
-        o = yolo_reformat(o)
-        yield Rec({
-            'seg': Rec(o['loc']),
-            'pfun': create_fun(o['label'].replace(' ', '_')),
-        })
-ObjDetector.witness_cache.append(yolo_detector)
-
-objs = list(yolo_detector(img))
-\end{lstlisting}
-
-The PyTTR implementation of \gls{ttr} functions does not support usage of the argument within the function body.
-The individuation function was therefore implemented in Python.
-To keep the connection to \gls{ttr} tight, the argument and the result are checked against their \gls{ttr} types.
-
-\begin{lstlisting}[label={lst:indfun},caption={Individuation function}]
-PTy = Type('PTy')
-PTy.learn_witness_condition(lambda p: isinstance(p, HypObj) \
-    and forsome(p.types, lambda t: isinstance(t, PType)))
-
-IndObj = RecType({
-    'x' : Ind,
-    'loc' : Segment,
-    'cp' : PTy,
-    'cl' : create_fun('location', 'ab').app('x').app('loc'),
-})
-IndFun = FunType(Obj, RecTy)
-
-def indfun(r):
-    if not Obj.query(r):
-        raise ValueError()
-    cp = r.pfun.app('x')
-    cl = create_fun('location', 'ab').app('x').app('loc')
-    indobj = RecType({
-        'x': SingletonType(Ind, Ind.create()),
-        'cp': SingletonType(cp, cp.create()),
-        'loc': SingletonType(Segment, r.seg),
-        'cl': SingletonType(cl, cl.create()),
-    })
-    if not unsingleton(indobj).subtype_of(IndObj):
-        raise ValueError()
-    return indobj
-IndFun.witness_cache.append(indfun)
-
-indobjs = [indfun(r) for r in objs]
-\end{lstlisting}
-
-In \autoref{lst:relclf}, each pair of $IndObj$ types is tested for each spatial relation classifier.
-
-\begin{lstlisting}[label=lst:relclf, caption=Spatial relation classifiers]
-from itertools import product
-
-LocTup = RecType({'lo': IndObj, 'refo': IndObj})
-ClfRes = RecType({'cr': PTy})
-RelClf = FunType(LocTup, ClfRes)
-
-location_relation_classifiers = {
-    'left': lambda a, b: a.cx < b.cx,
-    'right': lambda a, b: a.cx > b.cx,
-    'above': lambda a, b: a.cy < b.cy,
-    'below': lambda a, b: a.cy > b.cy,
-}
-
-def get_relclfs():
-    for pred, f in location_relation_classifiers.items():
-        def relclf(r):
-            if f(r.lo.loc, r.refo.loc):
-                c = create_fun(pred, 'ab').app(r.lo.x).app(r.refo.x)
-                return RecType({'cr': SingletonType(c, c.create())})
-            return RecType()
-        RelClf.witness_cache.append(relclf)
-        yield relclf
-
-def find_all_rels(indobjs):
-    """Find all relations between IndObj records."""
-    for relclf in get_relclfs():
-        for loT, refoT in product(indobjs, indobjs):
-            loctup = Rec({'lo': loT.create(), 'refo': refoT.create()})
-            yield relclf(loctup)
-
-rels = list(find_all_rels(indobjs))
-\end{lstlisting}
-
-The types generated by object detection and spatial classification are combined into a single type describing the visual scene.
-
-\begin{lstlisting}[label=lst:bel, caption=Combining beliefs.]
-def combine_beliefs(bel):
-    """Combine a list of belief record types into one."""
-    return unsingleton(use_ind_field_labels(reduce(merge_unconflict, bel, RecType())))
-
-bel = indobjs + rels
-bel_comb = combine_beliefs(bel)
-\end{lstlisting}
-
-Finally, a polar question utterance is validated against the scene.
-
-\begin{lstlisting}[label=lst:utt, caption=Validating an utterance against the scene]
-def validate_utt(utt, bel):
-    return bool(find_subtype_relabeling(combine_beliefs(bel), utt))
-
-def relabel_utt(utt, bel_comb):
-    """Relabels an utterance record type to match the combined beliefs.
-    
-    The result will be a subtype of bel_comb.
-    """
-    rlb = find_subtype_relabeling(bel_comb, utt)
-    return rectype_relabels(utt, rlb)
-\end{lstlisting}
 
 \subsection{Discussion}
 \label{sec:discussion}
