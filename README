@@ -1,0 +1,12 @@
+Implementing perceptual semantics in Type Theory with Records (TTR)
+
+A master thesis in Language Technology
+By Arild Matsson <arild@klavaro.se>
+
+
+The Latex document needs the fonts Free and Liberation.
+
+Use `latexmk` to compile and view the document:
+
+    latexmk -pdf imagettr.tex
+    latexmk -pdf -pvc imagettr.tex

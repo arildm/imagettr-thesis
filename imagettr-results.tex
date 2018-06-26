@@ -588,6 +588,13 @@ def eng_to_pyttr(text):
 
 
 
+\subsubsection{Agent}
+
+%TODO
+Implementation of the Agent is missing.
+
+
+
 \subsection{Evaluation}
 
 The evaluation results are presented in \autoref{tab:eval}.
@@ -627,39 +634,3 @@ Sure enough, there is at least one snowboard whose center coordinates is higher 
 \caption{Evaluation results.}
 \label{tab:eval}
 \end{table}
-
-
-
-\subsection{Discussion}
-\label{sec:discussion}
-
-A \gls{ttr} model was developed, combining perception and language in a \gls{vqa} setting.
-The model was then implemented in Python using PyTTR.
-External systems or basic implementations were used for object detection, spatial classification and natural-language parsing.
-The semantic representation framework, constituted by the \gls{ttr} model, then functions as a bridge between the perceptual systems.
-With this, the aims formulated in the introduction were reached.
-
-% Model
-
-As discussed in \autoref{sec:method-spatrel}, our treatment of spatial relations excludes the intrinsical meaning and functional aspects, in favor of model simplicity and easy implementation.
-Both features are treated in terms of \gls{ttr} by \cite{ttrspat}.
-The former requires a notion of the orientation of reference objects.
-Assuming an object classifier with this capability were available, implementing intrinsical spatial relations would not be a large step from the present model.
-Support for the functional aspect of spatial relations requires two things.
-Firstly, classifiers for functional relations (such as $\text{protects(o}_3\text{.a, o}_1\text{.a, o}_2\text{.a)}$ in \cite{ttrspat}, for an umbrella protecting a man from rain).
-Secondly, prediction from a set of functional relations to spatial classifiers that are sensitive to those functional relations.
-The second is needed to activate the appropriate spatial relation term depending on which functional relations are true according to the classifiers in the first.
-
-The model is restricted to a limited type of polar questions, far from the range of question types in the \gls{vqa} dataset \citep{AgrawalVQAVisualQuestion2015}.
-Vast extensions to the language parsing, the perceptual classification and the comparation of question and scene are possible and required in order to answer more advanced questions.
-Some examples are:
-further property classification (``Is the dog brown?''),
-wh-questions (``What is to the left of the car?''),
-quantities (``How many flowers are there?''),
-inference (``Does this person have 20/20 vision?'', for an image where a person is wearing glasses).
-
-% Implementation
-
-The implementation unfortunately lacks coverage of the $Agent$ record type.
-The agent serves to put the components together, and would enable modeling the \gls{vqa} procedure in \gls{ttr}.
-The present implementation instead uses a series of procedural Python function calls.

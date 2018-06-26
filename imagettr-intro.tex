@@ -24,13 +24,40 @@ Formal models such as \gls{fol} have long been of choice, but recent development
 Briefly put, the former kind tends to deliver deep structures of information in narrow domains, while the latter more easily covers wide domains, but with shallow information content \citep{Dobnik:2017ag}.
 A recent contribution that combines several branches in formal systems is \textit{\gls{ttr}} \citep{CooperAustiniantruthattitudes2005,CooperTypetheorylanguage2016}.
 
-The goal of this thesis is to provide a Python implementation of perception and classification of objects, recognition of spatial relations and basic natural language understanding in \gls{ttr}.
-The purpose of this task is to use \gls{ttr} as a multi-modal knowledge representation system, providing formal transparency.
-The implementation shall build on past proposals and focus on high-level cognition, meaning connecting vision and language through a cognitive model using \gls{ttr} as far as possible.
-Lower-level parts shall use existing solutions or basic placeholder implementations.
-The result shall function as a basic \gls{vqa} application, meaning it is able to answer questions given with an image as context.
-The extensive use of \gls{ttr} in the application, as well as its \gls{vqa} abilities, are the points on which the result is finally qualitatively evaluated.
+\subsection{Contribution of this thesis}
+\label{sec:contribution}
+
+The main question explored in this thesis is the following: What are the advantages and problems faced when implementing a \gls{ttr} model of perception and language?
+
+To qualify the question further, a number of requirements are taken into account.
+The model shall build on past proposals for such models, mainly \cite{ttrspat} and \cite{lspc}.
+It shall make extensive use of \gls{ttr}, and where it cannot, rely on either existing or new but simplistic models for self-contained subproblems.
+
+Some limitations are also considered in order to narrow down the scope.
+The setting for the model is a basic \gls{vqa} application, meaning it will be used to answer questions given with an image as context.
+The language domain is restricted to polar (yes/no) questions.
+
+%TODO Should I add a discussion on these requirements and limitations? Where?
+
+In response to the requirements and limitations mentioned above, some subordinate questions emerge.
+
+\begin{enumerate}
+\item How well do employed tools do in this application, and where does the application require extending them?
+\item In what extension can the model be covered by \gls{ttr} (and where does it need additional techniques)?
+\item How well does the model perform in a \gls{vqa} application?
+\item What advantages does such a model have against state of the art and other well-established approaches to:
+    \begin{enumerate}
+    \item \gls{vqa} solutions?
+    \item other models of perception and language?
+    \end{enumerate}
+\end{enumerate}
+
+In the thesis, a model is formulated and implemented, and the resulting implementation is evaluated in terms of the proposed questions.
+
+%The purpose of this task is to use \gls{ttr} as a multi-modal knowledge representation system, providing formal transparency.
 
 The theoretical background for this thesis is summarized in \autoref{sec:background}.
-The work put forward is outlined in \autoref{sec:method}, and presented in \autoref{sec:results}, including a \gls{ttr} model formulation and Python source code.
-A discussion follows, before an account of conclusions in \autoref{sec:conclusions}.
+In \autoref{sec:method}, the strategies and techniques used for the implementation are described.
+The implementation is then presented in \autoref{sec:results}.
+In \autoref{sec:discussion}, the results are discussed in relation to the questions above.
+Finally, some conclusions are made in \autoref{sec:conclusions}.
