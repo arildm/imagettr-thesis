@@ -83,14 +83,56 @@ spoken language \citep{CooperTypetheorylanguage2016}.
 
 
 
-%\subsubsection{Overview of \gls{ttr} syntax}
+\subsubsection{Overview of \gls{ttr}}
 
-%[brief summary of TTR syntax?]
+This section is a brief and rather informal overview of \gls{ttr}.
+See \cite{CooperTypetheorysemantics2012} for a slightly more verbose presentation with formal definitions, or \cite{CooperTypetheorylanguage2016} for an updated formal definition as well as a more extensively worded informal presentation.
+Some concepts are missing in the former but included in the latter, including list types.
+
+In \gls{ttr} there are two kinds of entities: types and objects.
+Each type is associated with a set of objects, which are of the type, or are \textbf{witnesses} of the type.
+The judgement that the object $a$ is a witness of the type $T$ is written $a : T$.
+For example, $34 : Int$ means that $34$ is of the type $Int$.
+
+A \textbf{record type} is a set of fields, each field carrying a label and a type.
+In the record type $\left[ \begin{array}{rcl} person &:& Ind \\ age &:& Int \end{array} \right]$ there is a field labeled $person$ of type $Ind$, and one labeled $age$ of the type $Int$.
+
+The witnesses of record types are \textbf{records}.
+A record is also a set of fields with labels, but instead of a type, a record field has an object.
+A record $r$ is a witness of a record type $T$, \textit{if and only if} every field in the record type has a matching field in the record, that is, the labels are the same and the object in the record field is a witness of the type in the record type.
+%The record may have additional fields that are not in the record type; this does not interfere with type judgement.
+The record $\left[ \begin{array}{rcl} person &=& \text{Arild} \\ age &=& 28 \end{array} \right]$ is a witness of the record type just mentioned.
+
+% Intensional/extensional? (TTL p. 6)
+
+A type $T_{sub}$ is a \textbf{subtype} of another type $T_{super}$, written $T_{sub} \sqsubseteq T_{super}$, if any witness of the subtype is necessarily also a witness of the supertype.
+For example, $Int \sqsubseteq Number$.
+%TODO "necessarily"?
+In the case of record types, this means that a record type $T_{sub}$ is a subtype of a record type $T_{super}$ if and only if every field in $T_{super}$ is present also in $T_{sub}$ (allowing that a type in a $T_{sub}$ field is itself a subtype of the type in the corresponding $T_{super}$ field).
+For example, $\left[ \begin{array}{rcl} x &:& Int \end{array} \right]$ is a subtype of $\left[ \begin{array}{rcl} x &:& Number \end{array} \right]$, provided $Int : Number$.
+
+Relationships between objects can be modeled using \textbf{ptypes}, complex types constructed from predicates and objects.
+For instance, the type $\text{hug}(a,b)$ is constructed from the predicate 'hug' with the objects $a$ in the first place and $b$ in the second.
+The situation that $a$ is hugging $b$ is true if there exists a witness of $\text{hug}(a,b)$.
+[What can such a witness be like?]
+
+A function from $T_{dom}$ to $T_{rng}$ is a witness of the \textbf{function type} $(T_{dom} \rightarrow T_{rng})$.
+For instance, if $f = \lambda x : Ind\ .\ \text{blue}(x)$, then $f : (Ind \rightarrow Type)$.
+
+A list of objects of type $T$ is a witness of the \textbf{list type} $[T]$:
+If $L$ is a list and $\forall a \in L, a : T$, then $L : [T]$.
+The list containing $a$, $b$ and $c$ can be written $[a, b, c]$.
+(This notation may not have been proposed in past \gls{ttr} literature.)
+
+Types themselves may be the witnesses of other types.
+$Type$ is the type of all types, so if $T$ is a type, then $T : Type$.
+(The controversial consequence that $Type : Type$ is handled in \citet[section 2.7]{CooperTypetheorysemantics2012}.)
+Similarly, $RecType$ is the type of all record types.
+% PType, the type of ptypes?
 
 
 
 \subsection{Perceptual semantics in \acrfull{ttr}}
-
 
 \cite{DobnikModellinglanguageaction2012} presents how \gls{ttr} can be used to model a situated conversational agent.
 The agent moves around in a point-space world.
