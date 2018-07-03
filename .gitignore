@@ -33,3 +33,17 @@
 *.fdb_latexmk
 
 .*.sw[op]
+
+*x.png
+*.4ct
+*.4tc
+*.css
+*.gummi
+*.html
+*.idv
+*.lg
+*.pdf
+*.synctex.gz*
+*.tmp
+*.xref
+
