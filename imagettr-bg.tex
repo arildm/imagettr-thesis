@@ -98,7 +98,7 @@ A \textbf{record type} is a set of fields, each field carrying a label and a typ
 In the record type $\left[ \begin{array}{rcl} person &:& Ind \\ age &:& Int \end{array} \right]$ there is a field labeled $person$ of type $Ind$, and one labeled $age$ of the type $Int$.
 
 The witnesses of record types are \textbf{records}.
-A record is also a set of fields with labels, but instead of a type, a record field has an object.
+A record is also a set of fields with labels, but instead of a type, a label is associated with an object.
 A record $r$ is a witness of a record type $T$, \textit{if and only if} every field in the record type has a matching field in the record, that is, the labels are the same and the object in the record field is a witness of the type in the record type.
 %The record may have additional fields that are not in the record type; this does not interfere with type judgement.
 The record $\left[ \begin{array}{rcl} person &=& \text{Arild} \\ age &=& 28 \end{array} \right]$ is a witness of the record type just mentioned.
@@ -109,14 +109,21 @@ A type $T_{sub}$ is a \textbf{subtype} of another type $T_{super}$, written $T_{
 For example, $Int \sqsubseteq Number$.
 %TODO "necessarily"?
 In the case of record types, this means that a record type $T_{sub}$ is a subtype of a record type $T_{super}$ if and only if every field in $T_{super}$ is present also in $T_{sub}$ (allowing that a type in a $T_{sub}$ field is itself a subtype of the type in the corresponding $T_{super}$ field).
-For example, $\left[ \begin{array}{rcl} x &:& Int \end{array} \right]$ is a subtype of $\left[ \begin{array}{rcl} x &:& Number \end{array} \right]$, provided $Int : Number$.
+For example, $\left[ \begin{array}{rcl} x &:& Int \end{array} \right] \sqsubseteq \left[ \begin{array}{rcl} x &:& Number \end{array} \right]$, provided $Int \sqsubseteq Number$.
 
 Relationships between objects can be modeled using \textbf{ptypes}, complex types constructed from predicates and objects.
 For instance, the type $\text{hug}(a,b)$ is constructed from the predicate 'hug' with the objects $a$ in the first place and $b$ in the second.
 The situation that $a$ is hugging $b$ is true if there exists a witness of $\text{hug}(a,b)$.
 [What can such a witness be like?]
 
-A function from $T_{dom}$ to $T_{rng}$ is a witness of the \textbf{function type} $(T_{dom} \rightarrow T_{rng})$.
+A type can be restricted to only have a single witness:
+If $T$ is a type and $a:T$, then $T_a$ is a \textbf{singleton type} having $a$ as its only witness.
+There is an alternative notation for singleton types used in record types:
+The record type $[x:Ind_a]$ can also be written $[x=a:Ind]$, and is restricted to the record $[x=a]$.
+A singleton-typed field notated this way is known as a \textbf{manifest field}.
+Any number of fields in a record type may be manifest fields.
+
+[discuss] A function from $T_{dom}$ to $T_{rng}$ is a witness of the \textbf{function type} $(T_{dom} \rightarrow T_{rng})$.
 For instance, if $f = \lambda x : Ind\ .\ \text{blue}(x)$, then $f : (Ind \rightarrow Type)$.
 
 A list of objects of type $T$ is a witness of the \textbf{list type} $[T]$:
@@ -124,7 +131,7 @@ If $L$ is a list and $\forall a \in L, a : T$, then $L : [T]$.
 The list containing $a$, $b$ and $c$ can be written $[a, b, c]$.
 (This notation may not have been proposed in past \gls{ttr} literature.)
 
-Types themselves may be the witnesses of other types.
+[discuss] Types themselves may be the witnesses of other types.
 $Type$ is the type of all types, so if $T$ is a type, then $T : Type$.
 (The controversial consequence that $Type : Type$ is handled in \citet[section 2.7]{CooperTypetheorysemantics2012}.)
 Similarly, $RecType$ is the type of all record types.
