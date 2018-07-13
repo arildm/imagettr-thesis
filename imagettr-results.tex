@@ -13,7 +13,7 @@ Then, parts of the Python source is presented, including PyTTR usage.
 Three basic types exist in the model.
 
 \begin{description}
-\item [$Ind$] A single individual object (or person), such as the reader or the Eiffel Tower.
+\item [$Ind$] A single individual object, such as the reader or the Eiffel Tower.
 \item [$Int$] An integer, such as 415.
 \item [$Image$] A 2-dimensional digital image. It serves as an identifier to a set of extracted information, and its file type and actual data is not important in this thesis.
 \end{description}
@@ -36,11 +36,12 @@ Ppty = (Ind \rightarrow Type)\end{equation}
 
 %[PTy?]
 
-A perceptual object is a record of the type $Obj$ (\autoref{eq:obj}).
+A perceptual object is a record of the record type $Obj$ (\autoref{eq:obj}).
+It contains a bounding box (the `seg' field) and a property (`pfun').
 An example record is given in \autoref{eq:objrec}.
 %$Obj$ records are the result of performing \textit{object detection}.
 %This fact is expressed in TTR as the function type $ObjDetector$ (\autoref{eq:objdetector}).
-An object detector is a function from an image to a set of perceptual objects, as captured by the $ObjDetector$ function type (\autoref{eq:objdetector}).
+An object detector is a function from an image to a set of such perceptual objects, as captured by the $ObjDetector$ function type (\autoref{eq:objdetector}).
 
 %[differences/similarites LSPC and others]
 
@@ -98,15 +99,14 @@ IndFun = ( Obj \rightarrow RecType )
 \end{equation}
 
 The record type resulting from applying an $IndFun$ function will be a subtype of $IndObj$.
-Furthermore, the $x$ and $loc$ fields will be specified using \textit{manifest fields}.
-The manifest field $\text{x} = a : Ind$ constrains the type so that any record of it must have $a$ as value for $\text{x}$.
+Furthermore, the $x$ and $loc$ fields will be specified using manifest fields.
 The $x$ field is specified as a newly instantiated $Ind$ object, $a_n$ (where $n$ is a number such that the new instatiation is unique).
 The $loc$ field is specified as the value of $seg$ in the $Obj$ record.
 
 %For the $x$ field, we create a new individual object $a_{new} : Ind$.
 %For the ptype fields $cp$ and $cl$, we also create new objects $e_{new} : r.\text{pfun}(\text{x})$ and $e_{new} : \text{location}(\text{x}, \text{loc})$.
 
-The individuation function is defined in \autoref{eq:indfundef}, with an example application in \autoref{eq:indfunrec}.
+The individuation function is defined, as explained above, in \autoref{eq:indfundef}, with an example application in \autoref{eq:indfunrec}.
 
 \begin{equation}\label{eq:indfundef}
 f_{IndFun} = \lambda r : Obj\ . \left[\begin{array}{lcl}
