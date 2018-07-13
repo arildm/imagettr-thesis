@@ -23,40 +23,28 @@ The connection between different modes of information, such as vision and langua
 Formal models such as \gls{fol} have long been of choice, but recent developments have seen data-driven approaches excel in some cases.
 Briefly put, the former kind tends to deliver deep structures of information in narrow domains, while the latter more easily covers wide domains, but with shallow information content \citep{Dobnik:2017ag}.
 A recent contribution that combines several branches in formal systems is \textit{\gls{ttr}} \citep{CooperAustiniantruthattitudes2005,CooperTypetheorylanguage2016}.
+\Gls{ttr} is implemented in Python as \textit{PyTTR} \citep{pyttr}.
 
 \subsection{Contribution of this thesis}
 \label{sec:contribution}
 
-The main question explored in this thesis is the following: What are the advantages and problems faced when implementing a \gls{ttr} model of perception and language?
+[SD] The main purpose of this thesis is to extend the basic implementation of TTR (PyTTR, \cite{pyttr}) to apply it (for the first time) in a practical task relating vision and language, in particular \acrfull{vqa}.
 
-To qualify the question further, a number of requirements are taken into account.
-The model shall build on past proposals for such models, mainly \cite{ttrspat} and \cite{lspc}.
-It shall make extensive use of \gls{ttr}, and where it cannot, rely on either existing or new but simplistic models for self-contained subproblems.
+The questions that this research raises are:
 
-Some limitations are also considered in order to narrow down the scope.
-The setting for the model is a basic \gls{vqa} application, meaning it will be used to answer questions given with an image as context.
-The language domain is restricted to polar (yes/no) questions.
+\begin{enumerate}
+\item To what degree is \textit{(a)} \gls{ttr} as a theoretical framework and \textit{(b)} its existing practical implementation, suited to connect existing vision and language systems?
+\item What are the benefits of using TTR this way for \textit{(a)} vision and language systems and \textit{(b)} visual question answering?
+\item What can connecting vision and language systems tell us about semantics (and TTR)?
+\end{enumerate}
+
+To explore these questions, a model will be formulated in TTR and implemented using PyTTR.
+The model will benefit from builing on past proposals; especially relevant are \cite{ttrspat} and \cite{lspc}.
+As a limitation for the \gls{vqa} task, the language domain is restricted to polar (yes/no) questions.
 
 %TODO Should I add a discussion on these requirements and limitations? Where?
 
-In response to the requirements and limitations mentioned above, some subordinate questions emerge.
-
-\begin{enumerate}
-\item How well do employed tools do in this application, and where does the application require extending them?
-\item In what extension can the model be covered by \gls{ttr} (and where does it need additional techniques)?
-\item How well does the model perform in a \gls{vqa} application?
-\item What advantages does such a model have against state of the art and other well-established approaches to:
-    \begin{enumerate}
-    \item \gls{vqa} solutions?
-    \item other models of perception and language?
-    \end{enumerate}
-\end{enumerate}
-
-In the thesis, a model is formulated and implemented, and the resulting implementation is evaluated in terms of the proposed questions.
-
-%The purpose of this task is to use \gls{ttr} as a multi-modal knowledge representation system, providing formal transparency.
-
-The theoretical background for this thesis is summarized in \autoref{sec:background}.
+The theoretical background is summarized in \autoref{sec:background}.
 In \autoref{sec:method}, the strategies and techniques used for the implementation are described.
 The implementation is then presented in \autoref{sec:results}.
 In \autoref{sec:discussion}, the results are discussed in relation to the questions above.
