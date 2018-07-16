@@ -5,6 +5,9 @@ In this section, the model is defined.
 First formally, in \gls{ttr}.
 Then, parts of the Python source is presented, including PyTTR usage.
 
+The types in the \gls{ttr} model are largely based on \cite{lspc}, but the $Segment$ type is new, the individuation function is improved and the $RelClf$ mechanism is more concretely defined.
+The $Agent$ type is also new.
+
 
 
 \subsection{\Acrshort{ttr} model}
@@ -161,7 +164,7 @@ LocTup = \left[\begin{array}{rcl}
 \end{equation}
 
 \begin{equation}\label{eq:clf}
-ClfFun = ( LocTup \rightarrow RecType )
+RelClf = ( LocTup \rightarrow RecType )
 \end{equation}
 
 For instance, a classifier for ``left'' might look like in \autoref{eq:leftclfdef}, where $\kappa_{left}$ is a non-TTR, boolean function.
@@ -196,6 +199,7 @@ If the belief types are $T_1, T_2, ..., T_n$, they are combined to $T_1 \underse
 
 
 \subsubsection{Agent}
+\label{sec:agent}
 
 We are now connecting the perceptual-conceptual pieces described above, by building an agent.
 It receives information on classified and located objects of an image, and apprehends their basic status and spatial relations.
@@ -207,7 +211,7 @@ This provides a means to answer to natural-language questions about the image.
 Agent = \left[\begin{array}{rcl}
     \text{objdetector} &:& ObjDetector \\
     \text{indfun} &:& IndFun \\
-    \text{appr} &:& [(Rec \rightarrow RecType)] \\
+    \text{relclfs} &:& [RelClf] \\
     \text{state} &:& AgentState \\
     \end{array}\right]
 \end{equation}
@@ -221,36 +225,47 @@ AgentState = \left[\begin{array}{rcl}
     \end{array}\right]
 \end{equation}
 
-The fields $objdetector$, $indfun$ and $appr$ of $Agent$ are to be statically defined for a specific agent.
-While running, the agent will modify the $AgentState$ record in $state$.
+The fields `objdetector', `indfun' and `relclfs' of $Agent$ are to be statically defined for a specific agent.
+While running, the agent will modify the $AgentState$ record in `state'.
+For an agent $ag : Agent$, the perception and question-answering procedure is carried out as follows.
 
-For an agent $agt : Agent$, the perception and question-answering procedure is carried out as follows.
+\paragraph{Visual perception}
 
 \begin{enumerate}
-\item Visual input in the form of an image is received and assigned to $agt.\text{state}.\text{img}$.
-\item $objdetector$ is invoked on $agt.\text{state.img}$ and creates a collection of records that are assigned to $agt.\text{state}.\text{perc}$.
-\item $indfun$ is, in turn, invoked on each record in $agt.\text{state.perc}$ and resulting record types are added to $agt.\text{state.bel}$.
-\item Now, each function in $agt.\text{appr}$ are applied:
+\item Visual input in the form of an image is received and assigned to $ag.\text{state}.\text{img}$.
+\item $ag.\text{objdetector}$ is invoked on $ag.\text{state.img}$ and creates a collection of records that are assigned to $ag.\text{state}.\text{perc}$.
+\item $ag.\text{indfun}$ is, in turn, invoked on each record in $ag.\text{state.perc}$ and resulting record types are added to $ag.\text{state.bel}$.
+\item Now, each function in $ag.\text{relclfs}$ are applied:
 	\begin{enumerate}
 	\item The fields of the domain record type of the function is considered its arguments.
-	\item Each combination of $agt.\text{state.bel}$ record types that matches the argument types is considered for input.
-	\item A record is instantiated for each input record type, and the records are combined into one that matches the domain record type of the function.
-	\item Resulting record types are added to $agt.\text{state.bel}$
+	\item Each combination of $ag.\text{state.bel}$ record types that matches the argument types is considered for input.
+	\item The input record types are combined to match the domain record type of the function, and the type is instantiated.
+	\item The function is applied to the created record, and the resulting record type is added to $ag.\text{state.bel}$
 	\end{enumerate}
-	For example, the \textit{left} classifier in \autoref{eq:leftclfdef} is applied to each pair of $IndObj$ after instantiating and combining records into a $LocTup$.
-\item Any language input is parsed and the resulting record type assigned to $agt.\text{state.utt}$.
-\item The record types in $agt.\text{state.bel}$ are combined. If the resulting record type is a relabel-subtype of $agt.\text{state.utt}$, the answer YES is emitted; otherwise NO.
+	For example, the \textit{left} classifier in \autoref{eq:leftclfdef} is applied to each pair of $IndObj$ after combining them into a $LocTup$ and instantiating it.
+    Note that the $IndObj$ have manifest fields which carry on to the $LocTup$ type, so it is more specific than just instantiating $LocTup$ itself.
 \end{enumerate}
 
-An example state of an agent $agt$ is shown in \autoref{eq:agt}.
+
+
+\paragraph{Language}
+
+\begin{enumerate}
+\item Any language input is parsed and the resulting record type assigned to $ag.\text{state.utt}$.
+\item The record types in $ag.\text{state.bel}$ are combined. If the resulting record type is a relabel-subtype of $ag.\text{state.utt}$, the answer YES is emitted; otherwise NO.
+\end{enumerate}
+
+
+
+An example state of an agent $ag$ is shown in \autoref{eq:ag}.
 
 \begin{landscape}
-\begin{equation}\label{eq:agt}
+\begin{equation}\label{eq:ag}
 \renewcommand{\arraystretch}{1.2}
-agt = \left[\begin{array}{rcl}
+ag = \left[\begin{array}{rcl}
     \text{objdetector} &=& \mathtt{yolo\_detector} \\
     \text{indfun} &=& \mathtt{indfun} \\
-    \text{appr} &=& [Clf_{left}, Clf_{right}, Clf_{above}, Clf_{below}] \\
+    \text{relclfs} &=& [Clf_{left}, Clf_{right}, Clf_{above}, Clf_{below}] \\
     \text{state} &=& \left[\begin{array}{rcl}
 		\text{img} &=& \mathtt{dogride.jpg} \\
 		\text{perc} &=& [
@@ -589,9 +604,13 @@ def eng_to_pyttr(text):
 
 
 \subsubsection{Agent}
+\label{sec:implagent}
 
-%TODO
-Implementation of the Agent is missing.
+% @TODO Typing of Python functions yolo_detector and indfun: now manipulating witness_cache but then LambdaFun?
+
+The agent is a record of the type $Agent$.
+Manipulation of the record is performed by Python functions \texttt{agent\_see} and \texttt{agent\_hear}.
+They correspond to the algorithms for visual perception and language, described in \autoref{sec:agent}
 
 
 
