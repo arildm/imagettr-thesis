@@ -1,9 +1,23 @@
 \section{Method}
 \label{sec:method}
 
+
+
+\subsection{Implementation overview}
+\label{sec:imploverview}
+
+An agent will be modeled in \gls{ttr} and implemented in PyTTR.
+The purpose of the agent is to perceive a scene, parse a question related to the scene and answer it.
+
+The agent will receive a 2D image as input and perform object detection and relationship classification on it.
+The results of these processes are situations which are modeled in \gls{ttr} as record types.
+The set of situations are the beliefs of the agent.
+The question is parsed to a \gls{ttr} representation which is also a record type.
+Finally, if 
+
+
 This thesis aims to produce a working implementation of an application with visual as well as natural-language input, using \gls{ttr}.
-Such an application largely resembles those put forward in \cite{ttrspat} and \cite{lspc}, but there are some differences.
-This application will feature:
+The application will feature:
 
 \begin{enumerate}
 \item Sensory input in the form of 2D images
@@ -135,10 +149,4 @@ Thus, the condition is reformulated to allow relabeling \citep[pp. 133–135]{Co
 If $Q$ is the type of a polar question utterance and $S$ is the type of the scene, the answer is YES if there is a relabeling $\eta$ such that $S \sqsubseteq Q_\eta$, and otherwise it is NO.
 
 %[classification before/after question]
-
-
-
-\subsection{Evaluation}
-
-The system is tested on a small amount of hand-crafted sentences for a handful of images from the \gls{vqa} dataset \citep{AgrawalVQAVisualQuestion2015}.
 

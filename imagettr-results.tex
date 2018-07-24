@@ -1,17 +1,113 @@
 \section{Results}
 \label{sec:results}
 
-In this section, the model is defined.
-First formally, in \gls{ttr}.
-Then, parts of the Python source is presented, including PyTTR usage.
+%In this section, the model is defined.
+%First formally, in \gls{ttr}.
+%Then, parts of the Python source is presented, including PyTTR usage.
 
-The types in the \gls{ttr} model are largely based on \cite{lspc}, but the $Segment$ type is new, the individuation function is improved and the $RelClf$ mechanism is more concretely defined.
-The $Agent$ type is also new.
+
+
+
+\subsection{Subtype relabeling}
+
+This model uses TTR record types to model situations.
+The two main situations in action are the perceived \textit{scene} and the statement expressed in a natural-language \textit{question}.
+In this project, the language is restricted to polar (yes/no) questions.
+Such a question has a corresponding declarative statement:
+The question ``Can you see them?'' corresponds to the statement ``You can see them''.
+Responding to such a question entails checking if the scene type is a \textit{subtype} of the question type.
+[SOURCE?]
+
+[TODO check \cite{RooyPolarQuestions2003}, (sources of) \cite{AloniQuantificationConceptualCovers2001}]
+
+In TTR, however, subtype checking is not enough.
+The fields in a record type are labeled, and they will not necessarily be the same in the scene type and the question type.
+This prompts for a more advanced variant of subtype checking, allowing \textit{relabeling}.
+
+\begin{definition}[Relabel-subtype]
+A record type $S$ is a \textbf{relabel-subtype} of the record type $Q$ if there is a relabeling $\eta$ of $S$, $S_\eta$, such that $S_\eta \sqsubseteq Q$.
+\end{definition}
+
+The number of relabelings in one record type, to the labels of another, can be quite large:
+If $S$ has 20 fields and $Q$ has five, then there are $\dfrac{20!}{(20-5)!} = 1\,860\,480$ relabelings of Q (the number of 5-permutations of 20).
+It is practically impossible to perform all relabelings and check whether subtypeness holds.
+An alternative algorithm is presented below for the purpose of this project.
+Fast computation is enabled by making a few assumptions about the input record types.
+
+\paragraph{Prerequisites}
+
+\begin{itemize}
+\item Any dependent fields depend only on basic (non-dependent) fields (basic or singleton type)
+\item No nested record types (this could be solved using flattening but it's not needed in this scope)
+\end{itemize}
+
+\paragraph{Algorithm}
+
+\begin{enumerate}
+\item For each basic-field relabeling of Q:
+    \begin{enumerate}
+    \item For each complex field in Q:
+        \begin{enumerate}
+        \item Find a subtype field in S and remember it
+        \item If no subtype field was found, skip to next basic-field relabeling
+        \end{enumerate}
+    \item A subtype S field was found for all complex Q fields; return the relabeling
+    \end{enumerate}
+\item Return nothing
+\end{enumerate}
+
+Now only the basic fields are included when considering relabelings of Q.
+If $S$ has eight basic fields and $Q$ has two, there are only $\dfrac{8!}{(8-2)!} = 56$ relabelings.
+For each relabeling, the remaining fields are subtype-checked in a nested loop with early exit.
+
+[what is this in terms of big-O?]
+
+A Python implementation is given in \autoref{lst:find_subtype_relabeling}.
+
+\begin{lstlisting}[label={lst:find_subtype_relabeling}, caption=The \texttt{find\_subtype\_relabeling} function]
+from itertools import permutations, combinations
+
+def my_subtype_of(sub, sup):
+    """Is T a subtype of U? Accept dependent rectype fields (= (fun, args) tuples) with simplistic equality test."""
+    try:
+        return sub.subtype_of(sup)
+    except AttributeError:
+        return isinstance(sub, tuple) and isinstance(sup, tuple) and show(sub) == show(sup)
+
+def find_subtype_relabeling(S, Q):
+    '''Could record type S be a sub type of record type Q if relabeling in Q is allowed?'''
+    # For each relabeling of basic-type fields
+    for sls in permutations(basic_fields(S), len(basic_fields(Q))):
+        # Try the basic-fields relabeling of Q
+        rlb_basic = dict(zip(basic_fields(Q), sls))
+        Q2 = rectype_relabels(Q, rlb_basic)
+        
+        # For each Q field, find a S field that is a subtype
+        rlb_dep = dict()
+        for ql in nonbasic_fields(Q2):
+            for sl in nonbasic_fields(S):
+                # The new labels must be unique.
+                if sl in rlb_dep.values(): continue
+                if my_subtype_of(S.field(sl), Q2.field(ql)):
+                    rlb_dep[ql] = sl
+                    break
+            if ql not in rlb_dep:
+                break
+
+        # Successful if all non-basic fields match.
+        if len(rlb_dep) == len(nonbasic_fields(Q2)):
+            return dict(**rlb_basic, **rlb_dep)
+    return None
+\end{lstlisting}
+
 
 
 
 \subsection{\Acrshort{ttr} model}
 \label{ssec:ttrmodel}
+
+The types in the \gls{ttr} model are largely based on \cite{lspc}, but the $Segment$ type is new, the individuation function is improved and the $RelClf$ mechanism is more concretely defined.
+The $Agent$ type is also new.
 
 Three basic types exist in the model.
 
@@ -110,6 +206,7 @@ The $loc$ field is specified as the value of $seg$ in the $Obj$ record.
 %For the ptype fields $cp$ and $cl$, we also create new objects $e_{new} : r.\text{pfun}(\text{x})$ and $e_{new} : \text{location}(\text{x}, \text{loc})$.
 
 The individuation function is defined, as explained above, in \autoref{eq:indfundef}, with an example application in \autoref{eq:indfunrec}.
+The output record type describes a situation where an individual identified as $a_0$ is classified as a person and is occupying a $276 \times 809$-sized rectangle with its center at $(138, 654)$.
 
 \begin{equation}\label{eq:indfundef}
 f_{IndFun} = \lambda r : Obj\ . \left[\begin{array}{lcl}
@@ -362,23 +459,6 @@ IndFun = FunType(Obj, RecTy)
 LocTup = RecType({'lo': IndObj, 'refo': IndObj})
 ClfRes = RecType({'cr': PTy})
 RelClf = FunType(LocTup, ClfRes)
-\end{lstlisting}
-
-
-
-\subsubsection{Application procedure}
-
-No implementation has been done of the agent described above.
-Instead, the procedure for object detection, spatial classification and question answering is performed by the lines of code in \autoref{lst:procedure}.
-The functions used here are partially described in the following subsections.
-
-\begin{lstlisting}[label=lst:procedure, caption=Application procedure]
-objs = list(yolo_detector(img))
-indobjs = [indfun(r) for r in objs]
-rels = list(find_all_rels(indobjs))
-bel = indobjs + rels
-q = eng_to_pyttr(text)
-ans = bool(find_subtype_relabeling(combine_beliefs(bel), q))
 \end{lstlisting}
 
 
