@@ -25,8 +25,10 @@ The fields in a record type are labeled, and they will not necessarily be the sa
 This prompts for a more advanced variant of subtype checking, allowing \textit{relabeling}.
 
 \begin{definition}[Relabel-subtype]
-A record type $S$ is a \textbf{relabel-subtype} of the record type $Q$ if there is a relabeling $\eta$ of $S$, $S_\eta$, such that $S_\eta \sqsubseteq Q$.
+A record type $S$ is a \textbf{relabel-subtype} of the record type $Q$ if there is a relabeling $\eta$ of $Q$, such that $S \sqsubseteq Q_\eta$.
 \end{definition}
+
+[Define $Q_\eta$ notation in intro/bg]
 
 The number of relabelings in one record type, to the labels of another, can be quite large:
 If $S$ has 20 fields and $Q$ has five, then there are $\dfrac{20!}{(20-5)!} = 1\,860\,480$ relabelings of Q (the number of 5-permutations of 20).
@@ -34,11 +36,33 @@ It is practically impossible to perform all relabelings and check whether subtyp
 An alternative algorithm is presented below for the purpose of this project.
 Fast computation is enabled by making a few assumptions about the input record types.
 
+
+
+\subsubsection{Subtype relabeling algorithm}
+
+This algorithm handles non-dependent (``basic'') and dependent fields separately.
+When considering relabelings of $Q$, only the basic fields are included.
+This drastically limits the number of relabelings to try:
+If $S$ has eight basic fields and $Q$ has two, there are only $\dfrac{8!}{(8-2)!} = 56$ relabelings.
+For each relabeling, the remaining (dependent) fields are subtype-checked individually.
+This means checking
+$\text{dog}(\text{x}) \sqsubseteq \text{dog}(\text{x})$ (true) instead of
+$[\text{c}_1 : \text{dog}(\text{x})] \sqsubseteq [\text{c}_2 : \text{dog}(\text{x})]$ (false).
+If there is some field in $Q_\eta$ that does not have a subtype field in $S$, then subtypeness cannot hold, and the rest of the complex fields are skipped in favor of trying the next basic-field relabeling.
+
 \paragraph{Prerequisites}
 
 \begin{itemize}
-\item Any dependent fields depend only on basic (non-dependent) fields (basic or singleton type)
-\item No nested record types (this could be solved using flattening but it's not needed in this scope)
+\item Any dependent fields depend only on basic (non-dependent) fields.
+
+For example, $\left[\begin{array}{rcl}
+\text{x} &:& Ind \\
+\text{c}_1 &:& \text{great}(\text{x}) \\
+\text{c}_2 &:& \text{believe}(\text{x}, \text{c}_1)
+\end{array}\right]$ is not allowed.
+
+\item No nested record types.
+(This restraint may be eliminated by using flattening, but it is not needed in this scope.)
 \end{itemize}
 
 \paragraph{Algorithm}
@@ -55,10 +79,6 @@ Fast computation is enabled by making a few assumptions about the input record t
     \end{enumerate}
 \item Return nothing
 \end{enumerate}
-
-Now only the basic fields are included when considering relabelings of Q.
-If $S$ has eight basic fields and $Q$ has two, there are only $\dfrac{8!}{(8-2)!} = 56$ relabelings.
-For each relabeling, the remaining fields are subtype-checked in a nested loop with early exit.
 
 [what is this in terms of big-O?]
 
@@ -100,6 +120,42 @@ def find_subtype_relabeling(S, Q):
     return None
 \end{lstlisting}
 
+
+
+\subsection{Parsing language to TTR}
+
+[who] has presented how to parse natural lanauge to tTR.
+But it's complicated and not yet implemented.
+Our domain is limited.
+So we use another natural-language parsing method that has already been implemented: semantically augmented syntax rules.
+
+\begin{lstlisting}[label={lst:grammar}, caption=A snippet of the FCFG grammar]
+QS[SEM=<?s(?vp)>] -> 'is' 'there' NP[SEM=?s] PP[SEM=?vp]
+
+NP[SEM=<?det(?n)>] -> Det[SEM=?det] N[SEM=?n]
+Det[SEM=<\P Q.exists x.(P(x) & Q(x))>] -> 'a' | 'an'
+
+VP[SEM=?pp] -> 'is' PP[SEM=?pp]
+PP[SEM=<\s.(?o(\o.?prep(s, o)))>] -> Prep[SEM=?prep] NP[SEM=?o]
+
+Prep[SEM=<left>] -> 'to' 'the' 'left' 'of'
+
+N[SEM=<kite>] -> 'kite'
+N[SEM=<person>] -> 'person'
+\end{lstlisting}
+
+
+
+\subsubsection{Translating first-order logic to TTR}
+
+Limited scope.
+
+\begin{figure}[h]
+\label{fig:tree}
+\includegraphics[width=\textwidth]{tree}
+\centering
+\caption{Example syntactic-semantic parsing of an utterance into first-order logic.}
+\end{figure}
 
 
 
