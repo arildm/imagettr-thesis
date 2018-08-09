@@ -39,7 +39,11 @@ Ppty = (Ind \rightarrow Type)\end{equation}
 
 %[PTy?]
 
-A perceptual object is a record of the record type $Obj$ (\autoref{eq:obj}).
+
+
+\subsubsection{Object detection}
+
+A \textit{perceptual object} is a record of the record type $Obj$ (\autoref{eq:obj}).
 It contains a bounding box (the `seg' field) and a property (`pfun').
 An example record is given in \autoref{eq:objrec}.
 %$Obj$ records are the result of performing \textit{object detection}.
@@ -77,9 +81,11 @@ ObjDetector = ( Image \rightarrow [Obj] )
 The perceptual object couples a property with a location, but it does not explicitly say anything about any individual object.
 In \cite{lspc}, the step from the perceptual to the \textit{conceptual} domain is made by generating a record type that corresponds to a situation, namely the situation that a certain individual has a certain property and is at a certain location.
 This situation record type is known as an \textit{individuated object}, and is a subtype of $IndObj$ (\autoref{eq:indobj}).
-Here, $x$ is an individual and $loc$ is a location.
+Here, $x$ is an individual and $loc$ is a bounding box.
 $cl$ specifies that $loc$ is the location of $x$, and the purpose of $cp$ is to declare a property of $x$.
 $PTy$ is defined as a supertype of all ptypes (\autoref{eq:pty}).
+
+[TODO What to do about PTy? Does it make sense? Skip it? Make use of it more?]
 
 \begin{equation}\label{eq:indobj}
 IndObj = \left[\begin{array}{rcl}
@@ -113,7 +119,7 @@ The individuation function is defined, as explained above, in \autoref{eq:indfun
 The output record type describes a situation where an individual identified as $a_0$ is classified as a person and is occupying a $276 \times 809$-sized rectangle with its center at $(138, 654)$.
 
 \begin{equation}\label{eq:indfundef}
-f_{IndFun} = \lambda r : Obj\ . \left[\begin{array}{lcl}
+f_{IndFun} = \lambda r : Obj\ . \left[\begin{array}{rcl}
     \text{x} = a_n &:& Ind \\
     \text{cp} &:& r.\text{pfun}(\text{x}) \\
     \text{cl} &:& \text{location}(\text{x}, \text{loc}) \\
@@ -133,7 +139,7 @@ f_{IndFun}(
 \text{pfun} &=& \lambda v:Ind\ .\ \text{person}(v)\\
 \end{array}\right]
 ) =
-\left[\begin{array}{lcl}
+\left[\begin{array}{rcl}
     \text{x} = a_0 &:& Ind \\
     \text{cp} &:& \text{person}(\text{x}) \\
     \text{cl} &:& \text{location}(\text{x}, \text{loc}) \\
@@ -148,7 +154,7 @@ f_{IndFun}(
 
 
 
-\subsubsection{Spatial relations}
+\subsubsection{Spatial relation classification}
 
 Relations may hold between pairs of individuated objects.
 How do we detect and model a certain relation between such a pair?
@@ -169,13 +175,15 @@ RelClf = ( LocTup \rightarrow RecType )
 \end{equation}
 
 For instance, a classifier for ``left'' might look like in \autoref{eq:leftclfdef}, where $\kappa_{left}$ is a non-TTR, boolean function.
-Of course, the requirement that the individual $r.\text{lo}.\text{x}$ is actually located at $r.\text{lo}.\text{loc}$ (and same for $r.\text{refo}$) is implicit from the typing as $IndObj$, where the field $\text{cl} : \text{location}(\text{x}, \text{loc})$ is necessarily present.
+Of course, the requirement that the individual $r.\text{lo}.\text{x}$ is actually located at $r.\text{lo}.\text{loc}$ (and same for $r.\text{refo}$) is implicit from the typing as $IndObj$, where a field typed as $\text{location}(\text{x}, \text{loc})$ is necessarily present.
 
 \begin{equation}\label{eq:leftclfdef}
 \lambda r : LocTup \ .\ 
 \begin{cases}
 \left[\begin{array}{rcl}
-    \text{cr} &:& \text{left}(r.\text{lo}.\text{x}, r.\text{refo}.\text{x}) \\
+    \text{x} &:& r.\text{lo}.\text{x} \\
+    \text{y} &:& r.\text{refo}.\text{x} \\
+    \text{cr} &:& \text{left}(\text{x}, \text{y}) \\
 \end{array}\right],
 & \text{if } \kappa_{left}(r.\text{lo}.\text{loc}, r.\text{refo}.\text{loc}) \\
 [], & \text{otherwise}
@@ -206,11 +214,11 @@ If the belief types are $T_1, T_2, ..., T_n$, they are combined to $T_1 \underse
 \subsubsection{Agent}
 \label{sec:agent}
 
-We are now connecting the perceptual-conceptual pieces described above, by building an agent.
-It receives information on classified and located objects of an image, and apprehends their basic status and spatial relations.
-It also receives the result of parsing a natural-language utterance.
-The information is in \gls{ttr} form, which finally allows the agent to connect the two modes.
-This provides a means to answer to natural-language questions about the image.
+The perceptual-conceptual pieces described above are now connected in an \textit{agent} record type with associated manipulation algorithms.
+Upon receiving an image, it will carry out object detection, individuation and spatial relation classification, in order to form its beliefs.
+It may also receive the result of parsing a natural-language utterance, upon which the utterance will be validated against the beliefs.
+%The information is in \gls{ttr} form, which finally allows the agent to connect the two modes.
+A construction like this provides a means to answer to natural-language questions about the image.
 
 \begin{equation}\label{eq:agent}
 Agent = \left[\begin{array}{rcl}
@@ -238,14 +246,16 @@ For an agent $ag : Agent$, the perception and question-answering procedure is ca
 
 \begin{enumerate}
 \item Visual input in the form of an image is received and assigned to $ag.\text{state}.\text{img}$.
-\item $ag.\text{objdetector}$ is invoked on $ag.\text{state.img}$ and creates a collection of records that are assigned to $ag.\text{state}.\text{perc}$.
-\item $ag.\text{indfun}$ is, in turn, invoked on each record in $ag.\text{state.perc}$ and resulting record types are added to $ag.\text{state.bel}$.
-\item Now, each function in $ag.\text{relclfs}$ are applied:
+\item $ag.\text{objdetector}$ is invoked on $ag.\text{state.img}$ and creates a collection of perceptual object records that are assigned to $ag.\text{state}.\text{perc}$.
+\item $ag.\text{indfun}$ is, in turn, invoked on each record in $ag.\text{state.perc}$ and resulting individuated object record types are added to $ag.\text{state.bel}$.
+\item Now, each function in $ag.\text{relclfs}$ is applied to each pair of record types in $ag.\text{state.bel}$:
 	\begin{enumerate}
-	\item The fields of the domain record type of the function is considered its arguments.
-	\item Each combination of $ag.\text{state.bel}$ record types that matches the argument types is considered for input.
-	\item The input record types are combined to match the domain record type of the function, and the type is instantiated.
-	\item The function is applied to the created record, and the resulting record type is added to $ag.\text{state.bel}$
+	%\item The fields of the domain record type of the function is considered its arguments.
+	%\item Each combination of $ag.\text{state.bel}$ record types that matches the argument types is considered for input.
+	%\item The input record types are combined to match the domain record type of the function, and the type is instantiated.
+    \item For each pair $T_1$ and $T_2$ in $ag.\text{state.bel}$, a $LocTup$ record type is constructed as $[\text{lo}: T_1, \text{refo}: T_2]$. Note that this will be specified to certain individuals and segments, and is thus more informative than the plain $LocTup$ type.
+    \item The specified $LocTup$ type is instantiated to a record.
+	\item Each function in $ag.\text{relclfs}$ is applied to the created record, and the record type resulting from each application is added to $ag.\text{state.bel}$ unless it is empty ($[]$).
 	\end{enumerate}
 	For example, the \textit{left} classifier in \autoref{eq:leftclfdef} is applied to each pair of $IndObj$ after combining them into a $LocTup$ and instantiating it.
     Note that the $IndObj$ have manifest fields which carry on to the $LocTup$ type, so it is more specific than just instantiating $LocTup$ itself.
@@ -323,6 +333,95 @@ ag = \left[\begin{array}{rcl}
     \end{array}\right]
 \end{equation}
 \end{landscape}
+
+
+
+\subsection{Combining situations}
+
+The beliefs of the agent are formed by a collection of record types.
+These are \textit{combined} into one, in order to build the scene type $S$.
+
+Consider the spatial relation classifiers, which create record types with the fields ``x'', ``y'', and ``cr''.
+One of these record types may be specified so that it declares that an individual $a_1$ is above another individual $a_2$ (\autoref{eq:combineterm1}).
+Another record type may declare that $a_2$ is to the right of $a_1$ (\autoref{eq:combineterm2}).
+The combination of these beliefs, which declares both these relationships, is described by \autoref{eq:combination}.
+To avoid conflict, new labels are created for some fields, prompting the expectation that combination results have no informative or predictable labels.
+
+\begin{equation} \label{eq:combineterm1}
+T_1 = \left[\begin{array}{rcl}
+    \text{x} &:& Ind_{a_1} \\
+    \text{y} &:& Ind_{a_2} \\
+    \text{cr} &:& \text{above}(\text{x}, \text{y})
+    \end{array}\right]
+\end{equation}
+
+\begin{equation} \label{eq:combineterm2}
+T_2 = \left[\begin{array}{rcl}
+    \text{x} &:& Ind_{a_2} \\
+    \text{y} &:& Ind_{a_1} \\
+    \text{cr} &:& \text{right}(\text{x}, \text{y})
+    \end{array}\right]
+\end{equation}
+
+\begin{equation} \label{eq:combination}
+\left[\begin{array}{rcl}
+    \text{x} &:& Ind_{a_1} \\
+    \text{y} &:& Ind_{a_2} \\
+    \text{cr}_1 &:& \text{above}(\text{x}, \text{y}) \\
+    \text{cr}_2 &:& \text{right}(\text{y}, \text{x})
+    \end{array}\right]
+\end{equation}
+
+TTR features a \textit{merge} operation ($\ttrmerge$), but a merge will not have the result desired here.
+Since the same labels occur in both belief types, a merge would result in \textit{meet types}, as seen in \autoref{eq:merge}, in a way which is not useful for this purpose.
+
+\begin{equation} \label{eq:merge}
+T_1  \ttrmerge T_2 =
+\left[\begin{array}{rcl}
+    \text{x} &:& Ind_{a_1} \wedge Ind_{a_2} \\
+    \text{y} &:& Ind_{a_2} \wedge Ind_{a_1} \\
+    \text{cr} &:& \text{above}(\text{x}, \text{y}) \wedge \text{right}(\text{x}, \text{y})
+    \end{array}\right]
+\end{equation}
+
+\cite{CooperTypetheorylanguage2016} solves this by a method of nesting and flattening.
+Each belief is added as the type of a new field ``prev'' in the next belief: $[\text{prev} : T_1] \ttrmerge T_2$.
+The result is then \textit{flattened} to avoid the nesting (\autoref{eq:combineprev}).
+The field labeled ``x'' in $T_1$ is now labeled ``prev.x'' and does not conflict with the field labeled ``x'' from $T_2$.
+% Duplicates?
+
+\begin{equation} \label{eq:combineprev}
+\left[\begin{array}{rcl}
+    \text{prev.x} &:& Ind_{a_1} \\
+    \text{prev.y} &:& Ind_{a_2} \\
+    \text{prev.cr} &:& \text{above}(\text{prev.x}, \text{prev.y}) \\
+    \text{x} &:& Ind_{a_2} \\
+    \text{y} &:& Ind_{a_1} \\
+    \text{cr} &:& \text{right}(\text{x}, \text{y})
+    \end{array}\right]
+\end{equation}
+
+Another method is used in this project for the purpose of computational speed.
+In this method, each belief record type is relabeled to only have unique labels, and then merged.
+An example result is shown in \autoref{eq:combineunconflict}.
+Generating unique labels is an operation outside TTR, making this method less purely TTR-powered.
+
+\begin{equation} \label{eq:combineunconflict}
+\left[\begin{array}{rcl}
+    \text{x}_1 &:& Ind_{a_1} \\
+    \text{y}_1 &:& Ind_{a_2} \\
+    \text{cr}_1 &:& \text{above}(\text{x}_1, \text{y}_1) \\
+    \text{x}_2 &:& Ind_{a_2} \\
+    \text{y}_2 &:& Ind_{a_1} \\
+    \text{cr}_2 &:& \text{right}(\text{x}_2, \text{y}_2)
+    \end{array}\right]
+\end{equation}
+
+Both methods result in duplicate fields: there is no meaningful difference between the fields labeled ``$\text{x}_1$'' and ``$\text{y}_2$'' above, as both have the same type.
+Removing duplicates does not only involve finding which fields have the same type as another field, but also relabling them so that all dependent fields refer to the same basic field as appropriate.
+
+[why deduplication? Because relabel-subtype doesn't seem to work otherwise.]
+[necessary to describe deduplication in detail?]
 
 
 
@@ -476,95 +575,6 @@ Limited scope.
 \end{figure}
 
 TODO
-
-
-
-\subsection{Combining situations}
-
-The beliefs of the agent are formed by a collection of record types.
-These are \textit{combined} into one, in order to build the scene type $S$.
-
-Consider the spatial relation classifiers, which create record types with the fields ``x'', ``y'', and ``cr''.
-One of these record types may be specified so that it declares that an individual $a_1$ is above another individual $a_2$ (\autoref{eq:combineterm1}).
-Another record type may declare that $a_2$ is to the right of $a_1$ (\autoref{eq:combineterm2}).
-The combination of these beliefs, which declares both these relationships, is described by \autoref{eq:combination}.
-To avoid conflict, new labels are created for some fields, prompting the expectation that combination results have no informative or predictable labels.
-
-\begin{equation} \label{eq:combineterm1}
-T_1 = \left[\begin{array}{rcl}
-    \text{x} &:& Ind_{a_1} \\
-    \text{y} &:& Ind_{a_2} \\
-    \text{cr} &:& \text{above}(\text{x}, \text{y})
-    \end{array}\right]
-\end{equation}
-
-\begin{equation} \label{eq:combineterm2}
-T_2 = \left[\begin{array}{rcl}
-    \text{x} &:& Ind_{a_2} \\
-    \text{y} &:& Ind_{a_1} \\
-    \text{cr} &:& \text{right}(\text{x}, \text{y})
-    \end{array}\right]
-\end{equation}
-
-\begin{equation} \label{eq:combination}
-\left[\begin{array}{rcl}
-    \text{x} &:& Ind_{a_1} \\
-    \text{y} &:& Ind_{a_2} \\
-    \text{cr}_1 &:& \text{above}(\text{x}, \text{y}) \\
-    \text{cr}_2 &:& \text{right}(\text{y}, \text{x})
-    \end{array}\right]
-\end{equation}
-
-TTR features a \textit{merge} operation ($\ttrmerge$), but a merge will not have the result desired here.
-Since the same labels occur in both belief types, a merge would result in \textit{meet types}, as seen in \autoref{eq:merge}, in a way which is not useful for this purpose.
-
-\begin{equation} \label{eq:merge}
-T_1  \ttrmerge T_2 =
-\left[\begin{array}{rcl}
-    \text{x} &:& Ind_{a_1} \wedge Ind_{a_2} \\
-    \text{y} &:& Ind_{a_2} \wedge Ind_{a_1} \\
-    \text{cr} &:& \text{above}(\text{x}, \text{y}) \wedge \text{right}(\text{x}, \text{y})
-    \end{array}\right]
-\end{equation}
-
-\cite{CooperTypetheorylanguage2016} solves this by a method of nesting and flattening.
-Each belief is added as the type of a new field ``prev'' in the next belief: $[\text{prev} : T_1] \ttrmerge T_2$.
-The result is then \textit{flattened} to avoid the nesting (\autoref{eq:combineprev}).
-The field labeled ``x'' in $T_1$ is now labeled ``prev.x'' and does not conflict with the field labeled ``x'' from $T_2$.
-% Duplicates?
-
-\begin{equation} \label{eq:combineprev}
-\left[\begin{array}{rcl}
-    \text{prev.x} &:& Ind_{a_1} \\
-    \text{prev.y} &:& Ind_{a_2} \\
-    \text{prev.cr} &:& \text{above}(\text{prev.x}, \text{prev.y}) \\
-    \text{x} &:& Ind_{a_2} \\
-    \text{y} &:& Ind_{a_1} \\
-    \text{cr} &:& \text{right}(\text{x}, \text{y})
-    \end{array}\right]
-\end{equation}
-
-Another method is used in this project for the purpose of computational speed.
-In this method, each belief record type is relabeled to only have unique labels, and then merged.
-An example result is shown in \autoref{eq:combineunconflict}.
-Generating unique labels is an operation outside TTR, making this method less purely TTR-powered.
-
-\begin{equation} \label{eq:combineunconflict}
-\left[\begin{array}{rcl}
-    \text{x}_1 &:& Ind_{a_1} \\
-    \text{y}_1 &:& Ind_{a_2} \\
-    \text{cr}_1 &:& \text{above}(\text{x}_1, \text{y}_1) \\
-    \text{x}_2 &:& Ind_{a_2} \\
-    \text{y}_2 &:& Ind_{a_1} \\
-    \text{cr}_2 &:& \text{right}(\text{x}_2, \text{y}_2)
-    \end{array}\right]
-\end{equation}
-
-Both methods result in duplicate fields: there is no meaningful difference between the fields labeled ``$\text{x}_1$'' and ``$\text{y}_2$'' above, as both have the same type.
-Removing duplicates does not only involve finding which fields have the same type as another field, but also relabling them so that all dependent fields refer to the same basic field as appropriate.
-
-[why deduplication? Because relabel-subtype doesn't seem to work otherwise.]
-[necessary to describe deduplication in detail?]
 
 
 
