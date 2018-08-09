@@ -7,158 +7,6 @@
 
 
 
-
-\subsection{Subtype relabeling}
-
-This model uses TTR record types to model situations.
-The two main situations in action are the perceived \textit{scene} and the statement expressed in a natural-language \textit{question}.
-In this project, the language is restricted to polar (yes/no) questions.
-Such a question has a corresponding declarative statement:
-The question ``Can you see them?'' corresponds to the statement ``You can see them''.
-Responding to such a question entails checking if the scene type is a \textit{subtype} of the question type.
-[SOURCE?]
-
-[TODO check \cite{RooyPolarQuestions2003}, (sources of) \cite{AloniQuantificationConceptualCovers2001}]
-
-In TTR, however, subtype checking is not enough.
-The fields in a record type are labeled, and they will not necessarily be the same in the scene type and the question type.
-This prompts for a more advanced variant of subtype checking, allowing \textit{relabeling}.
-
-\begin{definition}[Relabel-subtype]
-A record type $S$ is a \textbf{relabel-subtype} of the record type $Q$ if there is a relabeling $\eta$ of $Q$, such that $S \sqsubseteq Q_\eta$.
-\end{definition}
-
-[Define $Q_\eta$ notation in intro/bg]
-
-The number of relabelings in one record type, to the labels of another, can be quite large:
-If $S$ has 20 fields and $Q$ has five, then there are $\dfrac{20!}{(20-5)!} = 1\,860\,480$ relabelings of Q (the number of 5-permutations of 20).
-It is practically impossible to perform all relabelings and check whether subtypeness holds.
-An alternative algorithm is presented below for the purpose of this project.
-Fast computation is enabled by making a few assumptions about the input record types.
-
-
-
-\subsubsection{Subtype relabeling algorithm}
-
-This algorithm handles non-dependent (``basic'') and dependent fields separately.
-When considering relabelings of $Q$, only the basic fields are included.
-This drastically limits the number of relabelings to try:
-If $S$ has eight basic fields and $Q$ has two, there are only $\dfrac{8!}{(8-2)!} = 56$ relabelings.
-For each relabeling, the remaining (dependent) fields are subtype-checked individually.
-This means checking
-$\text{dog}(\text{x}) \sqsubseteq \text{dog}(\text{x})$ (true) instead of
-$[\text{c}_1 : \text{dog}(\text{x})] \sqsubseteq [\text{c}_2 : \text{dog}(\text{x})]$ (false).
-If there is some field in $Q_\eta$ that does not have a subtype field in $S$, then subtypeness cannot hold, and the rest of the complex fields are skipped in favor of trying the next basic-field relabeling.
-
-\paragraph{Prerequisites}
-
-\begin{itemize}
-\item Any dependent fields depend only on basic (non-dependent) fields.
-
-For example, $\left[\begin{array}{rcl}
-\text{x} &:& Ind \\
-\text{c}_1 &:& \text{great}(\text{x}) \\
-\text{c}_2 &:& \text{believe}(\text{x}, \text{c}_1)
-\end{array}\right]$ is not allowed.
-
-\item No nested record types.
-(This restraint may be eliminated by using flattening, but it is not needed in this scope.)
-\end{itemize}
-
-\paragraph{Algorithm}
-
-\begin{enumerate}
-\item For each basic-field relabeling of Q:
-    \begin{enumerate}
-    \item For each complex field in Q:
-        \begin{enumerate}
-        \item Find a subtype field in S and remember it
-        \item If no subtype field was found, skip to next basic-field relabeling
-        \end{enumerate}
-    \item A subtype S field was found for all complex Q fields; return the relabeling
-    \end{enumerate}
-\item Return nothing
-\end{enumerate}
-
-[what is this in terms of big-O?]
-
-A Python implementation is given in \autoref{lst:find_subtype_relabeling}.
-
-\begin{lstlisting}[label={lst:find_subtype_relabeling}, caption=The \texttt{find\_subtype\_relabeling} function]
-from itertools import permutations, combinations
-
-def my_subtype_of(sub, sup):
-    """Is T a subtype of U? Accept dependent rectype fields (= (fun, args) tuples) with simplistic equality test."""
-    try:
-        return sub.subtype_of(sup)
-    except AttributeError:
-        return isinstance(sub, tuple) and isinstance(sup, tuple) and show(sub) == show(sup)
-
-def find_subtype_relabeling(S, Q):
-    '''Could record type S be a sub type of record type Q if relabeling in Q is allowed?'''
-    # For each relabeling of basic-type fields
-    for sls in permutations(basic_fields(S), len(basic_fields(Q))):
-        # Try the basic-fields relabeling of Q
-        rlb_basic = dict(zip(basic_fields(Q), sls))
-        Q2 = rectype_relabels(Q, rlb_basic)
-        
-        # For each Q field, find a S field that is a subtype
-        rlb_dep = dict()
-        for ql in nonbasic_fields(Q2):
-            for sl in nonbasic_fields(S):
-                # The new labels must be unique.
-                if sl in rlb_dep.values(): continue
-                if my_subtype_of(S.field(sl), Q2.field(ql)):
-                    rlb_dep[ql] = sl
-                    break
-            if ql not in rlb_dep:
-                break
-
-        # Successful if all non-basic fields match.
-        if len(rlb_dep) == len(nonbasic_fields(Q2)):
-            return dict(**rlb_basic, **rlb_dep)
-    return None
-\end{lstlisting}
-
-
-
-\subsection{Parsing language to TTR}
-
-[who] has presented how to parse natural lanauge to tTR.
-But it's complicated and not yet implemented.
-Our domain is limited.
-So we use another natural-language parsing method that has already been implemented: semantically augmented syntax rules.
-
-\begin{lstlisting}[label={lst:grammar}, caption=A snippet of the FCFG grammar]
-QS[SEM=<?s(?vp)>] -> 'is' 'there' NP[SEM=?s] PP[SEM=?vp]
-
-NP[SEM=<?det(?n)>] -> Det[SEM=?det] N[SEM=?n]
-Det[SEM=<\P Q.exists x.(P(x) & Q(x))>] -> 'a' | 'an'
-
-VP[SEM=?pp] -> 'is' PP[SEM=?pp]
-PP[SEM=<\s.(?o(\o.?prep(s, o)))>] -> Prep[SEM=?prep] NP[SEM=?o]
-
-Prep[SEM=<left>] -> 'to' 'the' 'left' 'of'
-
-N[SEM=<kite>] -> 'kite'
-N[SEM=<person>] -> 'person'
-\end{lstlisting}
-
-
-
-\subsubsection{Translating first-order logic to TTR}
-
-Limited scope.
-
-\begin{figure}[h]
-\label{fig:tree}
-\includegraphics[width=\textwidth]{tree}
-\centering
-\caption{Example syntactic-semantic parsing of an utterance into first-order logic.}
-\end{figure}
-
-
-
 \subsection{\Acrshort{ttr} model}
 \label{ssec:ttrmodel}
 
@@ -336,6 +184,8 @@ Of course, the requirement that the individual $r.\text{lo}.\text{x}$ is actuall
 
 
 
+%%%%%%%%
+\begin{comment}
 \subsubsection{Combining beliefs}
 
 The hitherto generated types are considered our beliefs.
@@ -348,6 +198,8 @@ Instead, all record types are relabeled with new, unique labels, before being me
 If $T_1$ and $T_2$ are record types, then the \textbf{conflict-free merge} $T_1 \underset{u}{\wedge} T_2$ is a merge of the record types relabeled such that they do not share any labels.
 
 If the belief types are $T_1, T_2, ..., T_n$, they are combined to $T_1 \underset{u}{\wedge} T_2 \underset{u}{\wedge} ... \underset{u}{\wedge} T_n$.
+\end{comment}
+%%%%%%%%
 
 
 
@@ -471,6 +323,290 @@ ag = \left[\begin{array}{rcl}
     \end{array}\right]
 \end{equation}
 \end{landscape}
+
+
+
+\subsection{Subtype relabeling}
+
+This model uses TTR record types to model situations.
+The two main situations in action are the perceived \textit{scene} and the statement expressed in a natural-language \textit{question}.
+In this project, the language is restricted to polar (yes/no) questions.
+Such a question has a corresponding declarative statement:
+The question ``Can you see them?'' corresponds to the statement ``You can see them''.
+Responding to such a question entails checking if the scene type is a \textit{subtype} of the question type.
+[SOURCE?]
+
+[TODO check \cite{RooyPolarQuestions2003}, (sources of) \cite{AloniQuantificationConceptualCovers2001}]
+
+In TTR, however, subtype checking is not enough.
+The fields in a record type are labeled, and they will not necessarily be the same in the scene type and the question type.
+This prompts for a more advanced variant of subtype checking, allowing \textit{relabeling}.
+
+\begin{definition}[Relabel-subtype]
+A record type $S$ is a \textbf{relabel-subtype} of the record type $Q$ if there is a relabeling $\eta$ of $Q$, such that $S \sqsubseteq Q_\eta$.
+\end{definition}
+
+[Define $Q_\eta$ notation in intro/bg]
+
+The number of relabelings in one record type, to the labels of another, can be quite large:
+If $S$ has 20 fields and $Q$ has five, then there are $\dfrac{20!}{(20-5)!} = 1\,860\,480$ relabelings of Q (the number of 5-permutations of 20).
+It is practically impossible to perform all relabelings and check whether subtypeness holds.
+An alternative algorithm is presented below for the purpose of this project.
+Fast computation is enabled by making a few assumptions about the input record types.
+
+
+
+\subsubsection{Subtype relabeling algorithm}
+
+This algorithm handles non-dependent (``basic'') and dependent fields separately.
+When considering relabelings of $Q$, only the basic fields are included.
+This drastically limits the number of relabelings to try:
+If $S$ has eight basic fields and $Q$ has two, there are only $\dfrac{8!}{(8-2)!} = 56$ relabelings.
+For each relabeling, the remaining (dependent) fields are subtype-checked individually.
+This means checking
+$\text{dog}(\text{x}) \sqsubseteq \text{dog}(\text{x})$ (true) instead of
+$[\text{c}_1 : \text{dog}(\text{x})] \sqsubseteq [\text{c}_2 : \text{dog}(\text{x})]$ (false).
+If there is some field in $Q_\eta$ that does not have a subtype field in $S$, then subtypeness cannot hold, and the rest of the complex fields are skipped in favor of trying the next basic-field relabeling.
+
+\paragraph{Prerequisites}
+
+\begin{itemize}
+\item Any dependent fields depend only on basic (non-dependent) fields.
+
+For example, $\left[\begin{array}{rcl}
+\text{x} &:& Ind \\
+\text{c}_1 &:& \text{great}(\text{x}) \\
+\text{c}_2 &:& \text{believe}(\text{x}, \text{c}_1)
+\end{array}\right]$ is not allowed.
+
+\item No nested record types.
+(This restraint may be eliminated by using flattening, but it is not needed in this scope.)
+\end{itemize}
+
+\paragraph{Algorithm}
+
+\begin{enumerate}
+\item For each basic-field relabeling of Q:
+    \begin{enumerate}
+    \item For each complex field in Q:
+        \begin{enumerate}
+        \item Find a subtype field in S and remember it
+        \item If no subtype field was found, skip to next basic-field relabeling
+        \end{enumerate}
+    \item A subtype S field was found for all complex Q fields; return the relabeling
+    \end{enumerate}
+\item Return nothing
+\end{enumerate}
+
+[what is this in terms of big-O?]
+
+A Python implementation is given in \autoref{lst:find_subtype_relabeling}.
+
+\begin{lstlisting}[label={lst:find_subtype_relabeling}, caption=The \texttt{find\_subtype\_relabeling} function]
+from itertools import permutations, combinations
+
+def my_subtype_of(sub, sup):
+    """Is T a subtype of U? Accept dependent rectype fields (= (fun, args) tuples) with simplistic equality test."""
+    try:
+        return sub.subtype_of(sup)
+    except AttributeError:
+        return isinstance(sub, tuple) and isinstance(sup, tuple) and show(sub) == show(sup)
+
+def find_subtype_relabeling(S, Q):
+    '''Could record type S be a sub type of record type Q if relabeling in Q is allowed?'''
+    # For each relabeling of basic-type fields
+    for sls in permutations(basic_fields(S), len(basic_fields(Q))):
+        # Try the basic-fields relabeling of Q
+        rlb_basic = dict(zip(basic_fields(Q), sls))
+        Q2 = rectype_relabels(Q, rlb_basic)
+        
+        # For each Q field, find a S field that is a subtype
+        rlb_dep = dict()
+        for ql in nonbasic_fields(Q2):
+            for sl in nonbasic_fields(S):
+                # The new labels must be unique.
+                if sl in rlb_dep.values(): continue
+                if my_subtype_of(S.field(sl), Q2.field(ql)):
+                    rlb_dep[ql] = sl
+                    break
+            if ql not in rlb_dep:
+                break
+
+        # Successful if all non-basic fields match.
+        if len(rlb_dep) == len(nonbasic_fields(Q2)):
+            return dict(**rlb_basic, **rlb_dep)
+    return None
+\end{lstlisting}
+
+
+
+\subsection{Parsing language to TTR}
+
+[who] has presented how to parse natural lanauge to tTR.
+But it's complicated and not yet implemented.
+Our domain is limited.
+So we use another natural-language parsing method that has already been implemented: semantically augmented syntax rules.
+
+\begin{lstlisting}[label={lst:grammar}, caption=A snippet of the FCFG grammar]
+QS[SEM=<?s(?vp)>] -> 'is' 'there' NP[SEM=?s] PP[SEM=?vp]
+
+NP[SEM=<?det(?n)>] -> Det[SEM=?det] N[SEM=?n]
+Det[SEM=<\P Q.exists x.(P(x) & Q(x))>] -> 'a' | 'an'
+
+VP[SEM=?pp] -> 'is' PP[SEM=?pp]
+PP[SEM=<\s.(?o(\o.?prep(s, o)))>] -> Prep[SEM=?prep] NP[SEM=?o]
+
+Prep[SEM=<left>] -> 'to' 'the' 'left' 'of'
+
+N[SEM=<kite>] -> 'kite'
+N[SEM=<person>] -> 'person'
+\end{lstlisting}
+
+
+
+\subsubsection{Translating first-order logic to TTR}
+
+Limited scope.
+
+\begin{figure}[h]
+\label{fig:tree}
+\includegraphics[width=\textwidth]{tree}
+\centering
+\caption{Example syntactic-semantic parsing of an utterance into first-order logic.}
+\end{figure}
+
+TODO
+
+
+
+\subsection{Combining situations}
+
+The beliefs of the agent are formed by a collection of record types.
+These are \textit{combined} into one, in order to build the scene type $S$.
+
+Consider the spatial relation classifiers, which create record types with the fields ``x'', ``y'', and ``cr''.
+One of these record types may be specified so that it declares that an individual $a_1$ is above another individual $a_2$ (\autoref{eq:combineterm1}).
+Another record type may declare that $a_2$ is to the right of $a_1$ (\autoref{eq:combineterm2}).
+The combination of these beliefs, which declares both these relationships, is described by \autoref{eq:combination}.
+To avoid conflict, new labels are created for some fields, prompting the expectation that combination results have no informative or predictable labels.
+
+\begin{equation} \label{eq:combineterm1}
+T_1 = \left[\begin{array}{rcl}
+    \text{x} &:& Ind_{a_1} \\
+    \text{y} &:& Ind_{a_2} \\
+    \text{cr} &:& \text{above}(\text{x}, \text{y})
+    \end{array}\right]
+\end{equation}
+
+\begin{equation} \label{eq:combineterm2}
+T_2 = \left[\begin{array}{rcl}
+    \text{x} &:& Ind_{a_2} \\
+    \text{y} &:& Ind_{a_1} \\
+    \text{cr} &:& \text{right}(\text{x}, \text{y})
+    \end{array}\right]
+\end{equation}
+
+\begin{equation} \label{eq:combination}
+\left[\begin{array}{rcl}
+    \text{x} &:& Ind_{a_1} \\
+    \text{y} &:& Ind_{a_2} \\
+    \text{cr}_1 &:& \text{above}(\text{x}, \text{y}) \\
+    \text{cr}_2 &:& \text{right}(\text{y}, \text{x})
+    \end{array}\right]
+\end{equation}
+
+TTR features a \textit{merge} operation ($\ttrmerge$), but a merge will not have the result desired here.
+Since the same labels occur in both belief types, a merge would result in \textit{meet types}, as seen in \autoref{eq:merge}, in a way which is not useful for this purpose.
+
+\begin{equation} \label{eq:merge}
+T_1  \ttrmerge T_2 =
+\left[\begin{array}{rcl}
+    \text{x} &:& Ind_{a_1} \wedge Ind_{a_2} \\
+    \text{y} &:& Ind_{a_2} \wedge Ind_{a_1} \\
+    \text{cr} &:& \text{above}(\text{x}, \text{y}) \wedge \text{right}(\text{x}, \text{y})
+    \end{array}\right]
+\end{equation}
+
+\cite{CooperTypetheorylanguage2016} solves this by a method of nesting and flattening.
+Each belief is added as the type of a new field ``prev'' in the next belief: $[\text{prev} : T_1] \ttrmerge T_2$.
+The result is then \textit{flattened} to avoid the nesting (\autoref{eq:combineprev}).
+The field labeled ``x'' in $T_1$ is now labeled ``prev.x'' and does not conflict with the field labeled ``x'' from $T_2$.
+% Duplicates?
+
+\begin{equation} \label{eq:combineprev}
+\left[\begin{array}{rcl}
+    \text{prev.x} &:& Ind_{a_1} \\
+    \text{prev.y} &:& Ind_{a_2} \\
+    \text{prev.cr} &:& \text{above}(\text{prev.x}, \text{prev.y}) \\
+    \text{x} &:& Ind_{a_2} \\
+    \text{y} &:& Ind_{a_1} \\
+    \text{cr} &:& \text{right}(\text{x}, \text{y})
+    \end{array}\right]
+\end{equation}
+
+Another method is used in this project for the purpose of computational speed.
+In this method, each belief record type is relabeled to only have unique labels, and then merged.
+An example result is shown in \autoref{eq:combineunconflict}.
+Generating unique labels is an operation outside TTR, making this method less purely TTR-powered.
+
+\begin{equation} \label{eq:combineunconflict}
+\left[\begin{array}{rcl}
+    \text{x}_1 &:& Ind_{a_1} \\
+    \text{y}_1 &:& Ind_{a_2} \\
+    \text{cr}_1 &:& \text{above}(\text{x}_1, \text{y}_1) \\
+    \text{x}_2 &:& Ind_{a_2} \\
+    \text{y}_2 &:& Ind_{a_1} \\
+    \text{cr}_2 &:& \text{right}(\text{x}_2, \text{y}_2)
+    \end{array}\right]
+\end{equation}
+
+Both methods result in duplicate fields: there is no meaningful difference between the fields labeled ``$\text{x}_1$'' and ``$\text{y}_2$'' above, as both have the same type.
+Removing duplicates does not only involve finding which fields have the same type as another field, but also relabling them so that all dependent fields refer to the same basic field as appropriate.
+
+[why deduplication? Because relabel-subtype doesn't seem to work otherwise.]
+[necessary to describe deduplication in detail?]
+
+
+
+\subsection{Evaluation}
+
+The evaluation results are presented in \autoref{tab:eval}.
+Where the answer is incorrect, this is explained by different reasons.
+In 1.2, the car is classified as \textit{truck} and our model does not have any inference system for determining that if something is a truck then it is also a car.
+In 2.1 and 4.1, some of the objects are not successfully detected by the object detection system.
+In 3.1, the simplistic account of spatial relations conflicts with that of our intuition.
+Sure enough, there is at least one snowboard whose center coordinates is higher on the $y$ axis than that of at least one person.
+
+\begin{table}
+\begin{tabular}{cl}
+  
+	\includegraphics[width=0.3\textwidth]{vqa1.jpg} &
+	\begin{tabular}{llll}
+		1.1 & Is there an aeroplane? & Yes & Correct \\
+		1.2 & Is there a person to the right of a car? & No & Incorrect
+		\end{tabular} \\
+		
+	\includegraphics[width=0.3\textwidth]{vqa2.jpg} &
+	\begin{tabular}{llll}
+		2.1 & Is there a tent? & No & Incorrect \\
+		2.2 & Is there a kite above a person? & Yes & Correct
+		\end{tabular} \\
+		
+	\includegraphics[width=0.3\textwidth]{vqa3.jpg} &
+	\begin{tabular}{llll}
+		3.1 & Is there a snowboard above a person? & Yes & Incorrect \\
+		3.2 & Is there a snowboard below a person? & Yes & Correct
+		\end{tabular} \\
+		
+	\includegraphics[width=0.3\textwidth]{vqa4.jpg} &
+	\begin{tabular}{llll}
+		4.1 & Is there a giraffe below a tree? & No & Incorrect
+		\end{tabular} \\
+		
+  	\end{tabular}
+\caption{Evaluation results.}
+\label{tab:eval}
+\end{table}
 
 
 
@@ -747,45 +883,3 @@ def eng_to_pyttr(text):
 The agent is a record of the type $Agent$.
 Manipulation of the record is performed by Python functions \texttt{agent\_see} and \texttt{agent\_hear}.
 They correspond to the algorithms for visual perception and language, described in \autoref{sec:agent}
-
-
-
-\subsection{Evaluation}
-
-The evaluation results are presented in \autoref{tab:eval}.
-Where the answer is incorrect, this is explained by different reasons.
-In 1.2, the car is classified as \textit{truck} and our model does not have any inference system for determining that if something is a truck then it is also a car.
-In 2.1 and 4.1, some of the objects are not successfully detected by the object detection system.
-In 3.1, the simplistic account of spatial relations conflicts with that of our intuition.
-Sure enough, there is at least one snowboard whose center coordinates is higher on the $y$ axis than that of at least one person.
-
-\begin{table}
-\begin{tabular}{cl}
-  
-	\includegraphics[width=0.3\textwidth]{vqa1.jpg} &
-	\begin{tabular}{llll}
-		1.1 & Is there an aeroplane? & Yes & Correct \\
-		1.2 & Is there a person to the right of a car? & No & Incorrect
-		\end{tabular} \\
-		
-	\includegraphics[width=0.3\textwidth]{vqa2.jpg} &
-	\begin{tabular}{llll}
-		2.1 & Is there a tent? & No & Incorrect \\
-		2.2 & Is there a kite above a person? & Yes & Correct
-		\end{tabular} \\
-		
-	\includegraphics[width=0.3\textwidth]{vqa3.jpg} &
-	\begin{tabular}{llll}
-		3.1 & Is there a snowboard above a person? & Yes & Incorrect \\
-		3.2 & Is there a snowboard below a person? & Yes & Correct
-		\end{tabular} \\
-		
-	\includegraphics[width=0.3\textwidth]{vqa4.jpg} &
-	\begin{tabular}{llll}
-		4.1 & Is there a giraffe below a tree? & No & Incorrect
-		\end{tabular} \\
-		
-  	\end{tabular}
-\caption{Evaluation results.}
-\label{tab:eval}
-\end{table}
