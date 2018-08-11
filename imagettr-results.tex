@@ -1,9 +1,8 @@
 \section{Results}
 \label{sec:results}
 
-%In this section, the model is defined.
-%First formally, in \gls{ttr}.
-%Then, parts of the Python source is presented, including PyTTR usage.
+The results of this project consists primarily of a \gls{ttr} model, which connects language to visual perception in a basic \gls{vqa} setting and uses \gls{ttr} throughout.
+The solution includes new strategies to solve three significant sub-problems: efficiently combining multiple belief record types into one, basic translation from first-order logic to \gls{ttr} and finally a subtype relation insensitive to labels.
 
 
 
@@ -108,9 +107,9 @@ IndFun = ( Obj \rightarrow RecType )
 \end{equation}
 
 The record type resulting from applying an $IndFun$ function will be a subtype of $IndObj$.
-Furthermore, the $x$ and $loc$ fields will be specified using manifest fields.
-The $x$ field is specified as a newly instantiated $Ind$ object, $a_n$ (where $n$ is a number such that the new instatiation is unique).
-The $loc$ field is specified as the value of $seg$ in the $Obj$ record.
+Furthermore, the `x' and `loc' fields will be specified using manifest fields.
+The `x' field is specified as a newly instantiated $Ind$ object, $a_n$ (where $n$ is a number such that the new instatiation is unique).
+The `loc' field is specified as the value of `seg' in the $Obj$ record.
 
 %For the $x$ field, we create a new individual object $a_{new} : Ind$.
 %For the ptype fields $cp$ and $cl$, we also create new objects $e_{new} : r.\text{pfun}(\text{x})$ and $e_{new} : \text{location}(\text{x}, \text{loc})$.
@@ -211,10 +210,66 @@ If the belief types are $T_1, T_2, ..., T_n$, they are combined to $T_1 \underse
 
 
 
+\subsubsection{Beliefs}
+
+The set of individuated objects, added to the set of relation classification results, form a set of beliefs.
+Each of these types is a situation held to be true, by virtue of resulting from perception mechanisms.
+They can be \textit{combined} into one \textit{scene} record type which describes the full scene.
+This combination is not trivial, and is discussed in \autoref{sec:combine}.
+
+
+
+\subsubsection{Language}
+
+%The connection between visual perception and language happens by means of using the same representation (TTR) for both modes.
+%The representation of the former mode has been discussed above.
+%Digitally encoded visual data is input to the model, which uses an external object detector to extract information which forms the base of further acts of perception.
+%
+%For the language side, this model does not concern itself with parsing.
+%Instead, the parsing of natural language is expected to occur outside the model.
+%The resulting TTR representation 
+
+% @TODO Why is ag.state.utt not String and then have ag.state.parsed : RecType?
+
+% How do we go from language to TTR?
+As discussed in \autoref{sec:languagevqa}, TTR-based natural-language parsing has not yet been implemented as a ready-to-use library.
+Therefore, parsing must be done externally to the TTR model.
+This is described in \autoref{sec:parsing}.
+Any utterance is input to the model only as a TTR record type.
+
+% What will the parsing result look like in TTR?
+In this project, the utterance is always a polar question.
+With that restriction in place, it may take the same form as a declarative sentence:
+The question ``Is there a lamp above a table?'' takes the same form as the statement ``There is a lamp above a table''.
+\autoref{eq:question} models this example question.
+
+\begin{equation}\label{eq:question}
+\left[\begin{array}{rcl}
+    \text{x} &:& Ind \\
+    \text{y} &:& Ind \\
+    \text{c}_\text{x} &:& \text{lamp}(\text{x}) \\
+    \text{c}_\text{y} &:& \text{table}(\text{y}) \\
+    \text{c}_\text{r} &:& \text{above}(\text{x}, \text{y}) \\
+    \end{array}\right]
+\end{equation}
+
+% How do we use the question TTR type?
+% TODO In terms of DIALOGUE ACTS?
+The restriction to polar questions also guides the formulation of how to handle the TTR question type.
+Responding to a polar question involves checking whether the scene type is a subtype of the question type, $S \sqsubseteq Q$.
+If the subtype relation holds, the answer will be ``Yes'', and otherwise ``No''.
+An important problem, however, stems from the fact that TTR record types are labeled.
+In general, fields in the scene type and question type will not share labels in a way that enables simple subtype checking to be useful.
+The remedy to this is an alternative subtype relation $\subtrlb$ which is insensitive to labels.
+This new relation is discussed in \autoref{sec:subtyperelabeling}.
+[TODO Some of this is also repeated.]
+
+
+
 \subsubsection{Agent}
 \label{sec:agent}
 
-The perceptual-conceptual pieces described above are now connected in an \textit{agent} record type with associated manipulation algorithms.
+The perceptual-conceptual pieces described above are now connected in an \textit{agent} record type (\autoref{eq:agent} and \autoref{eq:state}) with associated manipulation algorithms.
 Upon receiving an image, it will carry out object detection, individuation and spatial relation classification, in order to form its beliefs.
 It may also receive the result of parsing a natural-language utterance, upon which the utterance will be validated against the beliefs.
 %The information is in \gls{ttr} form, which finally allows the agent to connect the two modes.
@@ -318,7 +373,9 @@ ag = \left[\begin{array}{rcl}
 					&:& Segment \\
 				\end{array}\right],
 			{}{} \left[\begin{array}{rcl}
-				\text{cr} &:& \text{above}(a_{0}, a_{1})
+				\text{x} &:& Ind_{a_{0}} \\
+				\text{y} &:& Ind_{a_{1}} \\
+				\text{cr} &:& \text{above}(\text{x}, \text{y})
 				\end{array}\right],
 			... ]
 			\end{array} \\
@@ -337,11 +394,12 @@ ag = \left[\begin{array}{rcl}
 
 
 \subsection{Combining situations}
+\label{sec:combine}
 
 The beliefs of the agent are formed by a collection of record types.
 These are \textit{combined} into one, in order to build the scene type $S$.
 
-Consider the spatial relation classifiers, which create record types with the fields ``x'', ``y'', and ``cr''.
+Consider the spatial relation classifiers, which create record types with the fields `x', `y', and `cr'.
 One of these record types may be specified so that it declares that an individual $a_1$ is above another individual $a_2$ (\autoref{eq:combineterm1}).
 Another record type may declare that $a_2$ is to the right of $a_1$ (\autoref{eq:combineterm2}).
 The combination of these beliefs, which declares both these relationships, is described by \autoref{eq:combination}.
@@ -385,9 +443,9 @@ T_1  \ttrmerge T_2 =
 \end{equation}
 
 \cite{CooperTypetheorylanguage2016} solves this by a method of nesting and flattening.
-Each belief is added as the type of a new field ``prev'' in the next belief: $[\text{prev} : T_1] \ttrmerge T_2$.
+Each belief is added as the type of a new field `prev' in the next belief: $[\text{prev} : T_1] \ttrmerge T_2$.
 The result is then \textit{flattened} to avoid the nesting (\autoref{eq:combineprev}).
-The field labeled ``x'' in $T_1$ is now labeled ``prev.x'' and does not conflict with the field labeled ``x'' from $T_2$.
+The field labeled `x' in $T_1$ is now labeled `prev.x' and does not conflict with the field labeled `x' from $T_2$.
 % Duplicates?
 
 \begin{equation} \label{eq:combineprev}
@@ -417,7 +475,7 @@ Generating unique labels is an operation outside TTR, making this method less pu
     \end{array}\right]
 \end{equation}
 
-Both methods result in duplicate fields: there is no meaningful difference between the fields labeled ``$\text{x}_1$'' and ``$\text{y}_2$'' above, as both have the same type.
+Both methods result in duplicate fields: there is no meaningful difference between the fields labeled `$\text{x}_1$' and `$\text{y}_2$' above, as both have the same type.
 Removing duplicates does not only involve finding which fields have the same type as another field, but also relabling them so that all dependent fields refer to the same basic field as appropriate.
 
 [why deduplication? Because relabel-subtype doesn't seem to work otherwise.]
@@ -426,6 +484,9 @@ Removing duplicates does not only involve finding which fields have the same typ
 
 
 \subsection{Subtype relabeling}
+\label{sec:subtyperelabeling}
+
+TODO Remove background which is already in 4.1.5 Language.
 
 This model uses TTR record types to model situations.
 The two main situations in action are the perceived \textit{scene} and the statement expressed in a natural-language \textit{question}.
@@ -442,7 +503,7 @@ The fields in a record type are labeled, and they will not necessarily be the sa
 This prompts for a more advanced variant of subtype checking, allowing \textit{relabeling}.
 
 \begin{definition}[Relabel-subtype]
-A record type $S$ is a \textbf{relabel-subtype} of the record type $Q$ if there is a relabeling $\eta$ of $Q$, such that $S \sqsubseteq Q_\eta$.
+A record type $S$ is a \textbf{relabel-subtype} of the record type $Q$, $S \subtrlb Q$, if there is a relabeling $\eta$ of $Q$, such that $S \sqsubseteq Q_\eta$.
 \end{definition}
 
 [Define $Q_\eta$ notation in intro/bg]
@@ -540,6 +601,7 @@ def find_subtype_relabeling(S, Q):
 
 
 \subsection{Parsing language to TTR}
+\label{sec:parsing}
 
 [who] has presented how to parse natural lanauge to tTR.
 But it's complicated and not yet implemented.
