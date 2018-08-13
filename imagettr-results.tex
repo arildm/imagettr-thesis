@@ -21,7 +21,7 @@ Three basic types exist in the model.
 \end{description}
 
 A $Segment$ is a record type describing a rectangular bounding box within an (implicit) image (\autoref{eq:seg}).
-Its fields contain the center coordinates of the box ($cx$ and $cy$) and the width ($w$) and height ($h$) of the box.
+Its fields contain the center coordinates of the box (`cx' and `cy') and the width (`w') and height (`h') of the box.
 $Ppty$ is the type of functions that can be applied to an individual and return a type (\autoref{eq:ppty}).
 In our account the resulting type will be restricted to a ptype that is dependent on the individual, thus describing a property of it.
 
@@ -212,10 +212,10 @@ If the belief types are $T_1, T_2, ..., T_n$, they are combined to $T_1 \underse
 
 \subsubsection{Beliefs}
 
-The set of individuated objects, added to the set of relation classification results, form a set of beliefs.
+The set of individuated objects, added to the set of relation classification results, forms a set of beliefs.
 Each of these types is a situation held to be true, by virtue of resulting from perception mechanisms.
 They can be \textit{combined} into one \textit{scene} record type which describes the full scene.
-This combination is not trivial, and is discussed in \autoref{sec:combine}.
+The method of such combination is not trivial, and is discussed in \autoref{sec:combine}.
 
 
 
@@ -271,7 +271,7 @@ This new relation is discussed in \autoref{sec:subtyperelabeling}.
 
 The perceptual-conceptual pieces described above are now connected in an \textit{agent} record type (\autoref{eq:agent} and \autoref{eq:state}) with associated manipulation algorithms.
 Upon receiving an image, it will carry out object detection, individuation and spatial relation classification, in order to form its beliefs.
-It may also receive the result of parsing a natural-language utterance, upon which the utterance will be validated against the beliefs.
+It may also receive a parsed natural-language utterance, which will then be validated against the beliefs.
 %The information is in \gls{ttr} form, which finally allows the agent to connect the two modes.
 A construction like this provides a means to answer to natural-language questions about the image.
 
@@ -402,8 +402,8 @@ These are \textit{combined} into one, in order to build the scene type $S$.
 Consider the spatial relation classifiers, which create record types with the fields `x', `y', and `cr'.
 One of these record types may be specified so that it declares that an individual $a_1$ is above another individual $a_2$ (\autoref{eq:combineterm1}).
 Another record type may declare that $a_2$ is to the right of $a_1$ (\autoref{eq:combineterm2}).
-The combination of these beliefs, which declares both these relationships, is described by \autoref{eq:combination}.
-To avoid conflict, new labels are created for some fields, prompting the expectation that combination results have no informative or predictable labels.
+The \textit{combination} of these beliefs, which declares both these relationships, is described by \autoref{eq:combination}.
+To avoid conflict, some fields have been relabeled, prompting the expectation that combination results have no informative or predictable labels.
 
 \begin{equation} \label{eq:combineterm1}
 T_1 = \left[\begin{array}{rcl}
@@ -444,7 +444,7 @@ T_1  \ttrmerge T_2 =
 
 \cite{CooperTypetheorylanguage2016} solves this by a method of nesting and flattening.
 Each belief is added as the type of a new field `prev' in the next belief: $[\text{prev} : T_1] \ttrmerge T_2$.
-The result is then \textit{flattened} to avoid the nesting (\autoref{eq:combineprev}).
+The result is then flattened to avoid the nesting (\autoref{eq:combineprev}).
 The field labeled `x' in $T_1$ is now labeled `prev.x' and does not conflict with the field labeled `x' from $T_2$.
 % Duplicates?
 
@@ -476,9 +476,10 @@ Generating unique labels is an operation outside TTR, making this method less pu
 \end{equation}
 
 Both methods result in duplicate fields: there is no meaningful difference between the fields labeled `$\text{x}_1$' and `$\text{y}_2$' above, as both have the same type.
-Removing duplicates does not only involve finding which fields have the same type as another field, but also relabling them so that all dependent fields refer to the same basic field as appropriate.
+Removing duplicates does not only involve finding which fields have the same type as another field, but also relabeling them so that all dependent fields refer to the same basic field as appropriate.
+%I.e. if `x_2' is relabeled to `y_1' and `y_2' to `x_1', then `c_2' must 
 
-[why deduplication? Because relabel-subtype doesn't seem to work otherwise.]
+[TODO why deduplication? Because relabel-subtype doesn't seem to work otherwise.]
 [necessary to describe deduplication in detail?]
 
 
@@ -528,10 +529,11 @@ $\text{dog}(\text{x}) \sqsubseteq \text{dog}(\text{x})$ (true) instead of
 $[\text{c}_1 : \text{dog}(\text{x})] \sqsubseteq [\text{c}_2 : \text{dog}(\text{x})]$ (false).
 If there is some field in $Q_\eta$ that does not have a subtype field in $S$, then subtypeness cannot hold, and the rest of the complex fields are skipped in favor of trying the next basic-field relabeling.
 
-\paragraph{Prerequisites}
+%\paragraph{Prerequisites}
+The algorithm imposes some prerequisites on the scene type $S$ and question type $Q$.
 
 \begin{itemize}
-\item Any dependent fields depend only on basic (non-dependent) fields.
+\item Any dependent fields depend only on basic (non-dependent) fields:
 
 For example, $\left[\begin{array}{rcl}
 \text{x} &:& Ind \\
@@ -543,6 +545,8 @@ For example, $\left[\begin{array}{rcl}
 (This restraint may be eliminated by using flattening, but it is not needed in this scope.)
 \end{itemize}
 
+%%%%%%%%
+\begin{comment}
 \paragraph{Algorithm}
 
 \begin{enumerate}
@@ -557,8 +561,10 @@ For example, $\left[\begin{array}{rcl}
     \end{enumerate}
 \item Return nothing
 \end{enumerate}
+\end{comment}
+%%%%%%%%
 
-[what is this in terms of big-O?]
+[TODO what is this in terms of big-O?]
 
 A Python implementation is given in \autoref{lst:find_subtype_relabeling}.
 
