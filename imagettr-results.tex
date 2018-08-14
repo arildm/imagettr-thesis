@@ -1,13 +1,15 @@
 \section{Results}
 \label{sec:results}
 
-The results of this project consists primarily of a \gls{ttr} model, which connects language to visual perception in a basic \gls{vqa} setting and uses \gls{ttr} throughout.
-The solution includes new strategies to solve three significant sub-problems: efficiently combining multiple belief record types into one, basic translation from first-order logic to \gls{ttr} and finally a subtype relation insensitive to labels.
+The results of this project consists primarily of a \gls{ttr} model, which connects language to visual perception in a basic \gls{vqa} setting and uses \gls{ttr} throughout (\autoref{sec:ttrmodel}).
+There are also a few significant sub-problems, which are not entirely within the TTR model but tightly connected to it.
+These have been solved as algorithms implemented in Python.
+They are: efficiently combining multiple belief record types into one (\autoref{sec:combine}), basic translation from first-order logic to \gls{ttr} (\autoref{sec:parsing}) and finally a subtype relation insensitive to labels, $\subtrlb$ (\autoref{sec:subtyperelabeling}).
 
 
 
 \subsection{\Acrshort{ttr} model}
-\label{ssec:ttrmodel}
+\label{sec:ttrmodel}
 
 The types in the \gls{ttr} model are largely based on \cite{lspc}, but the $Segment$ type is new, the individuation function is improved and the $RelClf$ mechanism is more concretely defined.
 The $Agent$ type is also new.
@@ -61,12 +63,12 @@ Obj = \left[\begin{array}{rcl}
 obj =
 \left[\begin{array}{rcl}
 \text{seg} &=& \left[\begin{array}{rcl}
-\text{cx} &=& 138\\
-\text{w} &=& 276\\
-\text{cy} &=& 654\\
-\text{h} &=& 809
+\text{cx} &=& 435\\
+\text{w} &=& 422\\
+\text{cy} &=& 355\\
+\text{h} &=& 242
 \end{array}\right]\\
-\text{pfun} &=& \lambda v:Ind\ .\ \text{person}(v)\\
+\text{pfun} &=& \lambda v:Ind\ .\ \text{bicycle}(v)\\
 \end{array}\right] : Obj\end{equation}
 
 \begin{equation}\label{eq:objdetector}
@@ -106,16 +108,16 @@ It is typed as $IndFun$ (\autoref{eq:indfun}).
 IndFun = ( Obj \rightarrow RecType )
 \end{equation}
 
-The record type resulting from applying an $IndFun$ function will be a subtype of $IndObj$.
-Furthermore, the `x' and `loc' fields will be specified using manifest fields.
+The individuation function is defined as $f_{IndFun}$ in \autoref{eq:indfundef}.
+The record type resulting from applying $f_{IndFun}$ is a subtype of $IndObj$, where the `x' and `loc' fields are specified using manifest fields.
 The `x' field is specified as a newly instantiated $Ind$ object, $a_n$ (where $n$ is a number such that the new instatiation is unique).
 The `loc' field is specified as the value of `seg' in the $Obj$ record.
 
 %For the $x$ field, we create a new individual object $a_{new} : Ind$.
 %For the ptype fields $cp$ and $cl$, we also create new objects $e_{new} : r.\text{pfun}(\text{x})$ and $e_{new} : \text{location}(\text{x}, \text{loc})$.
 
-The individuation function is defined, as explained above, in \autoref{eq:indfundef}, with an example application in \autoref{eq:indfunrec}.
-The output record type describes a situation where an individual identified as $a_0$ is classified as a person and is occupying a $276 \times 809$-sized rectangle with its center at $(138, 654)$.
+An example application of $f_{IndFun}$ is shown in \autoref{eq:indfunrec}.
+The output record type describes a situation where an individual identified as $a_0$ is classified as a bicycle and is occupying a $422 \times 242$-sized rectangle with its center at $(435, 355)$.
 
 \begin{equation}\label{eq:indfundef}
 f_{IndFun} = \lambda r : Obj\ . \left[\begin{array}{rcl}
@@ -130,23 +132,23 @@ f_{IndFun} = \lambda r : Obj\ . \left[\begin{array}{rcl}
 f_{IndFun}(
 \left[\begin{array}{rcl}
 \text{seg} &=& \left[\begin{array}{rcl}
-\text{cx} &=& 138\\
-\text{w} &=& 276\\
-\text{cy} &=& 654\\
-\text{h} &=& 809
+\text{cx} &=& 435\\
+\text{w} &=& 422\\
+\text{cy} &=& 355\\
+\text{h} &=& 242
 \end{array}\right]\\
-\text{pfun} &=& \lambda v:Ind\ .\ \text{person}(v)\\
+\text{pfun} &=& \lambda v:Ind\ .\ \text{bicycle}(v)\\
 \end{array}\right]
 ) =
 \left[\begin{array}{rcl}
     \text{x} = a_0 &:& Ind \\
-    \text{cp} &:& \text{person}(\text{x}) \\
+    \text{cp} &:& \text{bicycle}(\text{x}) \\
     \text{cl} &:& \text{location}(\text{x}, \text{loc}) \\
     \text{loc} = \left[\begin{array}{rcl}
-		\text{cx} &=& 138\\
-		\text{w} &=& 276\\
-		\text{cy} &=& 654\\
-		\text{h} &=& 809
+        \text{cx} &=& 435\\
+        \text{w} &=& 422\\
+        \text{cy} &=& 355\\
+        \text{h} &=& 242
 		\end{array}\right] &:& Segment\\
 \end{array}\right]
 \end{equation}
@@ -196,7 +198,7 @@ Of course, the requirement that the individual $r.\text{lo}.\text{x}$ is actuall
 \subsubsection{Combining beliefs}
 
 The hitherto generated types are considered our beliefs.
-As described in \autoref{ssec:languagevqa}, we can answer to a polar question if we \textit{combine} the beliefs to a scene type and check whether it is a subtype of the question type, $S \sqsubseteq Q$.
+As described in \autoref{sec:languagevqa}, we can answer to a polar question if we \textit{combine} the beliefs to a scene type and check whether it is a subtype of the question type, $S \sqsubseteq Q$.
 How is this combining carried out?
 A direct application of the \textit{merge} operation is not suitable for this, as we have labels reocurring in multiple record types.
 Instead, all record types are relabeled with new, unique labels, before being merged.
@@ -220,6 +222,7 @@ The method of such combination is not trivial, and is discussed in \autoref{sec:
 
 
 \subsubsection{Language}
+\label{sec:ttrlanguage}
 
 %The connection between visual perception and language happens by means of using the same representation (TTR) for both modes.
 %The representation of the former mode has been discussed above.
@@ -236,12 +239,8 @@ As discussed in \autoref{sec:languagevqa}, TTR-based natural-language parsing ha
 Therefore, parsing must be done externally to the TTR model.
 This is described in \autoref{sec:parsing}.
 Any utterance is input to the model only as a TTR record type.
-
 % What will the parsing result look like in TTR?
-In this project, the utterance is always a polar question.
-With that restriction in place, it may take the same form as a declarative sentence:
-The question ``Is there a lamp above a table?'' takes the same form as the statement ``There is a lamp above a table''.
-\autoref{eq:question} models this example question.
+\autoref{eq:question} models the question ``Is there a lamp above a table?''.
 
 \begin{equation}\label{eq:question}
 \left[\begin{array}{rcl}
@@ -255,14 +254,11 @@ The question ``Is there a lamp above a table?'' takes the same form as the state
 
 % How do we use the question TTR type?
 % TODO In terms of DIALOGUE ACTS?
-The restriction to polar questions also guides the formulation of how to handle the TTR question type.
-Responding to a polar question involves checking whether the scene type is a subtype of the question type, $S \sqsubseteq Q$.
-If the subtype relation holds, the answer will be ``Yes'', and otherwise ``No''.
+As mentioned in \autoref{sec:languagevqa}, answering the question corresponds to checking whether $S \sqsubseteq Q$.
 An important problem, however, stems from the fact that TTR record types are labeled.
 In general, fields in the scene type and question type will not share labels in a way that enables simple subtype checking to be useful.
 The remedy to this is an alternative subtype relation $\subtrlb$ which is insensitive to labels.
 This new relation is discussed in \autoref{sec:subtyperelabeling}.
-[TODO Some of this is also repeated.]
 
 
 
@@ -341,19 +337,19 @@ ag = \left[\begin{array}{rcl}
 		\text{perc} &=& [
 			\left[\begin{array}{rcl}
 				\text{seg} &=& \left[\begin{array}{rcl}
-					\text{w} &=& 197\\
 					\text{cx} &=& 452\\
+					\text{w} &=& 197\\
+					\text{cy} &=& 261 \\
 					\text{h} &=& 351\\
-					\text{cy} &=& 261
 					\end{array}\right]\\
 				\text{pfun} &=& \lambda a:Ind\ .\ \text{person}(a)
 				\end{array}\right],
 			\left[\begin{array}{rcl}
 				\text{seg} &=& \left[\begin{array}{rcl}
-					\text{w} &=& 422\\
 					\text{cx} &=& 435\\
+					\text{w} &=& 422\\
+					\text{cy} &=& 355 \\
 					\text{h} &=& 242\\
-					\text{cy} &=& 355
 					\end{array}\right]\\
 				\text{pfun} &=& \lambda a:Ind\ .\ \text{bicycle}(a)
 				\end{array}\right],
@@ -365,10 +361,10 @@ ag = \left[\begin{array}{rcl}
 				\text{cp} &:& \text{person}(x)\\
 				\text{cl} &:& \text{location}(x, loc)\\
 				\text{loc} = \left[\begin{array}{rcl}
-					\text{w} &=& 197\\
 					\text{cx} &=& 452\\
+					\text{w} &=& 197\\
+					\text{cy} &=& 261 \\
 					\text{h} &=& 351\\
-					\text{cy} &=& 261
 					\end{array}\right]
 					&:& Segment \\
 				\end{array}\right],
@@ -432,6 +428,8 @@ T_2 = \left[\begin{array}{rcl}
 
 TTR features a \textit{merge} operation ($\ttrmerge$), but a merge will not have the result desired here.
 Since the same labels occur in both belief types, a merge would result in \textit{meet types}, as seen in \autoref{eq:merge}, in a way which is not useful for this purpose.
+The meet type of two different singleton types, $Ind_{a_1} \wedge Ind_{a_2}$, can only be true if the two individuals are the same, $a_1 = a_2$.
+The constraint in the `cr' field then says that some individual is above and to the right of itself, which is meaningless and certainly not what we are trying to obtain.
 
 \begin{equation} \label{eq:merge}
 T_1  \ttrmerge T_2 =
@@ -477,44 +475,202 @@ Generating unique labels is an operation outside TTR, making this method less pu
 
 Both methods result in duplicate fields: there is no meaningful difference between the fields labeled `$\text{x}_1$' and `$\text{y}_2$' above, as both have the same type.
 Removing duplicates does not only involve finding which fields have the same type as another field, but also relabeling them so that all dependent fields refer to the same basic field as appropriate.
-%I.e. if `x_2' is relabeled to `y_1' and `y_2' to `x_1', then `c_2' must 
+%I.e. if `x_2' is relabeled to `y_1' and `y_2' to `x_1', then `c_2' must
 
 [TODO why deduplication? Because relabel-subtype doesn't seem to work otherwise.]
 [necessary to describe deduplication in detail?]
+
+The \textit{combine} and \textit{dedupe} function are defined in \autoref{lst:combine}.
+
+The \texttt{unique\_labels} function makes use of \texttt{gensym} in the PyTTR library, which generates new, consecutively numbered labels.
+A label containing an underscore (`\_') is assumed to already be uniquely numbered.
+Thus, labels without undescores are relabeled to new, numbered labels.
+
+In \texttt{combine}, a list of record types are reduced to one type by unique relabeling and merging.
+
+Finally, the \texttt{dedupe} function removes any duplicated field types by relabeling all occurrences of a field type with one of their labels. For example, in $[x:Ind_{a_1}, y:Ind_{a_1}]$, `y' is relabeled to `x'.
+(Or vice versa, as the order of record type fields is unspecified.)
+When all duplicates of some field type has been removed, recursion is used to avoid usage of old labels in the outer for-loop.
+
+\begin{lstlisting}[label={lst:combine}, caption=The \texttt{combine} and \texttt{dedupe} functions.]
+from functools import reduce
+
+def unique_labels(T):
+    """Relabel a RecType so each field label is unique over all RecTypes."""
+    rlb = ((l, gensym(l)) for l in T.labels() if '_' not in l)
+    return rectype_relabels(T, dict(rlb))
+
+def dedupe(T):
+    """Make a copy of a record type without duplicated field values."""
+    for l,v in T.fields():
+        # Are there more fields with the same value?
+        l2s = [l2 for l2,v2 in T.fields() if l2 != l and show(v) == show(v2)]
+        if len(l2s):
+            # Relabel all these fields to the same label,
+			# overwriting until one remains.
+            for l2 in l2s:
+                T.Relabel(l2, l)
+            # Dependent fields have changed, so start over.
+            return dedupe(T)
+    # No more duplicates.
+    return T
+
+def combine(Ts):
+    """Combine a list of belief record types into one."""
+    f = lambda a, b: a.merge(unique_labels(b))
+    return dedupe(reduce(f, Ts, RecType()))
+\end{lstlisting}
+
+
+
+\subsection{Parsing language to TTR}
+\label{sec:parsing}
+\glsreset{fol}
+
+As mentioned in \autoref{sec:ttnlp}, pure TTR solutions to natural language parsing have been developed but not implemented.
+Such an implementation is sufficiently complex and outside the scope of this thesis.
+Furthermore, the language domain is limited for the purpose of this thesis, and a wide-coverage parsing solution is more than what is necessary.
+Therefore, instead of implementing natural language parsing in \gls{ttr}, this project uses
+another standard method to parse natural language to \gls{fol}.
+The \gls{fol} expression is subsequently \textit{translated} to \gls{ttr} in a new algorithm.
+
+\subsubsection{Parsing to \acrlong{fol}}
+
+Parsing is done using a semantically augmented \gls{cfg}.
+The rules in the grammar determine how an utterance is parsed into a syntax tree.
+A determiner followed by a common noun form a noun phrase (NP $\rightarrow$ Det N), a sentence consists of a noun phrase and a verb phrase (S $\rightarrow$ NP VP), and so on.
+A feature-based grammar extends the \gls{cfg} framework so that each constituent is associated with a feature structure.
+This allows constituents to carry additional information which can be combined as defined in the grammar rules.
+
+The semantic augmentation uses feature structures to associate each constituent with a \gls{fol} term possibly using lambda calculus.
+For a simple example, a noun phrase may carry the term $t_{\text{NP}} = \lambda P \exists x P(x)$, and a verb phrase may carry $t_\text{VP} = \lambda z \ \text{sleep}(z)$.
+A sentence rule may combine them as $t_\text{S} \rightarrow t_\text{VP}(t_\text{NP})$.
+The result is $t_\text{S} = (\lambda P \exists x P(x)) (\lambda z \ \text{sleep}(z))$ which, after $\beta$-reduction, is equal to $t_\text{S} = \exists x \ \text{sleep}(x)$.
+(Note that the actual rules for noun and verb phrases are slightly more complex.)
+
+This project uses the semantically augmented \gls{cfg} framework available in NLTK \citep{nltk}.
+A snippet of the grammar is given in \autoref{lst:grammar}.
+The grammar can be used to generate the sample parse tree in \autoref{fig:tree}.
+Above the word-tokenized sentence, every node in the tree represents a constituent.
+Underneath the abbreviation, each constituent features first the expression given in the grammar specification (with some typographical modification), and second, the \gls{fol} term resulting from substitution and $\beta$-reduction.
+
+\begin{lstlisting}[label={lst:grammar}, caption=A snippet of the FCFG grammar]
+QS[SEM=<?np(?pp)>] -> 'is' 'there' NP[SEM=?np] PP[SEM=?pp]
+QS[SEM=<?np(\P.true)>] -> 'is' 'there' NP[SEM=?np]
+
+NP[SEM=<?det(?n)>] -> Det[SEM=?det] N[SEM=?n]
+Det[SEM=<\P Q.exists x.(P(x) & Q(x))>] -> 'a' | 'an'
+
+VP[SEM=?pp] -> 'is' PP[SEM=?pp]
+PP[SEM=<\x.(?np(\y.?prep(x, y)))>] -> Prep[SEM=?prep] NP[SEM=?np]
+
+Prep[SEM=<left>] -> 'to' 'the' 'left' 'of'
+
+N[SEM=<dog>] -> 'dog'
+N[SEM=<person>] -> 'person'
+\end{lstlisting}
+
+\begin{figure}[h]
+\includegraphics[width=\textwidth]{tree}
+\centering
+\caption{Example syntactic-semantic parsing of an utterance into first-order logic.}
+\label{fig:tree}
+\end{figure}
+
+
+
+\subsubsection{Translating \acrlong{fol} to \gls{ttr}}
+
+The result of the \gls{cfg} parsing is a Python object that encodes the \gls{fol} expression.
+A custom Python function \texttt{fol\_to\_pyttr}, given in \autoref{lst:foltopyttr}, traverses this object recursively and builds a PyTTR type.
+For an ``Exists'' expression, an $Ind$ field is added to the type.
+For an ``Application'' expression, a ptype field is added, copying the predicate and variable names.
+An ``And'' expression simply triggers recursion into each of the two terms.
+The constant `true' is added to allow simple existential questions like ``Is there an aeroplane?''
+A wrapper function \texttt{eng\_to\_pyttr} combines simple word tokenization, \gls{cfg} parsing and \gls{fol}-to-\gls{ttr} translation.
+
+\begin{lstlisting}[label=lst:foltopyttr, caption=Translation from \gls{fol} to \gls{ttr}.]
+import nltk
+from nltk.sem.logic import ApplicationExpression, AndExpression, ExistsExpression, ConstantExpression
+
+def fol_to_pyttr(expr, T=RecType()):
+    """Turns a FOL object into a RecType."""
+    # Existential quantifier -> Ind field.
+    if isinstance(expr, ExistsExpression):
+        T.addfield(str(expr.variable), Ind)
+        return fol_to_pyttr(expr.term, T)
+    
+    # Application -> ptype, e.g. left(x, y)
+    if isinstance(expr, ApplicationExpression):
+        pred, args = expr.uncurry()
+        # Create a PType function, e.g. lambda x:Ind . dog(x)
+        fun = create_fun(str(pred), 'abcd'[:len(args)])
+        T.addfield(gensym('c'), (fun, [str(a) for a in args]))
+        return T
+    
+    # For and-expressions, interpret each term.
+    if isinstance(expr, AndExpression):
+        fol_to_pyttr(expr.first, T)
+        fol_to_pyttr(expr.second, T)
+        return T
+    
+    # A constant function in the "is there an X" rule trivially gives "true".
+    if isinstance(expr, ConstantExpression) and str(expr.variable) == 'true':
+        return T
+    
+    raise ValueError('Unknown expression: ' + str(type(expr)) + ' ' + str(expr))
+
+def eng_to_pyttr(text):
+    # Tokenize.
+    sent = text.lower().strip('.?!').split()
+    # NLTK-parse to syntax tree.
+    trees = parser.parse(sent)
+    # Extract semantic representation for the tree.
+    sem = nltk.sem.root_semrep(list(trees)[0])
+    # Interpret to TTR record type.
+    T = fol_to_pyttr(sem, RecType())
+    return T
+\end{lstlisting}
 
 
 
 \subsection{Subtype relabeling}
 \label{sec:subtyperelabeling}
 
-TODO Remove background which is already in 4.1.5 Language.
+Perceptual mechanisms and the combination of belief types have produced a scene type $S$.
+Separately, natural language parsing has provided a question type $Q$.
+Now, in order to answer the question, we are interested in whether $S \sqsubseteq Q$.
 
-This model uses TTR record types to model situations.
-The two main situations in action are the perceived \textit{scene} and the statement expressed in a natural-language \textit{question}.
-In this project, the language is restricted to polar (yes/no) questions.
-Such a question has a corresponding declarative statement:
-The question ``Can you see them?'' corresponds to the statement ``You can see them''.
-Responding to such a question entails checking if the scene type is a \textit{subtype} of the question type.
-[SOURCE?]
-
-[TODO check \cite{RooyPolarQuestions2003}, (sources of) \cite{AloniQuantificationConceptualCovers2001}]
-
-In TTR, however, subtype checking is not enough.
-The fields in a record type are labeled, and they will not necessarily be the same in the scene type and the question type.
+However, the fact that \gls{ttr} record types are labeled prevents direct usage of the subtype relation.
+Field labels in the scene type will generally not agree with those in the question type.
 This prompts for a more advanced variant of subtype checking, allowing \textit{relabeling}.
 
 \begin{definition}[Relabel-subtype]
-A record type $S$ is a \textbf{relabel-subtype} of the record type $Q$, $S \subtrlb Q$, if there is a relabeling $\eta$ of $Q$, such that $S \sqsubseteq Q_\eta$.
-\end{definition}
+A record type $S$ is a \textbf{relabel-subtype} of the record type $Q$, $S \subtrlb Q$, if there is a relabeling $\eta$ of $Q$ such that $S \sqsubseteq Q_\eta$.
 
-[Define $Q_\eta$ notation in intro/bg]
+%Such a relabeling $\eta$ is known as a \textbf{subtype relabeling} of $Q$.
+% or rather supertype relabeling?
+\end{definition}
 
 The number of relabelings in one record type, to the labels of another, can be quite large:
 If $S$ has 20 fields and $Q$ has five, then there are $\dfrac{20!}{(20-5)!} = 1\,860\,480$ relabelings of Q (the number of 5-permutations of 20).
 It is practically impossible to perform all relabelings and check whether subtypeness holds.
-An alternative algorithm is presented below for the purpose of this project.
-Fast computation is enabled by making a few assumptions about the input record types.
+An alternative algorithm is presented below for the purpose of this project, where fast computation is enabled by making a few assumptions about the input record types.
 
+
+
+\begin{comment}
+\paragraph{Subtype-relabeling}
+Subtypeness can instead be checked field-wise:
+For every field $\langle\ell_Q, T_Q\rangle$ in $Q$, if there is a field $\langle\ell_S, T_S\rangle$ in $S$ such that $T_S \sqsubseteq T_Q$, then let $\eta(\ell_Q) = \ell_S$.
+If $\eta$ covers all fields in $Q$, then it follows that $S \sqsubseteq Q_\eta$.
+
+However, we need to mind the types that are dependent on other fields.
+For example, $\text{dog}(\text{x}) \cancel{\sqsubseteq} \text{dog}(\text{y})$ even if both $\text{x}:Ind$ and $\text{y}:Ind$ are fields in the respective record types.
+To remedy this, the simple approach mentioned above is carried out as a first step, but for basic-type fields only.
+Then, for every basic-field relabeling, the second approach is carried out.
+In the example case, some of the basic-type relabelings will then have relabeled $\text{y}$ to $\text{x}$ so that the field-wise check becomes $\text{dog}(\text{x}) \sqsubseteq \text{dog}(\text{x})$.
+\end{comment}
 
 
 \subsubsection{Subtype relabeling algorithm}
@@ -529,11 +685,13 @@ $\text{dog}(\text{x}) \sqsubseteq \text{dog}(\text{x})$ (true) instead of
 $[\text{c}_1 : \text{dog}(\text{x})] \sqsubseteq [\text{c}_2 : \text{dog}(\text{x})]$ (false).
 If there is some field in $Q_\eta$ that does not have a subtype field in $S$, then subtypeness cannot hold, and the rest of the complex fields are skipped in favor of trying the next basic-field relabeling.
 
+% TODO what is this in terms of big-O?
+
 %\paragraph{Prerequisites}
-The algorithm imposes some prerequisites on the scene type $S$ and question type $Q$.
+The algorithm imposes some prerequisites on the scene type $S$ and question type $Q$:
 
 \begin{itemize}
-\item Any dependent fields depend only on basic (non-dependent) fields:
+\item Any dependent fields depend only on basic (non-dependent) fields.
 
 For example, $\left[\begin{array}{rcl}
 \text{x} &:& Ind \\
@@ -563,8 +721,6 @@ For example, $\left[\begin{array}{rcl}
 \end{enumerate}
 \end{comment}
 %%%%%%%%
-
-[TODO what is this in terms of big-O?]
 
 A Python implementation is given in \autoref{lst:find_subtype_relabeling}.
 
@@ -604,360 +760,3 @@ def find_subtype_relabeling(S, Q):
     return None
 \end{lstlisting}
 
-
-
-\subsection{Parsing language to TTR}
-\label{sec:parsing}
-
-[who] has presented how to parse natural lanauge to tTR.
-But it's complicated and not yet implemented.
-Our domain is limited.
-So we use another natural-language parsing method that has already been implemented: semantically augmented syntax rules.
-
-\begin{lstlisting}[label={lst:grammar}, caption=A snippet of the FCFG grammar]
-QS[SEM=<?s(?vp)>] -> 'is' 'there' NP[SEM=?s] PP[SEM=?vp]
-
-NP[SEM=<?det(?n)>] -> Det[SEM=?det] N[SEM=?n]
-Det[SEM=<\P Q.exists x.(P(x) & Q(x))>] -> 'a' | 'an'
-
-VP[SEM=?pp] -> 'is' PP[SEM=?pp]
-PP[SEM=<\s.(?o(\o.?prep(s, o)))>] -> Prep[SEM=?prep] NP[SEM=?o]
-
-Prep[SEM=<left>] -> 'to' 'the' 'left' 'of'
-
-N[SEM=<kite>] -> 'kite'
-N[SEM=<person>] -> 'person'
-\end{lstlisting}
-
-
-
-\subsubsection{Translating first-order logic to TTR}
-
-Limited scope.
-
-\begin{figure}[h]
-\label{fig:tree}
-\includegraphics[width=\textwidth]{tree}
-\centering
-\caption{Example syntactic-semantic parsing of an utterance into first-order logic.}
-\end{figure}
-
-TODO
-
-
-
-\subsection{Evaluation}
-
-The evaluation results are presented in \autoref{tab:eval}.
-Where the answer is incorrect, this is explained by different reasons.
-In 1.2, the car is classified as \textit{truck} and our model does not have any inference system for determining that if something is a truck then it is also a car.
-In 2.1 and 4.1, some of the objects are not successfully detected by the object detection system.
-In 3.1, the simplistic account of spatial relations conflicts with that of our intuition.
-Sure enough, there is at least one snowboard whose center coordinates is higher on the $y$ axis than that of at least one person.
-
-\begin{table}
-\begin{tabular}{cl}
-  
-	\includegraphics[width=0.3\textwidth]{vqa1.jpg} &
-	\begin{tabular}{llll}
-		1.1 & Is there an aeroplane? & Yes & Correct \\
-		1.2 & Is there a person to the right of a car? & No & Incorrect
-		\end{tabular} \\
-		
-	\includegraphics[width=0.3\textwidth]{vqa2.jpg} &
-	\begin{tabular}{llll}
-		2.1 & Is there a tent? & No & Incorrect \\
-		2.2 & Is there a kite above a person? & Yes & Correct
-		\end{tabular} \\
-		
-	\includegraphics[width=0.3\textwidth]{vqa3.jpg} &
-	\begin{tabular}{llll}
-		3.1 & Is there a snowboard above a person? & Yes & Incorrect \\
-		3.2 & Is there a snowboard below a person? & Yes & Correct
-		\end{tabular} \\
-		
-	\includegraphics[width=0.3\textwidth]{vqa4.jpg} &
-	\begin{tabular}{llll}
-		4.1 & Is there a giraffe below a tree? & No & Incorrect
-		\end{tabular} \\
-		
-  	\end{tabular}
-\caption{Evaluation results.}
-\label{tab:eval}
-\end{table}
-
-
-
-\subsection{Python implementation}
-\label{ssec:python}
-
-This section presents significant parts of the Python implementation of the model described above.
-The full code, including visualization and more comments, is published as a Jupyter Notebook at \url{https://github.com/arildm/imagettr}.
-
-
-
-\subsubsection{PyTTR definitions}
-
-\begin{lstlisting}[label={lst:pyttrbasic}, caption=TTR type definitions]
-Ind = BType('Ind')
-
-Int = BType('Int')
-Int.learn_witness_condition(lambda x: isinstance(x, int))
-
-Image = BType('Image')
-Image.learn_witness_condition(lambda x: isinstance(x, PIL.Image.Image))
-
-Segment = RecType({'cx': Int, 'cy': Int, 'w': Int, 'h': Int})
-Ppty = FunType(Ind, Ty)
-Obj = RecType({'seg': Segment, 'pfun': Ppty})
-Objs = ListType(Obj)
-ObjDetector = FunType(Image, Objs)
-ObjDetector.witness_cache.append(yolo_detector)
-
-PTy = Type('PTy')
-PTy.learn_witness_condition(lambda p: isinstance(p, HypObj) \
-    and forsome(p.types, lambda t: isinstance(t, PType)))
-
-IndObj = RecType({
-    'x' : Ind,
-    'loc' : Segment,
-    'cp' : PTy,
-    'cl' : create_fun('location', 'ab').app('x').app('loc'),
-})
-IndFun = FunType(Obj, RecTy)
-
-LocTup = RecType({'lo': IndObj, 'refo': IndObj})
-ClfRes = RecType({'cr': PTy})
-RelClf = FunType(LocTup, ClfRes)
-\end{lstlisting}
-
-
-
-\subsubsection{Outside PyTTR}
-
-\paragraph{Individuation function}
-
-The PyTTR implementation of \gls{ttr} functions does not support usage of the argument within the function body.
-The individuation function was therefore implemented in Python.
-To keep the connection to \gls{ttr} tight, the argument and the result are checked against their \gls{ttr} types.
-
-\begin{lstlisting}[label={lst:indfun},caption={Individuation function}]
-def indfun(r):
-    if not Obj.query(r):
-        raise ValueError()
-    cp = r.pfun.app('x')
-    cl = create_fun('location', 'ab').app('x').app('loc')
-    indobj = RecType({
-        'x': SingletonType(Ind, Ind.create()),
-        'cp': SingletonType(cp, cp.create()),
-        'loc': SingletonType(Segment, r.seg),
-        'cl': SingletonType(cl, cl.create()),
-    })
-    if not unsingleton(indobj).subtype_of(IndObj):
-        raise ValueError()
-    return indobj
-IndFun.witness_cache.append(indfun)
-\end{lstlisting}
-
-\paragraph{Spatial relation classification}
-
-In \autoref{lst:relclf}, each pair of $IndObj$ types is tested for each spatial relation classifier.
-A classifier is a tuple of a predicate identifier (e.g. {\tt left}) and a function from two $Segment$s to a boolean value.
-The return values of {\tt get\_relclfs} are functions of the same kind as the example in \autoref{eq:leftclfdef}.
-
-\begin{lstlisting}[label=lst:relclf, caption=Spatial relation classifiers]
-def get_relclfs():
-    for pred, f in location_relation_classifiers.items():
-        def relclf(r):
-            if f(r.lo.loc, r.refo.loc):
-                c = create_fun(pred, 'ab').app(r.lo.x).app(r.refo.x)
-                return RecType({'cr': SingletonType(c, c.create())})
-            return RecType()
-        RelClf.witness_cache.append(relclf)
-        yield relclf
-
-def find_all_rels(indobjs):
-    """Find all relations between IndObj records."""
-    for relclf in get_relclfs():
-        for loT, refoT in product(indobjs, indobjs):
-            loctup = Rec({'lo': loT.create(), 'refo': refoT.create()})
-            yield relclf(loctup)
-\end{lstlisting}
-
-\paragraph{YOLO}
-
-In \autoref{lst:yolo}, YOLO object detection is invoked on an image, and the result is converted to PyTTR records.
-
-\begin{lstlisting}[label=lst:yolo, caption=YOLO usage]
-def yolo_detector(i):
-    """Creates IndObj records for YOLO results."""
-    for o in yolo(i):
-        o = yolo_reformat(o)
-        yield Rec({
-            'seg': Rec(o['loc']),
-            'pfun': create_fun(o['label'].replace(' ', '_')),
-        })
-\end{lstlisting}
-
-
-
-\subsubsection{Extensions to PyTTR}
-
-The combining of beliefs and the subtype relabeling require TTR operations that are not defined in PyTTR.
-
-\paragraph{Combining beliefs}
-
-The conflict-free merge operation defined in \autoref{def:cfmerge} is implemented in \autoref{lst:mergeunconflict}.
-For example, if $T_1 = T_2 = [x:Ind]$, then $\mathtt{merge\_unconflict}(T_1, T_2)$ evaluates to $\left[\begin{array}{rcl} x_0&:&Ind \\ x_1&:&Ind \end{array}\right]$ (or a similar record type with different subscript indices).
-
-\begin{lstlisting}[label={lst:mergeunconflict},caption={merge\_unconflict}]
-def unique_labels(T):
-    """Relabel a RecType so each field label is unique over all RecTypes."""
-    for l, v in T.comps.__dict__.items():
-        if '_' not in l:
-            T.Relabel(l, gensym(l))
-    return T
-
-def merge_unconflict(T1, T2):
-    """Merge two RecTypes after making sure they do not share any field labels."""
-    T1c = unique_labels(copy_rectype(T1))
-    T2c = unique_labels(copy_rectype(T2))
-    return T1c.merge(T2c)
-\end{lstlisting}
-
-With dependent types, it is customary in \gls{ttr} literature to include the dependum as a field and use the field label in the dependent type.
-In our implementation, spatial classifiers return record types where dependums are instead specified as individuals directly.
-The function in \autoref{lst:useindfieldlabels} helps when those record types are combined with others.
-
-\begin{lstlisting}[label={lst:useindfieldlabels},caption={use\_ind\_field\_labels}]
-def use_ind_field_labels(T):
-    """c:foo(a) becomes c:foo(x) if x=a:Ind is present."""
-    T = copy_rectype(T)
-    for l, v in T.comps.__dict__.items():
-        if isinstance(v, SingletonType) and v.comps.base_type == Ind:
-            a = v.comps.obj
-            T.Relabel(a, l)
-            # Undo the relabeling of the Ind field itself.
-            T.comps.__dict__[l] = SingletonType(Ind, a)
-    return T
-\end{lstlisting}
-
-\autoref{lst:combine} defines the function for combining record types in the fashion required: conflict-free merging and subsequent dependum re-referencing.
-
-\begin{lstlisting}[label={lst:combine},caption={combine}]
-def combine_beliefs(bel):
-    """Combine a list of belief record types into one."""
-    return unsingleton(use_ind_field_labels(reduce(merge_unconflict, bel, RecType())))
-\end{lstlisting}
-
-\paragraph{Subtype-relabeling}
-
-The condition described in \autoref{ssec:languagevqa} necessitated the ability to find a relabeling $\eta$ that would fulfill a subtype relation $S \sqsubseteq Q_\eta$.
-A simple approach to finding such a relabeling is to list every possible combination and one-by-one perform relabeling and check subtypeness.
-However, that is computationally very expensive, and not very interesting even if speed is not a priority.
-
-Another quicker approach is to not perform the relabeling in all steps.
-Subtypeness can instead be checked field-wise:
-For every field $\langle\ell_Q, T_Q\rangle$ in $Q$, if there is a field $\langle\ell_S, T_S\rangle$ in $S$ such that $T_S \sqsubseteq T_Q$, then let $\eta(\ell_Q) = \ell_S$.
-If $\eta$ covers all fields in $Q$, then it follows that $S \sqsubseteq Q_\eta$.
-
-However, we need to mind the types that are dependent on other fields.
-For example, $\text{dog}(\text{x}) \cancel{\sqsubseteq} \text{dog}(\text{y})$ even if both $\text{x}:Ind$ and $\text{y}:Ind$ are fields in the respective record types.
-To remedy this, the simple approach mentioned above is carried out as a first step, but for basic-type fields only.
-Then, for every basic-field relabeling, the second approach is carried out.
-In the example case, some of the basic-type relabelings will then have relabeled $\text{y}$ to $\text{x}$ so that the field-wise check becomes $\text{dog}(\text{x}) \sqsubseteq \text{dog}(\text{x})$.
-
-\begin{lstlisting}[label=lst:subtyperlb, caption=Subtype-relabeling.]
-from itertools import permutations, combinations
-
-def find_subtype_relabeling(T, U):
-    '''Could record type T be a sub type of record type U if relabeling in T is allowed?'''
-    # Find possible relabelings for basic-type fields
-    basic_label_permutations = set(ps[:len(basic_fields(U))] for ps in permutations(basic_fields(T)))
-    
-    for tks in basic_label_permutations:
-        # Copy U and try a basic-fields relabeling
-        U2 = copy_rectype(U)
-        rlb = dict(zip(basic_fields(U), tks))
-        rectype_relabels(U2, rlb)
-        
-        # For each U field, find a T field that is a subtype
-        match = dict()
-        for uk in nonbasic_fields(U2):
-            for tk in nonbasic_fields(T):
-                if T.comps.__dict__[tk].subtype_of(U2.comps.__dict__[uk]):
-                    match[uk] = tk
-                    break
-            if uk not in match:
-                break
-
-        # Successful if all non-basic fields match.
-        if len(match) == len(nonbasic_fields(U2)):
-            return dict(**rlb, **match)
-    return None
-\end{lstlisting}
-
-
-
-\subsubsection{Language parsing}
-
-Parsing to PyTTR cannot be done directly.
-The output of NLTK feature grammars is either strings or \gls{fol} expressions.
-For the need of variable substitution, we choose the latter.
-The resulting \gls{fol} conjunction expression is then translated to PyTTR ptypes, and $Ind$ fields are created from the arguments of the predicates.
-
-\begin{lstlisting}[label=lst:grammar, caption=Basic parsing of natural language into PyTTR object]
-import nltk
-
-grammar = nltk.grammar.FeatureGrammar.fromstring(r'''
-%start S
-S[SEM=<?s(x) & ?vp(x, y)>] -> NP[SEM=?s] VP[SEM=?vp]
-S[SEM=?q] -> QS[SEM=?q]
-QS[SEM=<?s(x) & ?vp(x, y)>] -> 'is' 'there' NP[SEM=?s] PP[SEM=?vp]
-NP[SEM=<?det(?n)>] -> Det[SEM=?det] N[SEM=?n]
-Det[SEM=<\P a.P(a)>] -> 'a' | 'an'
-N[SEM=<dog>] -> 'dog'
-N[SEM=<car>] -> 'car'
-N[SEM=<person>] -> 'person'
-N[SEM=<bicycle>] -> 'bicycle'
-N[SEM=<backpack>] -> 'backpack'
-VP[SEM=?pp] -> 'is' PP[SEM=?pp]
-PP[SEM=<\a b.(?prep(a, b) & ?o(b))>] -> Prep[SEM=?prep] NP[SEM=?o]
-Prep[SEM=<left>] -> 'to' 'the' 'left' 'of'
-Prep[SEM=<right>] -> 'to' 'the' 'right' 'of'
-Prep[SEM=<above>] -> 'above'
-Prep[SEM=<under>] -> 'under'
-''')
-parser = nltk.FeatureChartParser(grammar)
-
-def fopc_to_pyttr(expr, T=RecType()):
-    """Turns a FOPC object into a RecType."""
-    from nltk.sem.logic import ApplicationExpression, AndExpression
-    if isinstance(expr, ApplicationExpression):
-        pred, args = expr.uncurry()
-        T.addfield(gensym('c'), mkptype(str(pred), vars=[str(a) for a in args]))
-        for x in args:
-            if str(x) not in T.comps.__dict__:
-                T.addfield(str(x), Ind)
-    if isinstance(expr, AndExpression):
-        fopc_to_pyttr(expr.first, T)
-        fopc_to_pyttr(expr.second, T)
-    return T
-
-def eng_to_pyttr(text):
-    trees = parser.parse(text.lower().strip('.?!').split())
-    sem = nltk.sem.root_semrep(list(trees)[0])
-    T = fopc_to_pyttr(sem)
-    return T
-\end{lstlisting}
-
-
-
-\subsubsection{Agent}
-\label{sec:implagent}
-
-% @TODO Typing of Python functions yolo_detector and indfun: now manipulating witness_cache but then LambdaFun?
-
-The agent is a record of the type $Agent$.
-Manipulation of the record is performed by Python functions \texttt{agent\_see} and \texttt{agent\_hear}.
-They correspond to the algorithms for visual perception and language, described in \autoref{sec:agent}

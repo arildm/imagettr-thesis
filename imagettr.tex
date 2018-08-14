@@ -31,6 +31,7 @@
 \newacronym{yolo}{YOLO}{You only look once}
 \newacronym{nlp}{NLP}{natural language processing}
 \newacronym{fol}{FOL}{first-order logic}
+\newacronym{cfg}{CFG}{context-free grammar}
 
 \newtheorem{definition}{Definition}
 
@@ -38,6 +39,8 @@
 \newcommand{\ttrmerge}{\mathrel{\underset\cdot\wedge}}
 %\newcommand{\subtrlb}{\mathrel{\sqsubseteq\!\!\!\sqsubseteq}}
 \newcommand{\subtrlb}{\mathrel{\sqsubseteq_\text{rlb}}}
+
+\def\equationautorefname{equation}
 
 
 \begin{document}
@@ -124,6 +127,8 @@ The results show that an implementation of a \gls{ttr} model can account for mul
 \input{imagettr-discussion.tex}
 
 \input{imagettr-conclusions.tex}
+
+%\input{pyttr-output.tex}
 
 \bibliography{imagettr}
 \end{document}

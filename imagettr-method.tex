@@ -9,40 +9,32 @@
 An agent will be modeled in \gls{ttr} and implemented in PyTTR.
 The purpose of the agent is to perceive a scene, parse a question related to the scene and answer it.
 
-The agent will receive a 2D image as input and perform object detection and relationship classification on it.
-The results of these processes are situations which are modeled in \gls{ttr} as record types.
-The set of situations are the beliefs of the agent.
-The question is parsed to a \gls{ttr} representation which is also a record type.
-Finally, if 
-
-
-This thesis aims to produce a working implementation of an application with visual as well as natural-language input, using \gls{ttr}.
-The application will feature:
-
-\begin{enumerate}
-\item Sensory input in the form of 2D images
-\item Utilizing an external object recognition system
-\item Detection of geometric spatial relations
-\item Basic natural language understanding
-\end{enumerate}
+The agent will receive a 2D image as well as a natural-language question as input.
+Perceptual processes are performed on the image, which results in a set of beliefs.
+The question is parsed and evaluated against the beliefs in order to obtain an answer.
 
 While operational functionality and the overall procedural code is written in Python, the core model is written in \gls{ttr} (realized as Python code using PyTTR).
 As such, \gls{ttr} serves as a formal specification language.
-The additional layer provides formal transparency and type robustness.
+This additional layer provides formal transparency and type robustness.
+% What?
 
-This section will describe some reasoning around the decisions taken, regarding the design of the \gls{ttr} model as well as its implementation.
+This section will describe some tools and frameworks used to formulate and implement the model.
 
 
 
 \subsection{Object detection with YOLO}
 
-You only look once (YOLO) \citep{RedmonYouOnlyLook2015} is a neural network model for image recognition.
-It is trained using a loss function which takes detection as well as classification into account.
+\textit{You only look once (YOLO)} \citep{RedmonYouOnlyLook2015} is a neural network model for image recognition.
+Given an image, it will detect objects and classify them.
+Each detection consists of a bounding box in pixel coordinates, a class label and a confidence score between $0$ and $1$.
+
+YOLO is trained using a loss function which takes detection as well as classification into account.
 In other words, it simultaneously predicts bounding boxes and classifies the contained objects.
 Unlike \cite{HeMaskRCNN2017} and others, it does not contain any recurrent layers.
-The joint, recurrence-free model makes for a rather small network size, which in turn means a favorable evaluation speed.
-However, compared to state of the art, it lags behind in accuracy.
-The network is pretrained on the COCO dataset \cite{LinMicrosoftCOCOCommon2014}.
+The joint, recurrence-free model makes for a rather small network size and a high evaluation speed, although it does lag behind in accuracy compared to the state of the art.
+
+The model exists in a few different network configurations, which have all been trained on the COCO dataset \citep{LinMicrosoftCOCOCommon2014}.
+Development within this thesis has been using the ``YOLOv2'' configuration.
 
 \begin{figure}[h]
 \label{fig:dogbike_annotated}
@@ -54,24 +46,24 @@ The network is pretrained on the COCO dataset \cite{LinMicrosoftCOCOCommon2014}.
 YOLO is written in C, using the Darknet neural network library \citep{darknet13}.
 It can be used in Python with the TensorFlow machine learning library and the Darkflow library which translates a Darknet model to TensorFlow.
 
-When invoked from Python, the return value is a collection of dict objects, each containing a label, coordinates and a confidence score, as exemplified in \autoref{lst:yolo_out}.
-Results with confidence over a certain threshold are cast into \gls{ttr} records as described in \autoref{sec:python}.
-In this process, the bounding box coordinates are cast from a top-left and bottom-right tuple $\langle\langle x_1, y_1\rangle, \langle x_2, y_2\rangle\rangle$ to a center-width-height tuple $\langle x_c, y_c, w, h\rangle$, as the latter is more adequate for spatial classification.
+When invoked from Python, the return value is a collection of dict objects, each containing a label, coordinates and a confidence score, as exemplified in \autoref{lst:yoloout}.
+Results with confidence over a certain threshold are cast into \gls{ttr} records.
+In this process, the bounding box coordinates are cast from a top-left and bottom-right tuple $\langle\langle x_1, y_1\rangle, \langle x_2, y_2\rangle\rangle$ to a center-width-height tuple $\langle x_c, y_c, w, h\rangle$ (later defined as the $Segment$ type), as the latter is more adequate for the spatial classification used in this project.
 
-\begin{lstlisting}[label=lst:yolo_out, caption=Example output of YOLO invocation]
+\begin{lstlisting}[label=lst:yoloout, caption=Example output of YOLO invocation]
 [
-	{
-		'topleft': {'x': 354, 'y': 86},
-		'bottomright': {'x': 551, 'y': 437},
-		'label': 'person',
-		'confidence': 0.80116189
-	},
-	{
-		'topleft': {'x': 224, 'y': 234},
-		'bottomright': {'x': 646, 'y': 476},
-		'label': 'bicycle',
-		'confidence': 0.85828924
-	},
+    {
+        'topleft': {'x': 354, 'y': 86},
+        'bottomright': {'x': 551, 'y': 437},
+        'label': 'person',
+        'confidence': 0.80116189,
+    },
+    {
+        'topleft': {'x': 224, 'y': 234},
+        'bottomright': {'x': 646, 'y': 476},
+        'label': 'bicycle',
+        'confidence': 0.85828924,
+    },
 	...
 ]
 \end{lstlisting}
@@ -80,7 +72,7 @@ In this process, the bounding box coordinates are cast from a top-left and botto
 
 \subsection{Objects and perception}
 
-Our model of the perception of objects is largely based on \cite{lspc}.
+The perception of objects in this model is largely based on \cite{lspc}.
 First, the object detection algorithm returns a set of \textit{perceptual objects}.
 Each of them is evidence that a certain location is associated with a certain property (such as being a dog), but it does not constrain any individual to this association.
 Second, an \textit{individuated object} is generated for each perceptual object.
@@ -101,9 +93,9 @@ In our case, $Image$ is used for the full image but we use $Segment$ to refer to
 
 Our method of spatial relation classification is inspired by \cite{ttrspat} but more simplistic.
 One simplification is that the reference frame is fixed.
-This means we only consider the deictic meaning of spatial relation terms, and not the intrinsic.
+In the words of \cite{Garnhamunifiedtheorymeaning1989}, this means we only consider the deictic meaning of spatial relation terms, and not the intrinsic.
 ``Left'' will mean to the left in the plane of the image, even if the reference object is turned on the side or toward the viewer.
-Another simplification is the neglection of the \textit{functional} aspect of spatial relations \citep{CoventryInterplayGeometryFunction2001}.
+Another simplification is the neglection of the \textit{functional} aspects of spatial relations \citep{CoventryInterplayGeometryFunction2001}.
 
 In our model, a spatial classifier $\kappa$ takes two locations and returns a boolean result.
 We have implemented spatial classifiers as Python functions.
@@ -113,40 +105,42 @@ This was done for the four relations ``left'', ``right'', ``above'' and ``below'
 
 
 
-\subsection{Language and \acrshort{vqa}}
+\subsection{Language and \acrfull{vqa}}
 \label{sec:languagevqa}
 
 In contrast to full \gls{vqa} systems, the model presented in this thesis will be restricted to a limited type of questions, namely polar questions on the location of one object in relation to another.
-For example: ``Is the bicycle below the tree?''
-A \textit{scene type} describing the visual scene is created by combining the types generated by the perceptual classification outlined above.
-It serves as the context in which questions are evaluated.
+Such a question has a corresponding declarative statement:
+The question ``Can you see them?'' corresponds to the statement ``You can see them''.
+[TODO source?]
 
-The existing research on \gls{ttr}-based approaches to textual or phonetic parsing, overviewed in \autoref{sec:ttnlp}, would surely cover the kind of utterances considered here.
-However, there is currently no implementation available and ready to use, and parsing is not within the main focus of this thesis.
-Therefore, the natural-language parsing implemented for this thesis is instead a simplistic one.
-It uses feature structure context-free grammar (FCFG) tools available in NLTK \citep{BirdNaturalLanguageProcessing2009} to parse text into \gls{fol} expressions.
-With a custom function, the \gls{fol} expressions are transformed to a TTR record type.
-As an example, the question ``Is there a dog to the left of a car?'' is parsed into the type in \autoref{eq:uttex}.
-
-\begin{equation}\label{eq:uttex}
-\left[\begin{array}{rcl}
-\text{x} &:& Ind\\
-\text{y} &:& Ind\\
-\text{c}_\text{dog} &:& \text{dog}(x)\\
-\text{c}_\text{car} &:& \text{car}(y)\\
-\text{c}_\text{left} &:& \text{left}(x, y)\\
-\end{array}\right]\end{equation}
+[TODO check \cite{RooyPolarQuestions2003}, (sources of) \cite{AloniQuantificationConceptualCovers2001}]
 
 Giving the natural-language utterance a representation in the same formal framework as the image allows comparing them to each other.
-The situation described by the question type will be true if there is a witness of that type \citep{BarwiseSituationsAttitudes1981,CooperAustiniantruthattitudes2005}.
+% TODO Comparing?
+The system will laborate with a \textit{question type} ($Q$) representing the question, as well as a \textit{scene type} ($S$) representing the perceived scene.
+
+The situation described by the question type will be true if there exists a witness of that type, $r:Q$ \citep{BarwiseSituationsAttitudes1981,CooperAustiniantruthattitudes2005}.
 The scene type, on the other hand, is considered true by virtue of being generated by perceptual classification.
 It follows that the question type is true if it is a supertype of the scene type.
+Thus, rather than looking for a witness to the question type, we formulate the problem as subtype checking, described in detail in \autoref{sec:subtyperelabeling}.
+%However, the subtype relation requires matching field labels, which will not be the case here, as labels are generated on the fly.
+%Thus, the condition is reformulated to allow relabeling \citep[pp. 133–135]{CooperTypetheorylanguage2016}:
+The question is answered with ``yes'' or ``no'' depending on whether the scene type is a subtype of the question type, $S \sqsubseteq Q$.
 
-So rather than looking for a witness to the question type, we formulate the problem as subtype checking.
-However, the subtype relation requires matching field labels, which will not be the case here, as labels are generated on the fly.
-Thus, the condition is reformulated to allow relabeling \citep[pp. 133–135]{CooperTypetheorylanguage2016}:
+The existing research on \gls{ttr}-based approaches to natural-language parsing, overviewed in \autoref{sec:ttnlp}, might be extensive enough to cover the kind of utterances considered here.
+However, there is currently no implementation available and ready to use, and parsing is not within the main focus of this thesis.
+Therefore, the natural-language parsing implemented for this thesis is instead a simplistic one, detailed in \autoref{sec:parsing}
+%It uses feature structure context-free grammar (FCFG) tools available in NLTK \citep{BirdNaturalLanguageProcessing2009} to parse text into \gls{fol} expressions.
+%With a custom function, the \gls{fol} expressions are transformed to a TTR record type.
+%As an example, the question ``Is there a dog to the left of a car?'' is parsed into the type in \autoref{eq:uttex}.
 
-If $Q$ is the type of a polar question utterance and $S$ is the type of the scene, the answer is YES if there is a relabeling $\eta$ such that $S \sqsubseteq Q_\eta$, and otherwise it is NO.
+%\begin{equation}\label{eq:uttex}
+%\left[\begin{array}{rcl}
+%\text{x} &:& Ind\\
+%\text{y} &:& Ind\\
+%\text{c}_\text{dog} &:& \text{dog}(x)\\
+%\text{c}_\text{car} &:& \text{car}(y)\\
+%\text{c}_\text{left} &:& \text{left}(x, y)\\
+%\end{array}\right]\end{equation}
 
 %[classification before/after question]
-
