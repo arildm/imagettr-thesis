@@ -100,13 +100,13 @@ The judgement that the object $a$ is a witness of the type $T$ is written $a : T
 For example, $34 : Int$ means that $34$ is of the type $Int$.
 
 A \textbf{record type} is a set of fields, each field carrying a label and a type.
-In the record type $\left[ \begin{array}{rcl} person &:& Ind \\ age &:& Int \end{array} \right]$ there is a field labeled $person$ of type $Ind$, and one labeled $age$ of the type $Int$.
+In the record type $\left[ \begin{array}{rcl} \text{person} &:& Ind \\ \text{age} &:& Int \end{array} \right]$ there is a field labeled $person$ of type $Ind$, and one labeled $age$ of the type $Int$.
 
 The witnesses of record types are \textbf{records}.
 A record is also a set of fields with labels, but instead of a type, a label is associated with an object.
 A record $r$ is a witness of a record type $T$, \textit{if and only if} every field in the record type has a matching field in the record, that is, the labels are the same and the object in the record field is a witness of the type in the record type.
 %The record may have additional fields that are not in the record type; this does not interfere with type judgement.
-The record $\left[ \begin{array}{rcl} person &=& \text{Arild} \\ age &=& 28 \end{array} \right]$ is a witness of the record type just mentioned.
+The record $\left[ \begin{array}{rcl} \text{person} &=& a_{12} \\ \text{age} &=& 28 \end{array} \right]$ is a witness of the record type just mentioned, provided $a_{12} : Ind$ and $28 : Int$.
 
 % Intensional/extensional? (TTL p. 6)
 
@@ -143,6 +143,8 @@ Similarly, $RecType$ is the type of all record types.
 % PType, the type of ptypes?
 
 [TODO Relabel, $\eta$, flatten]
+
+[TODO Merge, join, meet]
 
 
 

@@ -14,12 +14,14 @@ They are: efficiently combining multiple belief record types into one (\autoref{
 The types in the \gls{ttr} model are largely based on \cite{lspc}, but the $Segment$ type is new, the individuation function is improved and the $RelClf$ mechanism is more concretely defined.
 The $Agent$ type is also new.
 
-Three basic types exist in the model.
+Five basic types exist in the model.
 
 \begin{description}
 \item [$Ind$] A single individual object, such as the reader or the Eiffel Tower.
 \item [$Int$] An integer, such as 415.
 \item [$Image$] A 2-dimensional digital image. It serves as an identifier to a set of extracted information, and its file type and actual data is not important in this thesis.
+\item [$String$] A piece of plain text of arbitrary length.
+\item [$Nothing$] Has a single, empty value as its only witness.
 \end{description}
 
 A $Segment$ is a record type describing a rectangular bounding box within an (implicit) image (\autoref{eq:seg}).
@@ -232,13 +234,12 @@ The method of such combination is not trivial, and is discussed in \autoref{sec:
 %Instead, the parsing of natural language is expected to occur outside the model.
 %The resulting TTR representation 
 
-% @TODO Why is ag.state.utt not String and then have ag.state.parsed : RecType?
-
 % How do we go from language to TTR?
+In order to add the  connection to language, any natural-language utterance must be parsed into \gls{ttr}.
 As discussed in \autoref{sec:languagevqa}, TTR-based natural-language parsing has not yet been implemented as a ready-to-use library.
 Therefore, parsing must be done externally to the TTR model.
 This is described in \autoref{sec:parsing}.
-Any utterance is input to the model only as a TTR record type.
+%Any utterance is input to the model only as a TTR record type.
 % What will the parsing result look like in TTR?
 \autoref{eq:question} models the question ``Is there a lamp above a table?''.
 
@@ -282,10 +283,11 @@ Agent = \left[\begin{array}{rcl}
 
 \begin{equation}\label{eq:state}
 AgentState = \left[\begin{array}{rcl}
-    \text{img} &:& Image \\
+    \text{img} &:& Image \vee Nothing \\
     \text{perc} &:& [Obj] \\
     \text{bel} &:& [RecType] \\
-    \text{utt} &:& RecType \\
+    \text{utt} &:& String \vee Nothing \\
+    \text{que} &:& RecType \\
     \end{array}\right]
 \end{equation}
 
@@ -317,8 +319,9 @@ For an agent $ag : Agent$, the perception and question-answering procedure is ca
 \paragraph{Language}
 
 \begin{enumerate}
-\item Any language input is parsed and the resulting record type assigned to $ag.\text{state.utt}$.
-\item The record types in $ag.\text{state.bel}$ are combined. If the resulting record type is a relabel-subtype of $ag.\text{state.utt}$, the answer YES is emitted; otherwise NO.
+\item Any language input utterance is assigned to $ag.\text{state.utt}$.
+\item The utterance is parsed and the resulting record type ($Q$) assigned to $ag.\text{state.que}$.
+\item The record types in $ag.\text{state.bel}$ are combined ($S$). If the resulting record type is a relabel-subtype of $ag.\text{state.que}$, $S \subtrlb Q$ the answer ``Yes'' is emitted; otherwise ``No''.
 \end{enumerate}
 
 
@@ -333,7 +336,7 @@ ag = \left[\begin{array}{rcl}
     \text{indfun} &=& \mathtt{indfun} \\
     \text{relclfs} &=& [Clf_{left}, Clf_{right}, Clf_{above}, Clf_{below}] \\
     \text{state} &=& \left[\begin{array}{rcl}
-		\text{img} &=& \mathtt{dogride.jpg} \\
+		\text{img} &=& \text{\tt <Image "dogride.jpg">} \\
 		\text{perc} &=& [
 			\left[\begin{array}{rcl}
 				\text{seg} &=& \left[\begin{array}{rcl}
@@ -375,7 +378,8 @@ ag = \left[\begin{array}{rcl}
 				\end{array}\right],
 			... ]
 			\end{array} \\
-		\text{utt} &=& \left[\begin{array}{rcl}
+        \text{utt} &=& \text{``Is there a dog to the left of a bicycle?''} \\
+		\text{que} &=& \left[\begin{array}{rcl}
 			\text{x} &:& Ind\\
 			\text{y} &:& Ind\\
 			\text{c}_\text{0} &:& \text{dog}(x)\\
@@ -480,17 +484,16 @@ Removing duplicates does not only involve finding which fields have the same typ
 [TODO why deduplication? Because relabel-subtype doesn't seem to work otherwise.]
 [necessary to describe deduplication in detail?]
 
-The \textit{combine} and \textit{dedupe} function are defined in \autoref{lst:combine}.
+The \textit{combine} and \textit{dedupe} functions are defined in \autoref{lst:combine}.
 
-The \texttt{unique\_labels} function makes use of \texttt{gensym} in the PyTTR library, which generates new, consecutively numbered labels.
+In \texttt{combine}, a list of record types are reduced to one type by unique relabeling and merging.
+The \texttt{unique\_labels} function makes use of \texttt{gensym} in the PyTTR library, which generates new, consecutively numbered labels such as \texttt{loc\_4} (typeset here as $\text{loc}_4$).
 A label containing an underscore (`\_') is assumed to already be uniquely numbered.
 Thus, labels without undescores are relabeled to new, numbered labels.
 
-In \texttt{combine}, a list of record types are reduced to one type by unique relabeling and merging.
-
 Finally, the \texttt{dedupe} function removes any duplicated field types by relabeling all occurrences of a field type with one of their labels. For example, in $[x:Ind_{a_1}, y:Ind_{a_1}]$, `y' is relabeled to `x'.
-(Or vice versa, as the order of record type fields is unspecified.)
-When all duplicates of some field type has been removed, recursion is used to avoid usage of old labels in the outer for-loop.
+(Or possibly vice versa; the order of record type fields is unspecified.)
+When all duplicates of some field type have been removed, recursion is used to avoid usage of old labels in the outer for-loop.
 
 \begin{lstlisting}[label={lst:combine}, caption=The \texttt{combine} and \texttt{dedupe} functions.]
 from functools import reduce
