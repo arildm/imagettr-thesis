@@ -1,3 +1,6 @@
+\def\equationautorefname{equation}
+\let\subsectionautorefname\sectionautorefname
+\let\subsubsectionautorefname\sectionautorefname
 \glsresetall
 \section{Background}
 \label{sec:background}
@@ -64,26 +67,45 @@ For example, an umbrella may be well said to be \textit{above} a man, but less c
 
 
 
-\subsection{Type theory in natural language processing}
+\subsection{\Acrfull{ttr}}
 \label{sec:ttnlp}
 
 Type theory is a logic system developed by \cite{WhiteheadPrincipiamathematica1910}, \cite{church40}, \cite{martinlof84} among others \citep{CoquandTypeTheory2015}.
+The theory revolves around the concept that any object belongs to a type.
+The judgement that an object $a$ belongs to a type $T$ is written $a:T$.
+Functions are restricted to certain types, which allows more specificity in how they can be applied.
+For example, the factorial function $f_!$ may be defined over natural numbers by typing it as $f_! :\mathbb{N} \rightarrow \mathbb{N}$.
 %Several different type theories have been created, of which Church's \textit{simply typed \textlambda-calculus} \cite{church40} and Martin-Löf's \textit{intuitionistic type theory} \citep{martinlof84} are some prominent examples.
-In \cite{RantaTypetheoreticalGrammar1995}, it is used as a method of syntactic parsing.
-\cite{KohlhaseTypeTheoreticSemanticslDRT1996} combines type theory with discourse representation theory (DRT).
+
+\cite{RantaTypetheoreticalGrammar1995} uses type theory to drive a method of syntactic parsing.
+At a glance, consider how the type-theoretical judgements $\text{``the''} : \mathit{Det}$, $\text{``door''} : \mathit{N}$ and $f_\text{DetN}:\mathit{Det}\rightarrow\mathit{N}\rightarrow\mathit{NP}$ dictate that $f_\text{DetN}(\text{``the''}, \text{``door''})$ is an object of the type $\mathit{NP}$.
+
+Another example of type theory in \gls{nlp} is \cite{KohlhaseTypeTheoreticSemanticslDRT1996}, which extends Discourse Representation Theory (DRT) with elements from type theory in order to provide compositionality.
 
 %[a hint of what tt provides]
 
+% Introducing TTR
 
+\glsreset{ttr}
+\Gls{ttr} \citep{CooperRecordsRecordTypes2005} combines several theories from logic, semantics and linguistics in a single type-theoretic framework.
+It employs \textit{records}, objects which themselves are structured compositions of other objects;
+and accordingly, \textit{record types} which are structures of other types.
+More details on the features of \gls{ttr} are given in the overview in \autoref{sec:ttr}.
 
-\subsection{\acrfull{ttr}}
-
-\cite{CooperRecordsRecordTypes2005} combines several theories from logic, semantics and linguistics in a single type-theoretic framework known as \acrfull{ttr}.
-It has been employed to model natural language in the context of
+\gls{ttr} has primarily been used to power various accounts of \gls{nlp}, for example
 syntax \citep{CooperAustiniantruthattitudes2005, CooperRecordsRecordTypes2005, CooperTypetheorysemantics2012, CooperTypetheorylanguage2016},
 dialogue \citep{Larssonformalviewcorrective2009, LarssonDialoguesHaveContent2011, CooperTypetheorylanguage2016},
 situated agents \citep{DobnikModellinglanguageaction2012, ttrspat,lspc} and
 spoken language \citep{CooperTypetheorylanguage2016}.
+
+% Usage of TTR in NLP, semantics, perceptual semantics
+
+\cite{DobnikModellinglanguageaction2012} presents how \gls{ttr} can be used to model a situated conversational agent.
+The agent moves around in a point-space world.
+Objects, detected as sub point-spaces are recognized, as are (geometric and extra-geometric) spatial relations between them.
+The work is followed up by \cite{ttrspat} and \cite{lspc}, which model similar situated agents.
+
+%\cite{LarssonFormalsemanticsperceptual2015}
 
 
 
@@ -145,18 +167,6 @@ Similarly, $RecType$ is the type of all record types.
 [TODO Relabel, $\eta$, flatten]
 
 [TODO Merge, join, meet]
-
-
-
-\subsubsection{Perceptual semantics in \acrfull{ttr}}
-\label{sec:percsemttr}
-
-\cite{DobnikModellinglanguageaction2012} presents how \gls{ttr} can be used to model a situated conversational agent.
-The agent moves around in a point-space world.
-Objects, detected as sub point-spaces are recognized, as are (geometric and extra-geometric) spatial relations between them.
-The work is followed up by \cite{ttrspat} and \cite{lspc}, which model similar situated agents.
-
-%\cite{LarssonFormalsemanticsperceptual2015}
 
 
 
