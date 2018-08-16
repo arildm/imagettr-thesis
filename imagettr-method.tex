@@ -3,6 +3,8 @@
 
 
 
+%%%%%%%%%%%%
+\begin{comment}
 \subsection{Implementation overview}
 \label{sec:imploverview}
 
@@ -19,6 +21,8 @@ This additional layer provides formal transparency and type robustness.
 % What?
 
 This section will describe some tools and frameworks used to formulate and implement the model.
+\end{comment}
+%%%%%%%%%%%%%%
 
 
 
@@ -77,7 +81,7 @@ First, the object detection algorithm returns a set of \textit{perceptual object
 Each of them is evidence that a certain location is associated with a certain property (such as being a dog), but it does not constrain any individual to this association.
 Second, an \textit{individuated object} is generated for each perceptual object.
 This describes the situation that there is an individual, which has the given property, at the given location.
-In the \gls{ttr} implementation (presented in full in \autoref{sec:ttrmodel}), the individuated object is a type.
+%In the \gls{ttr} implementation (presented in full in \autoref{sec:ttrmodel}), the individuated object is a type.
 %[what's so good about it being a type?] \cite{BarwiseSituationsAttitudes1981}
 
 In \cite{lspc}, the world has the form of a 3D point space rather than a 2D image.

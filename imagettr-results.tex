@@ -330,8 +330,10 @@ An example state of an agent $ag$ is shown in \autoref{eq:ag}.
 
 \begin{landscape}
 \begin{equation}\label{eq:ag}
-\renewcommand{\arraystretch}{1.2}
-ag = \left[\begin{array}{rcl}
+%\arraycolsep=1pt
+\def\arraystretch{1.2}
+ag =
+\left[\begin{array}{rcl}
     \text{objdetector} &=& \mathtt{yolo\_detector} \\
     \text{indfun} &=& \mathtt{indfun} \\
     \text{relclfs} &=& [Clf_{left}, Clf_{right}, Clf_{above}, Clf_{below}] \\
@@ -356,9 +358,8 @@ ag = \left[\begin{array}{rcl}
 					\end{array}\right]\\
 				\text{pfun} &=& \lambda a:Ind\ .\ \text{bicycle}(a)
 				\end{array}\right],
-			...
-			] \\
-		\text{bel} &=& \begin{array}{l} [
+			... ] \\
+		\text{bel} &=& [
 			\left[\begin{array}{rcl}
 				\text{x} = a_0 &:& Ind\\
 				\text{cp} &:& \text{person}(x)\\
@@ -376,8 +377,7 @@ ag = \left[\begin{array}{rcl}
 				\text{y} &:& Ind_{a_{1}} \\
 				\text{cr} &:& \text{above}(\text{x}, \text{y})
 				\end{array}\right],
-			... ]
-			\end{array} \\
+			... ] \\
         \text{utt} &=& \text{``Is there a dog to the left of a bicycle?''} \\
 		\text{que} &=& \left[\begin{array}{rcl}
 			\text{x} &:& Ind\\
@@ -393,7 +393,7 @@ ag = \left[\begin{array}{rcl}
 
 
 
-\subsection{Combining situations}
+\subsection{Combining situation types}
 \label{sec:combine}
 
 The beliefs of the agent are formed by a collection of record types.
@@ -637,7 +637,7 @@ def eng_to_pyttr(text):
 
 
 
-\subsection{Subtype relabeling}
+\subsection{The relabel-subtype relation}
 \label{sec:subtyperelabeling}
 
 Perceptual mechanisms and the combination of belief types have produced a scene type $S$.
@@ -647,6 +647,8 @@ Now, in order to answer the question, we are interested in whether $S \sqsubsete
 However, the fact that \gls{ttr} record types are labeled prevents direct usage of the subtype relation.
 Field labels in the scene type will generally not agree with those in the question type.
 This prompts for a more advanced variant of subtype checking, allowing \textit{relabeling}.
+
+[TODO Why relabel supertype Q and not subtype S?]
 
 \begin{definition}[Relabel-subtype]
 A record type $S$ is a \textbf{relabel-subtype} of the record type $Q$, $S \subtrlb Q$, if there is a relabeling $\eta$ of $Q$ such that $S \sqsubseteq Q_\eta$.
@@ -763,3 +765,24 @@ def find_subtype_relabeling(S, Q):
     return None
 \end{lstlisting}
 
+
+
+\subsection{Additions to PyTTR}
+
+Some extensions to PyTTR were necessary for the implementation to be possible.
+%In order to utilize PyTTR in the application, a few TTR operations had to be added.
+%Additionally, a few functions which were TTR-related, but not obviously operations, were added.
+Of these, some were added directly to the PyTTR library, because simpler version of the operations of functions were already there.
+Others were defined in the custom application.
+These were all small functions or additions.
+They include:
+
+\begin{description}
+\item[Python-body functions] A \gls{ttr} function is modelled by the PyTTR \texttt{Fun} class, where the function body is made up by another PyTTR object. Application of the function is implemented as substituting the argument in the body object. Some operations here have required more advanced operations. A \texttt{LambdaFun} subclass of \texttt{Fun} was thus created to allow any Python code as its body.
+\item[Copying a record type] This facilitated the creation of new record types based off an existing one, without altering the original.
+\item[Relabeling multiple fields] PyTTR originally only contains a method for relabeling a single field.
+\item[Relabel fix] When a relabeled field occurs in a sibling dependent field value, the dependent field value must be updated to use the new label. For instance, if `x' is relabeled to `y' in $\left[ \begin{array}{rcl}\text{x} &:& Ind \\ \text{c} &:& \text{p}(\text{x}) \end{array}\right]$, then $\text{p}(\text{x})$ must be updated to $\text{p}(\text{y})$.
+\item[A fix for LazyObject] LazyObject is a class in the PyTTR library used for making references between fields. Prior to the fix, it could only be used for paths longer than one item, for instance $r.x$ but not $r$.
+\item[Flatten for record types] The flatten operation was implemented for records but not for record types. Flatten was used together with merging in one version of the implementation, but was later replaced by another approach, using only merging.
+\item[Latex output fixes] These did not contribute to the implementation itself, but to the writing of this thesis.
+\end{description}

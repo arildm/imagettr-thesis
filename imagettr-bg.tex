@@ -7,6 +7,23 @@
 
 This section will highlight some important pieces of the history of past research in relevant fields.
 
+\subsection{Image recognition and object detection}
+
+In image recognition, visual data is analyzed in order to detect and classify objects.
+A wide range of models have been developed to solve this task.
+Some focus only on the detection of objects \citep{BlaschkoLearningLocalizeObjects2008}, some only on classification \citep[ResNet,][]{HeDeepResidualLearning2015}, and others attempt to solve the full problem in an integrated fashion \citep{RedmonYouOnlyLook2015,HeMaskRCNN2017}.
+
+There are different strategies for encoding the image into features.
+For one, SIFT is a technique where significant locations of an image are used to extract \textit{keypoints} \citep{LoweObjectrecognitionlocal1999}.
+Classification can then be performed by comparing the keypoints of a target image to those in a database.
+
+With \textit{convolutional neural networks}, however, the need for prior feature extraction is generally eliminated \citep{HeDeepResidualLearning2015, HeMaskRCNN2017}.
+Color image data is highly dimensional: it is typically represented digitally as a 2D matrix of pixels, where each pixel itself specifies a quantity of each of three basic colors.
+Convolutional layers reduce the dimensionality so that an image can be encoded in a single (one-dimensional) vector.
+The full image is often first divided into same-size overlapping segments, thus capturing locational aspects of the data.
+
+
+
 \subsection{Computational semantics}
 
 Semantics is the study of meaning.
@@ -170,7 +187,7 @@ Similarly, $RecType$ is the type of all record types.
 
 
 
-\subsubsection{\gls{ttr} programming: PyTTR}
+\subsubsection{PyTTR: Programming with \gls{ttr}}
 \label{sec:pyttr}
 
 \cite{pyttr} provides a Python implementation of \gls{ttr} known as PyTTR.
@@ -182,23 +199,6 @@ By implementing a theoretical model as a computer program, it can ``come alive''
 When implemented, the model can be evaluated and compared in practical settings it to other models.
 
 %[What has been written in PyTTR so far? nu, animat]
-
-
-
-\subsection{Image recognition and object detection}
-
-In image recognition, visual data is analyzed in order to detect and classify objects.
-A wide range of models have been developed to solve this task.
-Some focus only on the detection of objects \citep{BlaschkoLearningLocalizeObjects2008}, some only on classification \citep[ResNet,][]{HeDeepResidualLearning2015}, and others attempt to solve the full problem in an integrated fashion \citep{RedmonYouOnlyLook2015,HeMaskRCNN2017}.
-
-There are different strategies for encoding the image into features.
-For one, SIFT is a technique where significant locations of an image are used to extract \textit{keypoints} \citep{LoweObjectrecognitionlocal1999}.
-Classification can then be performed by comparing the keypoints of a target image to those in a database.
-
-With \textit{convolutional neural networks}, however, the need for prior feature extraction is generally eliminated \citep{HeDeepResidualLearning2015, HeMaskRCNN2017}.
-Color image data is highly dimensional: it is typically represented digitally as a 2D matrix of pixels, where each pixel itself specifies a quantity of each of three basic colors.
-Convolutional layers reduce the dimensionality so that an image can be encoded in a single (one-dimensional) vector.
-The full image is often first divided into same-size overlapping segments, thus capturing locational aspects of the data.
 
 
 

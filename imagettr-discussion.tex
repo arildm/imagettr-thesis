@@ -24,42 +24,6 @@ inference (``Does this person have 20/20 vision?'', for an image where a person 
 
 
 
-\subsection{PyTTR}
-% Move most of this to Result?!
-
-Two types of extensions to PyTTR were necessary for the implementation to be possible.
-Firstly, the implementation of missing TTR operations and utility functions, and secondly, more advanced operations.
-%TODO Nicer
-
-
-
-\subsubsection{Simple operations and utility functions}
-
-In order to utilize PyTTR in the application, a few TTR operations had to be added.
-Additionally, a few functions which were TTR-related, but not obviously operations, were added.
-Of these, some were added directly to the PyTTR library, because simpler version of the operations of functions were already there.
-Others were defined in the custom application.
-These were all small functions or additions.
-They include:
-
-\begin{description}
-\item[Copying a record type] with the purpose of making changes to the copy in order to create a new type
-\item[Relabeling multiple fields] as PyTTR only contains a method for relabeling a single field (see \textit{Additions to PyTTR library code} below)
-\item[Merge a list of record types] as PyTTR only contains a method for pairwise merging
-\item[Relabel fix] When a relabeled field occurs in a sibling dependent field value, the dependent field value must be updated to use the new label. For instance, if $x$ is relabeled to $y$ in $\left[ \begin{array}{rcl}x &:& Ind \\ c &:& \text{p}(\text{x}) \end{array}\right]$, then $\text{p}(\text{x})$ must be updated to $\text{p}(\text{y})$.
-\item[A fix for LazyObject] LazyObject is a class in the PyTTR library used for making references between fields. Prior to the fix, it could only be used for paths longer than one item, for instance $r.x$ but not $r$.
-\item[Flatten for record types] The flatten operation was implemented for records but not for record types. Flatten was used together with merging in one version of the implementation, but was later replaced by another approach, using only merging.
-\item[Latex output fixes] These did not contribute to the implementation itself, but to the writing of this thesis.
-\end{description}
-
-
-
-\subsubsection{Advanced TTR operations}
-
-The relabel-subtype operation, [to be] described in \autoref{sec:results} is relatively advanced, and more specific to this application.
-
-
-
 \subsection{TTR coverage}
 
 
