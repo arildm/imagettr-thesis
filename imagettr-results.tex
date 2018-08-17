@@ -2,13 +2,13 @@
 \label{sec:results}
 
 The results of this project consists primarily of a \gls{ttr} model, which connects language to visual perception in a basic \gls{vqa} setting and uses \gls{ttr} throughout (\autoref{sec:ttrmodel}).
-There are also a few significant sub-problems, which are not entirely within the TTR model but tightly connected to it.
+There are also a few significant sub-problems, which are not entirely within the \gls{ttr} model but tightly connected to it.
 These have been solved as algorithms implemented in Python.
 They are: efficiently combining multiple belief record types into one (\autoref{sec:combine}), basic translation from first-order logic to \gls{ttr} (\autoref{sec:parsing}) and finally a subtype relation insensitive to labels, $\subtrlb$ (\autoref{sec:subtyperelabeling}).
 
 
 
-\subsection{\Acrshort{ttr} model}
+\subsection{\Gls{ttr} model}
 \label{sec:ttrmodel}
 
 The types in the \gls{ttr} model are largely based on \cite{lspc}, but the $Segment$ type is new, the individuation function is improved and the $RelClf$ mechanism is more concretely defined.
@@ -84,23 +84,21 @@ ObjDetector = ( Image \rightarrow [Obj] )
 The perceptual object couples a property with a location, but it does not explicitly say anything about any individual object.
 In \cite{lspc}, the step from the perceptual to the \textit{conceptual} domain is made by generating a record type that corresponds to a situation, namely the situation that a certain individual has a certain property and is at a certain location.
 This situation record type is known as an \textit{individuated object}, and is a subtype of $IndObj$ (\autoref{eq:indobj}).
-Here, $x$ is an individual and $loc$ is a bounding box.
-$cl$ specifies that $loc$ is the location of $x$, and the purpose of $cp$ is to declare a property of $x$.
-$PTy$ is defined as a supertype of all ptypes (\autoref{eq:pty}).
+Here, `x' is an individual and `loc' is a bounding box.
+The `cl' field specifies that `loc' is the location of `x', and the purpose of `cp' is to declare a property of `x'.
+As all individuated objects are subtypes of $IndObj$, the `cp' field must have a type that will be a supertype of any ptype; we define $PType$ to be this.
 
-[TODO What to do about PTy? Does it make sense? Skip it? Make use of it more?]
+\begin{definition}
+For any ptype $T = \mathit{pred}(\mathit{args})$, $T \sqsubseteq PType$.
+\end{definition}
 
 \begin{equation}\label{eq:indobj}
 IndObj = \rec{
 \text{x} &:& Ind \\
 \text{loc} &:& Segment \\
-\text{cp} &:& PTy \\
+\text{cp} &:& PType \\
 \text{cl} &:& \text{location}(\text{x}, \text{loc}) \\
 }
-\end{equation}
-
-\begin{equation}\label{eq:pty}
-PTy : Type
 \end{equation}
 
 A function for generating an $IndObj$ subtype from an $Obj$ record is known from \cite{lspc} as an \textit{individuation function}.
@@ -177,7 +175,7 @@ LocTup = \rec{
 RelClf = ( LocTup \rightarrow RecType )
 \end{equation}
 
-For instance, a classifier for ``left'' might look like in \autoref{eq:leftclfdef}, where $\kappa_{left}$ is a non-TTR, boolean function.
+For instance, a classifier for ``left'' might look like in \autoref{eq:leftclfdef}, where $\kappa_{left}$ is a non-\gls{ttr}, boolean function.
 Of course, the requirement that the individual $r.\text{lo}.\text{x}$ is actually located at $r.\text{lo}.\text{loc}$ (and same for $r.\text{refo}$) is implicit from the typing as $IndObj$, where a field typed as $\text{location}(\text{x}, \text{loc})$ is necessarily present.
 
 \begin{equation}\label{eq:leftclfdef}
@@ -236,8 +234,8 @@ The method of such combination is not trivial, and is discussed in \autoref{sec:
 
 % How do we go from language to TTR?
 In order to add the  connection to language, any natural-language utterance must be parsed into \gls{ttr}.
-As discussed in \autoref{sec:languagevqa}, TTR-based natural-language parsing has not yet been implemented as a ready-to-use library.
-Therefore, parsing must be done externally to the TTR model.
+As discussed in \autoref{sec:languagevqa}, \gls{ttr}-based natural-language parsing has not yet been implemented as a ready-to-use library.
+Therefore, parsing must be done externally to the \gls{ttr} model.
 This is described in \autoref{sec:parsing}.
 %Any utterance is input to the model only as a TTR record type.
 % What will the parsing result look like in TTR?
@@ -256,7 +254,7 @@ Equation~\ref{eq:question} models the question ``Is there a lamp above a table?'
 % How do we use the question TTR type?
 % TODO In terms of DIALOGUE ACTS?
 As mentioned in \autoref{sec:languagevqa}, answering the question corresponds to checking whether $S \sqsubseteq Q$.
-An important problem, however, stems from the fact that TTR record types are labeled.
+An important problem, however, stems from the fact that \gls{ttr} record types are labeled.
 In general, fields in the scene type and question type will not share labels in a way that enables simple subtype checking to be useful.
 The remedy to this is an alternative subtype relation $\subtrlb$ which is insensitive to labels.
 This new relation is discussed in \autoref{sec:subtyperelabeling}.
@@ -306,7 +304,7 @@ For an agent $ag : Agent$, the perception and question-answering procedure is ca
 	%\item The fields of the domain record type of the function is considered its arguments.
 	%\item Each combination of $ag.\text{state.bel}$ record types that matches the argument types is considered for input.
 	%\item The input record types are combined to match the domain record type of the function, and the type is instantiated.
-    \item For each pair $T_1$ and $T_2$ in $ag.\text{state.bel}$, a $LocTup$ record type is constructed as $[\text{lo}: T_1, \text{refo}: T_2]$. Note that this will be specified to certain individuals and segments, and is thus more informative than the plain $LocTup$ type.
+    \item For each pair $T_1$ and $T_2$ in $ag.\text{state.bel}$, a $LocTup$ record type is constructed as $\rec{\text{lo} &:& T_1 \\ \text{refo} &:& T_2}$. Note that this will be specified to certain individuals and segments, and is thus more informative than the plain $LocTup$ type.
     \item The specified $LocTup$ type is instantiated to a record.
 	\item Each function in $ag.\text{relclfs}$ is applied to the created record, and the record type resulting from each application is added to $ag.\text{state.bel}$ unless it is empty ($[]$).
 	\end{enumerate}
@@ -430,7 +428,7 @@ T_2 = \rec{
     }
 \end{equation}
 
-TTR features a \textit{merge} operation ($\ttrmerge$), but a merge will not have the result desired here.
+\gls{ttr} features a \textit{merge} operation ($\ttrmerge$), but a merge will not have the result desired here.
 Since the same labels occur in both belief types, a merge would result in \textit{meet types}, as seen in \autoref{eq:merge}, in a way which is not useful for this purpose.
 The meet type of two different singleton types, $Ind_{a_1} \wedge Ind_{a_2}$, can only be true if the two individuals are the same, $a_1 = a_2$.
 The constraint in the `cr' field then says that some individual is above and to the right of itself, which is meaningless and certainly not what we are trying to obtain.
@@ -464,7 +462,7 @@ The field labeled `x' in $T_1$ is now labeled `prev.x' and does not conflict wit
 Another method is used in this project for the purpose of computational speed.
 In this method, each belief record type is relabeled to only have unique labels, and then merged.
 An example result is shown in \autoref{eq:combineunconflict}.
-Generating unique labels is an operation outside TTR, making this method less purely TTR-powered.
+Generating unique labels is an operation outside \gls{ttr}, making this method less purely \gls{ttr}-powered.
 
 \begin{equation} \label{eq:combineunconflict}
 \rec{
@@ -478,20 +476,19 @@ Generating unique labels is an operation outside TTR, making this method less pu
 \end{equation}
 
 Both methods result in duplicate fields: there is no meaningful difference between the fields labeled `$\text{x}_1$' and `$\text{y}_2$' above, as both have the same type.
-Removing duplicates does not only involve finding which fields have the same type as another field, but also relabeling them so that all dependent fields refer to the same basic field as appropriate.
-%I.e. if `x_2' is relabeled to `y_1' and `y_2' to `x_1', then `c_2' must
+Removing these duplicates (also \textit{deduplication}, or \textit{dedupe}) is necessary for the subtype check that will follow.
+This process first involves finding which fields have the same type as another field.
+Subsequently, simply removing duplicates is not an option, as there may be other fields that depend on the duplicate field.
+These dependent fields must also be updated to use the remaining field.
 
-[TODO why deduplication? Because relabel-subtype doesn't seem to work otherwise.]
-[necessary to describe deduplication in detail?]
-
-The \textit{combine} and \textit{dedupe} functions are defined in \autoref{lst:combine}.
+The \texttt{combine} and \texttt{dedupe} functions are defined in \autoref{lst:combine}.
 
 In \texttt{combine}, a list of record types are reduced to one type by unique relabeling and merging.
 The \texttt{unique\_labels} function makes use of \texttt{gensym} in the PyTTR library, which generates new, consecutively numbered labels such as \texttt{loc\_4} (typeset here as $\text{loc}_4$).
 A label containing an underscore (`\_') is assumed to already be uniquely numbered.
 Thus, labels without undescores are relabeled to new, numbered labels.
 
-Finally, the \texttt{dedupe} function removes any duplicated field types by relabeling all occurrences of a field type with one of their labels. For example, in $[x:Ind_{a_1}, y:Ind_{a_1}]$, `y' is relabeled to `x'.
+Finally, the \texttt{dedupe} function removes any duplicated field types by relabeling all occurrences of a field type with one of their labels. For example, in $\rec{\text{x} &:& Ind_{a_1} \\ \text{y} &:& Ind_{a_1}}$, `y' is relabeled to `x'.
 (Or possibly vice versa; the order of record type fields is unspecified.)
 When all duplicates of some field type have been removed, recursion is used to avoid usage of old labels in the outer for-loop.
 
@@ -526,18 +523,18 @@ def combine(Ts):
 
 
 
-\subsection{Parsing language to TTR}
+\subsection{Parsing language to \gls{ttr}}
 \label{sec:parsing}
 \glsreset{fol}
 
-As mentioned in \autoref{sec:ttnlp}, pure TTR solutions to natural language parsing have been developed but not implemented.
+As mentioned in \autoref{sec:ttnlp}, pure \gls{ttr} solutions to natural language parsing have been developed but not implemented.
 Such an implementation is sufficiently complex and outside the scope of this thesis.
 Furthermore, the language domain is limited for the purpose of this thesis, and a wide-coverage parsing solution is more than what is necessary.
 Therefore, instead of implementing natural language parsing in \gls{ttr}, this project uses
 another standard method to parse natural language to \gls{fol}.
 The \gls{fol} expression is subsequently \textit{translated} to \gls{ttr} in a new algorithm.
 
-\subsubsection{Parsing to \acrlong{fol}}
+\subsubsection{Parsing to \gls{fol}}
 
 Parsing is done using the NLTK library \citep{nltk}, which contains a semantically augmented \gls{cfg} framework just like the method introduced in \autoref{sec:compsem}.
 It uses feature structures to associate each constituent with a \gls{fol} term possibly using lambda calculus.
@@ -571,7 +568,7 @@ N[SEM=<person>] -> 'person'
 
 
 
-\subsubsection{Translating \acrlong{fol} to \gls{ttr}}
+\subsubsection{Translating \gls{fol} to \gls{ttr}}
 
 The result of the \gls{cfg} parsing is a Python object that encodes the \gls{fol} expression.
 A custom Python function \texttt{fol\_to\_pyttr}, given in \autoref{lst:foltopyttr}, traverses this object recursively and builds a PyTTR type.
@@ -637,9 +634,9 @@ However, the fact that \gls{ttr} record types are labeled prevents direct usage 
 Field labels in the scene type will generally not agree with those in the question type.
 This prompts for a more advanced variant of subtype checking, allowing \textit{relabeling}.
 
-[TODO Why relabel supertype Q and not subtype S?]
+% TODO Why relabel supertype Q and not subtype S?
 
-\begin{definition}[Relabel-subtype]
+\begin{definition}
 A record type $S$ is a \textbf{relabel-subtype} of the record type $Q$, $S \subtrlb Q$, if there is a relabeling $\eta$ of $Q$ such that $S \sqsubseteq Q_\eta$.
 
 %Such a relabeling $\eta$ is known as a \textbf{subtype relabeling} of $Q$.
@@ -676,7 +673,7 @@ If $S$ has eight basic fields and $Q$ has two, there are only $\dfrac{8!}{(8-2)!
 For each relabeling, the remaining (dependent) fields are subtype-checked individually.
 This means checking
 $\text{dog}(\text{x}) \sqsubseteq \text{dog}(\text{x})$ (true) instead of
-$[\text{c}_1 : \text{dog}(\text{x})] \sqsubseteq [\text{c}_2 : \text{dog}(\text{x})]$ (false).
+$\rec{\text{c}_1 &:& \text{dog}(\text{x})} \sqsubseteq \rec{\text{c}_2 &:& \text{dog}(\text{x})}$ (false).
 If there is some field in $Q_\eta$ that does not have a subtype field in $S$, then subtypeness cannot hold, and the rest of the complex fields are skipped in favor of trying the next basic-field relabeling.
 
 % TODO what is this in terms of big-O?

@@ -100,7 +100,7 @@ For example, an umbrella may be well said to be \textit{above} a man, but less c
 
 
 
-\subsection{\Acrfull{ttr}}
+\subsection{\Gls{ttr}}
 \label{sec:ttnlp}
 
 Type theory is a logic system developed by \cite{WhiteheadPrincipiamathematica1910}, \cite{church40}, \cite{martinlof84} among others \citep{CoquandTypeTheory2015}.
@@ -145,17 +145,15 @@ The work is followed up by \cite{ttrspat} and \cite{lspc}, which model similar s
 \subsubsection{Overview of \gls{ttr}}
 \label{sec:ttr}
 
-This section is a brief and rather informal overview of \gls{ttr}.
-See \cite{CooperTypetheorysemantics2012} for a slightly more verbose presentation with formal definitions, or \cite{CooperTypetheorylanguage2016} for an updated formal definition as well as a more extensively worded informal presentation.
-Some concepts are missing in the former but included in the latter, including list types.
+This section is an overview of \gls{ttr} based on \cite{CooperTypetheorysemantics2012} and \cite{CooperTypetheorylanguage2016}.
 
 In \gls{ttr} there are two kinds of entities: types and objects.
-Each type is associated with a set of objects, which are of the type, or are \textbf{witnesses} of the type.
+Each type is associated with a set of objects which are of that type, or in other words are \textbf{witnesses} of that type.
 The judgement that the object $a$ is a witness of the type $T$ is written $a : T$.
 For example, $34 : Int$ means that $34$ is of the type $Int$.
 
 A \textbf{record type} is a set of fields, each field carrying a label and a type.
-In the record type $\rec{\text{person} &:& Ind \\ \text{age} &:& Int}$ there is a field labeled $person$ of type $Ind$, and one labeled $age$ of the type $Int$.
+In the record type $\rec{\text{person} &:& Ind \\ \text{age} &:& Int}$ there is a field labeled `person' of type $Ind$, and one labeled `age' of the type $Int$.
 
 The witnesses of record types are \textbf{records}.
 A record is also a set of fields with labels, but instead of a type, a label is associated with an object.
@@ -174,7 +172,8 @@ For example, $\rec{\text{x} &:& Int} \sqsubseteq \rec{\text{x} &:& Number}$, pro
 Relationships between objects can be modeled using \textbf{ptypes}, complex types constructed from predicates and objects.
 For instance, the type $\text{hug}(a,b)$ is constructed from the predicate 'hug' with the objects $a$ in the first place and $b$ in the second.
 The situation that $a$ is hugging $b$ is true if there exists a witness of $\text{hug}(a,b)$.
-[What can such a witness be like?]
+In a record type, a ptype typically uses the labels of other fields for its arguments:
+In $\rec{\text{x} &:& Ind \\ \text{c} &:& \text{green}(\text{x})}$, the field `c' is \textit{dependent} on the field `x'.
 
 A type can be restricted to only have a single witness:
 If $T$ is a type and $a:T$, then $T_a$ is a \textbf{singleton type} having $a$ as its only witness.
@@ -183,8 +182,8 @@ The record type $\rec{\text{x} &:& Ind_a}$ can also be written $\rec{\text{x}=a 
 A singleton-typed field notated this way is known as a \textbf{manifest field}.
 Any number of fields in a record type may be manifest fields.
 
-[TODO discuss] A function from $T_{dom}$ to $T_{rng}$ is a witness of the \textbf{function type} $(T_{dom} \rightarrow T_{rng})$.
-For instance, if $f = \lambda x : Ind\ .\ \text{blue}(x)$, then $f : (Ind \rightarrow Type)$.
+A function from $T_{dom}$ to $T_{rng}$ is a witness of the \textbf{function type} $T_{dom} \rightarrow T_{rng}$.
+For instance, if $f = \lambda x : Ind\ .\ \text{blue}(x)$, then $f : Ind \rightarrow Type$.
 
 A list of objects of type $T$ is a witness of the \textbf{list type} $[T]$:
 If $L$ is a list and $\forall a \in L, a : T$, then $L : [T]$.
@@ -213,21 +212,6 @@ The \textbf{merge} of two types $T_1 \ttrmerge T_2$ is a somewhat more complicat
 If $T_1$ and $T_2$ are record types, their fields are added together to a new record type;
 if any label occurs in both types, so $T_1$ has $\langle \ell, T'_1\rangle$ and $T_2$ has $\langle \ell, T'_2\rangle$, a field with that label is added, which has the merge of the two field types, $\langle \ell, T'_1 \ttrmerge T'_2\rangle$.
 If any of $T_1$ and $T_2$ is not a record type, then $T_1 \ttrmerge T_2 = T_1 \wedge T_2$.
-
-
-
-\subsubsection{PyTTR: Programming with \gls{ttr}}
-\label{sec:pyttr}
-
-\cite{pyttr} provides a Python implementation of \gls{ttr} known as PyTTR.
-It supports the modeling of \gls{ttr} types and operations such as judgement and type checking.
-As a Python library it also enables other features and peripheral procedures to be written in Python.
-
-PyTTR allows, in turn, the implementation of \gls{ttr} models.
-By implementing a theoretical model as a computer program, it can ``come alive'' and be tested on real problems and data.
-When implemented, the model can be evaluated and compared in practical settings it to other models.
-
-%[What has been written in PyTTR so far? nu, animat]
 
 
 

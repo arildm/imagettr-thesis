@@ -26,6 +26,21 @@ This section will describe some tools and frameworks used to formulate and imple
 
 
 
+\subsection{PyTTR: Programming with \gls{ttr}}
+\label{sec:pyttr}
+
+\cite{pyttr} provides a Python implementation of \gls{ttr} known as PyTTR.
+It supports the modeling of \gls{ttr} types and operations such as judgement and type checking.
+As a Python library it also enables other features and peripheral procedures to be written in Python.
+
+PyTTR allows, in turn, the implementation of \gls{ttr} models.
+By implementing a theoretical model as a computer program, it can ``come alive'' and be tested on real problems and data.
+When implemented, the model can be evaluated and compared in practical settings it to other models.
+
+%[What has been written in PyTTR so far? nu, animat]
+
+
+
 \subsection{Object detection with YOLO}
 
 \textbf{You only look once (YOLO)} \citep{RedmonYouOnlyLook2015} is a neural network model for image recognition.
@@ -109,15 +124,13 @@ This was done for the four relations ``left'', ``right'', ``above'' and ``below'
 
 
 
-\subsection{Language and \acrfull{vqa}}
+\subsection{Language and \gls{vqa}}
 \label{sec:languagevqa}
 
 In contrast to full \gls{vqa} systems, the model presented in this thesis will be restricted to a limited type of questions, namely polar questions on the location of one object in relation to another.
 Such a question has a corresponding declarative statement:
 The question ``Can you see them?'' corresponds to the statement ``You can see them''.
-[TODO source?]
-
-[TODO check \cite{RooyPolarQuestions2003}, (sources of) \cite{AloniQuantificationConceptualCovers2001}]
+% TODO source?
 
 Giving the natural-language utterance a representation in the same formal framework as the image allows comparing them to each other.
 % TODO Comparing?
