@@ -30,12 +30,12 @@ $Ppty$ is the type of functions that can be applied to an individual and return 
 In our account the resulting type will be restricted to a ptype that is dependent on the individual, thus describing a property of it.
 
 \begin{equation}\label{eq:seg}
-Segment = \left[\begin{array}{rcl}
+Segment = \rec{
 \text{cx} &:& Int\\
 \text{cy} &:& Int\\
 \text{w} &:& Int\\
 \text{h} &:& Int
-\end{array}\right]\end{equation}
+}\end{equation}
 
 \begin{equation}\label{eq:ppty}
 Ppty = (Ind \rightarrow Type)\end{equation}
@@ -56,22 +56,22 @@ An object detector is a function from an image to a set of such perceptual objec
 %[differences/similarites LSPC and others]
 
 \begin{equation}\label{eq:obj}
-Obj = \left[\begin{array}{rcl}
+Obj = \rec{
 \text{seg} &:& Segment\\
 \text{pfun} &:& Ppty \\
-\end{array}\right]\end{equation}
+}\end{equation}
 
 \begin{equation}\label{eq:objrec}
 obj =
-\left[\begin{array}{rcl}
-\text{seg} &=& \left[\begin{array}{rcl}
+\rec{
+\text{seg} &=& \rec{
 \text{cx} &=& 435\\
 \text{w} &=& 422\\
 \text{cy} &=& 355\\
 \text{h} &=& 242
-\end{array}\right]\\
+}\\
 \text{pfun} &=& \lambda v:Ind\ .\ \text{bicycle}(v)\\
-\end{array}\right] : Obj\end{equation}
+} : Obj\end{equation}
 
 \begin{equation}\label{eq:objdetector}
 ObjDetector = ( Image \rightarrow [Obj] )
@@ -91,12 +91,12 @@ $PTy$ is defined as a supertype of all ptypes (\autoref{eq:pty}).
 [TODO What to do about PTy? Does it make sense? Skip it? Make use of it more?]
 
 \begin{equation}\label{eq:indobj}
-IndObj = \left[\begin{array}{rcl}
+IndObj = \rec{
 \text{x} &:& Ind \\
 \text{loc} &:& Segment \\
 \text{cp} &:& PTy \\
 \text{cl} &:& \text{location}(\text{x}, \text{loc}) \\
-\end{array}\right]
+}
 \end{equation}
 
 \begin{equation}\label{eq:pty}
@@ -122,37 +122,37 @@ An example application of $f_{IndFun}$ is shown in \autoref{eq:indfunrec}.
 The output record type describes a situation where an individual identified as $a_0$ is classified as a bicycle and is occupying a $422 \times 242$-sized rectangle with its center at $(435, 355)$.
 
 \begin{equation}\label{eq:indfundef}
-f_{IndFun} = \lambda r : Obj\ . \left[\begin{array}{rcl}
+f_{IndFun} = \lambda r : Obj\ . \rec{
     \text{x} = a_n &:& Ind \\
     \text{cp} &:& r.\text{pfun}(\text{x}) \\
     \text{cl} &:& \text{location}(\text{x}, \text{loc}) \\
     \text{loc} = r.\text{seg} &:& Segment\\
-\end{array}\right]
+}
 \end{equation}
 
 \begin{equation}\label{eq:indfunrec}
 f_{IndFun}(
-\left[\begin{array}{rcl}
-\text{seg} &=& \left[\begin{array}{rcl}
+\rec{
+\text{seg} &=& \rec{
 \text{cx} &=& 435\\
 \text{w} &=& 422\\
 \text{cy} &=& 355\\
 \text{h} &=& 242
-\end{array}\right]\\
+}\\
 \text{pfun} &=& \lambda v:Ind\ .\ \text{bicycle}(v)\\
-\end{array}\right]
+}
 ) =
-\left[\begin{array}{rcl}
+\rec{
     \text{x} = a_0 &:& Ind \\
     \text{cp} &:& \text{bicycle}(\text{x}) \\
     \text{cl} &:& \text{location}(\text{x}, \text{loc}) \\
-    \text{loc} = \left[\begin{array}{rcl}
+    \text{loc} = \rec{
         \text{cx} &=& 435\\
         \text{w} &=& 422\\
         \text{cy} &=& 355\\
         \text{h} &=& 242
-		\end{array}\right] &:& Segment\\
-\end{array}\right]
+		} &:& Segment\\
+}
 \end{equation}
 
 
@@ -167,10 +167,10 @@ Records of this type contain instantiations (records) of two $IndObj$ record typ
 In \autoref{eq:clf}, a classifier is modeled as a function from such a record to a new record type which should describe the relation.
 
 \begin{equation}\label{eq:loctup}
-LocTup = \left[\begin{array}{rcl}
+LocTup = \rec{
     \text{lo} &:& IndObj \\
     \text{refo} &:& IndObj \\
-    \end{array}\right]
+    }
 \end{equation}
 
 \begin{equation}\label{eq:clf}
@@ -183,11 +183,11 @@ Of course, the requirement that the individual $r.\text{lo}.\text{x}$ is actuall
 \begin{equation}\label{eq:leftclfdef}
 \lambda r : LocTup \ .\ 
 \begin{cases}
-\left[\begin{array}{rcl}
+\rec{
     \text{x} &:& r.\text{lo}.\text{x} \\
     \text{y} &:& r.\text{refo}.\text{x} \\
     \text{cr} &:& \text{left}(\text{x}, \text{y}) \\
-\end{array}\right],
+},
 & \text{if } \kappa_{left}(r.\text{lo}.\text{loc}, r.\text{refo}.\text{loc}) \\
 [], & \text{otherwise}
 \end{cases}
@@ -244,13 +244,13 @@ This is described in \autoref{sec:parsing}.
 Equation~\ref{eq:question} models the question ``Is there a lamp above a table?''.
 
 \begin{equation}\label{eq:question}
-\left[\begin{array}{rcl}
+\rec{
     \text{x} &:& Ind \\
     \text{y} &:& Ind \\
     \text{c}_\text{x} &:& \text{lamp}(\text{x}) \\
     \text{c}_\text{y} &:& \text{table}(\text{y}) \\
     \text{c}_\text{r} &:& \text{above}(\text{x}, \text{y}) \\
-    \end{array}\right]
+    }
 \end{equation}
 
 % How do we use the question TTR type?
@@ -273,22 +273,22 @@ It may also receive a parsed natural-language utterance, which will then be veri
 A construction like this provides a means to answer to natural-language questions about the image.
 
 \begin{equation}\label{eq:agent}
-Agent = \left[\begin{array}{rcl}
+Agent = \rec{
     \text{objdetector} &:& ObjDetector \\
     \text{indfun} &:& IndFun \\
     \text{relclfs} &:& [RelClf] \\
     \text{state} &:& AgentState \\
-    \end{array}\right]
+    }
 \end{equation}
 
 \begin{equation}\label{eq:state}
-AgentState = \left[\begin{array}{rcl}
+AgentState = \rec{
     \text{img} &:& Image \vee Nothing \\
     \text{perc} &:& [Obj] \\
     \text{bel} &:& [RecType] \\
     \text{utt} &:& String \vee Nothing \\
     \text{que} &:& RecType \\
-    \end{array}\right]
+    }
 \end{equation}
 
 The fields `objdetector', `indfun' and `relclfs' of $Agent$ are to be statically defined for a specific agent.
@@ -333,61 +333,61 @@ An example state of an agent $ag$ is shown in \autoref{eq:ag}.
 %\arraycolsep=1pt
 \def\arraystretch{1.2}
 ag =
-\left[\begin{array}{rcl}
+\rec{
     \text{objdetector} &=& \mathtt{yolo\_detector} \\
     \text{indfun} &=& \mathtt{indfun} \\
     \text{relclfs} &=& [Clf_{left}, Clf_{right}, Clf_{above}, Clf_{below}] \\
-    \text{state} &=& \left[\begin{array}{rcl}
+    \text{state} &=& \rec{
 		\text{img} &=& \text{\tt <Image "dogride.jpg">} \\
 		\text{perc} &=& [
-			\left[\begin{array}{rcl}
-				\text{seg} &=& \left[\begin{array}{rcl}
+			\rec{
+				\text{seg} &=& \rec{
 					\text{cx} &=& 452\\
 					\text{w} &=& 197\\
 					\text{cy} &=& 261 \\
 					\text{h} &=& 351\\
-					\end{array}\right]\\
+					}\\
 				\text{pfun} &=& \lambda a:Ind\ .\ \text{person}(a)
-				\end{array}\right],
-			\left[\begin{array}{rcl}
-				\text{seg} &=& \left[\begin{array}{rcl}
+				},
+			\rec{
+				\text{seg} &=& \rec{
 					\text{cx} &=& 435\\
 					\text{w} &=& 422\\
 					\text{cy} &=& 355 \\
 					\text{h} &=& 242\\
-					\end{array}\right]\\
+					}\\
 				\text{pfun} &=& \lambda a:Ind\ .\ \text{bicycle}(a)
-				\end{array}\right],
+				},
 			... ] \\
 		\text{bel} &=& [
-			\left[\begin{array}{rcl}
+			\rec{
 				\text{x} = a_0 &:& Ind\\
 				\text{cp} &:& \text{person}(x)\\
 				\text{cl} &:& \text{location}(x, loc)\\
-				\text{loc} = \left[\begin{array}{rcl}
+				\text{loc} = \rec{
 					\text{cx} &=& 452\\
 					\text{w} &=& 197\\
 					\text{cy} &=& 261 \\
 					\text{h} &=& 351\\
-					\end{array}\right]
+					}
 					&:& Segment \\
-				\end{array}\right],
-			{}{} \left[\begin{array}{rcl}
+				},
+			{}{} \rec{
 				\text{x} &:& Ind_{a_{0}} \\
 				\text{y} &:& Ind_{a_{1}} \\
 				\text{cr} &:& \text{above}(\text{x}, \text{y})
-				\end{array}\right],
+				},
 			... ] \\
         \text{utt} &=& \text{``Is there a dog to the left of a bicycle?''} \\
-		\text{que} &=& \left[\begin{array}{rcl}
+		\text{que} &=& \rec{
 			\text{x} &:& Ind\\
 			\text{y} &:& Ind\\
 			\text{c}_\text{0} &:& \text{dog}(x)\\
 			\text{c}_\text{1} &:& \text{bicycle}(y)\\
 			\text{c}_\text{2} &:& \text{left}(x, y)\\
-			\end{array}\right] \\
-		\end{array}\right] \\
-    \end{array}\right]
+			} \\
+		} \\
+    }
 \end{equation}
 \end{landscape}
 
@@ -406,28 +406,28 @@ The \textit{combination} of these beliefs, which declares both these relationshi
 To avoid conflict, some fields have been relabeled, prompting the expectation that combination results have no informative or predictable labels.
 
 \begin{equation} \label{eq:combineterm1}
-T_1 = \left[\begin{array}{rcl}
+T_1 = \rec{
     \text{x} &:& Ind_{a_1} \\
     \text{y} &:& Ind_{a_2} \\
     \text{cr} &:& \text{above}(\text{x}, \text{y})
-    \end{array}\right]
+    }
 \end{equation}
 
 \begin{equation} \label{eq:combineterm2}
-T_2 = \left[\begin{array}{rcl}
+T_2 = \rec{
     \text{x} &:& Ind_{a_2} \\
     \text{y} &:& Ind_{a_1} \\
     \text{cr} &:& \text{right}(\text{x}, \text{y})
-    \end{array}\right]
+    }
 \end{equation}
 
 \begin{equation} \label{eq:combination}
-\left[\begin{array}{rcl}
+\rec{
     \text{x} &:& Ind_{a_1} \\
     \text{y} &:& Ind_{a_2} \\
     \text{cr}_1 &:& \text{above}(\text{x}, \text{y}) \\
     \text{cr}_2 &:& \text{right}(\text{y}, \text{x})
-    \end{array}\right]
+    }
 \end{equation}
 
 TTR features a \textit{merge} operation ($\ttrmerge$), but a merge will not have the result desired here.
@@ -437,11 +437,11 @@ The constraint in the `cr' field then says that some individual is above and to 
 
 \begin{equation} \label{eq:merge}
 T_1  \ttrmerge T_2 =
-\left[\begin{array}{rcl}
+\rec{
     \text{x} &:& Ind_{a_1} \wedge Ind_{a_2} \\
     \text{y} &:& Ind_{a_2} \wedge Ind_{a_1} \\
     \text{cr} &:& \text{above}(\text{x}, \text{y}) \wedge \text{right}(\text{x}, \text{y})
-    \end{array}\right]
+    }
 \end{equation}
 
 \cite{CooperTypetheorylanguage2016} solves this by a method of nesting and flattening.
@@ -451,14 +451,14 @@ The field labeled `x' in $T_1$ is now labeled `prev.x' and does not conflict wit
 % Duplicates?
 
 \begin{equation} \label{eq:combineprev}
-\left[\begin{array}{rcl}
+\rec{
     \text{prev.x} &:& Ind_{a_1} \\
     \text{prev.y} &:& Ind_{a_2} \\
     \text{prev.cr} &:& \text{above}(\text{prev.x}, \text{prev.y}) \\
     \text{x} &:& Ind_{a_2} \\
     \text{y} &:& Ind_{a_1} \\
     \text{cr} &:& \text{right}(\text{x}, \text{y})
-    \end{array}\right]
+    }
 \end{equation}
 
 Another method is used in this project for the purpose of computational speed.
@@ -467,14 +467,14 @@ An example result is shown in \autoref{eq:combineunconflict}.
 Generating unique labels is an operation outside TTR, making this method less purely TTR-powered.
 
 \begin{equation} \label{eq:combineunconflict}
-\left[\begin{array}{rcl}
+\rec{
     \text{x}_1 &:& Ind_{a_1} \\
     \text{y}_1 &:& Ind_{a_2} \\
     \text{cr}_1 &:& \text{above}(\text{x}_1, \text{y}_1) \\
     \text{x}_2 &:& Ind_{a_2} \\
     \text{y}_2 &:& Ind_{a_1} \\
     \text{cr}_2 &:& \text{right}(\text{x}_2, \text{y}_2)
-    \end{array}\right]
+    }
 \end{equation}
 
 Both methods result in duplicate fields: there is no meaningful difference between the fields labeled `$\text{x}_1$' and `$\text{y}_2$' above, as both have the same type.
@@ -687,11 +687,11 @@ The algorithm imposes some prerequisites on the scene type $S$ and question type
 \begin{itemize}
 \item Any dependent fields depend only on basic (non-dependent) fields.
 
-For example, $\left[\begin{array}{rcl}
+For example, $\rec{
 \text{x} &:& Ind \\
 \text{c}_1 &:& \text{great}(\text{x}) \\
 \text{c}_2 &:& \text{believe}(\text{x}, \text{c}_1)
-\end{array}\right]$ is not allowed.
+}$ is not allowed.
 
 \item No nested record types.
 (This restraint may be eliminated by using flattening, but it is not needed in this scope.)
@@ -770,7 +770,7 @@ They include:
 \item[Python-body functions] A \gls{ttr} function is modelled by the PyTTR \texttt{Fun} class, where the function body is made up by another PyTTR object. Application of the function is implemented as substituting the argument in the body object. Some operations here have required more advanced operations. A \texttt{LambdaFun} subclass of \texttt{Fun} was thus created to allow any Python code as its body.
 \item[Copying a record type] This facilitated the creation of new record types based off an existing one, without altering the original.
 \item[Relabeling multiple fields] PyTTR originally only contains a method for relabeling a single field.
-\item[Relabel fix] When a relabeled field occurs in a sibling dependent field value, the dependent field value must be updated to use the new label. For instance, if `x' is relabeled to `y' in $\left[ \begin{array}{rcl}\text{x} &:& Ind \\ \text{c} &:& \text{p}(\text{x}) \end{array}\right]$, then $\text{p}(\text{x})$ must be updated to $\text{p}(\text{y})$.
+\item[Relabel fix] When a relabeled field occurs in a sibling dependent field value, the dependent field value must be updated to use the new label. For instance, if `x' is relabeled to `y' in $\rec{\text{x} &:& Ind \\ \text{c} &:& \text{p}(\text{x})}$, then $\text{p}(\text{x})$ must be updated to $\text{p}(\text{y})$.
 \item[A fix for LazyObject] LazyObject is a class in the PyTTR library used for making references between fields. Prior to the fix, it could only be used for paths longer than one item, for instance $r.x$ but not $r$.
 \item[Flatten for record types] The flatten operation was implemented for records but not for record types. Flatten was used together with merging in one version of the implementation, but was later replaced by another approach, using only merging.
 \item[Latex output fixes] These did not contribute to the implementation itself, but to the writing of this thesis.

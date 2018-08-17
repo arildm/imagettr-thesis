@@ -57,7 +57,7 @@ Formal approaches, on the other hand, require more or less precisely crafted rul
 
 \cite{SearleMindsbrainsprograms1980} disputes whether a computer really can \textit{understand} concepts, that is, whether it will be able operate on grounded symbols or just the (arbitrary) symbols themselves.
 \cite{HarnadSymbolGroundingProblem1990} names this the \textit{symbol grounding problem}.
-\cite{SteelsSymbolGroundingProblem2007} describes experiments where a number of agents participate in a language game, where they make up random words for preset concepts and manage to ``agree'' on which words to use for which concepts.
+\cite{SteelsSymbolGroundingProblem2007} describes experiments where a number of artificial agents participate in a language game, where they make up random words for preset concepts and manage to ``agree'' on which words to use for which concepts.
 With the success in these experiments, \citeauthor{SteelsSymbolGroundingProblem2007} concludes that the symbol grounding problem is solved.
 
 
@@ -155,13 +155,13 @@ The judgement that the object $a$ is a witness of the type $T$ is written $a : T
 For example, $34 : Int$ means that $34$ is of the type $Int$.
 
 A \textbf{record type} is a set of fields, each field carrying a label and a type.
-In the record type $\left[ \begin{array}{rcl} \text{person} &:& Ind \\ \text{age} &:& Int \end{array} \right]$ there is a field labeled $person$ of type $Ind$, and one labeled $age$ of the type $Int$.
+In the record type $\rec{\text{person} &:& Ind \\ \text{age} &:& Int}$ there is a field labeled $person$ of type $Ind$, and one labeled $age$ of the type $Int$.
 
 The witnesses of record types are \textbf{records}.
 A record is also a set of fields with labels, but instead of a type, a label is associated with an object.
 A record $r$ is a witness of a record type $T$, \textit{if and only if} every field in the record type has a matching field in the record, that is, the labels are the same and the object in the record field is a witness of the type in the record type.
 %The record may have additional fields that are not in the record type; this does not interfere with type judgement.
-The record $\left[ \begin{array}{rcl} \text{person} &=& a_{12} \\ \text{age} &=& 28 \end{array} \right]$ is a witness of the record type just mentioned, provided $a_{12} : Ind$ and $28 : Int$.
+The record $\rec{\text{person} &=& a_{12} \\ \text{age} &=& 28}$ is a witness of the record type just mentioned, provided $a_{12} : Ind$ and $28 : Int$.
 
 % Intensional/extensional? (TTL p. 6)
 
@@ -169,7 +169,7 @@ A type $T_{sub}$ is a \textbf{subtype} of another type $T_{super}$, written $T_{
 For example, $Int \sqsubseteq Number$.
 %TODO "necessarily"?
 In the case of record types, this means that a record type $T_{sub}$ is a subtype of a record type $T_{super}$ if and only if every field in $T_{super}$ is present also in $T_{sub}$ (allowing that a type in a $T_{sub}$ field is itself a subtype of the type in the corresponding $T_{super}$ field).
-For example, $\left[ \begin{array}{rcl} x &:& Int \end{array} \right] \sqsubseteq \left[ \begin{array}{rcl} x &:& Number \end{array} \right]$, provided $Int \sqsubseteq Number$.
+For example, $\rec{\text{x} &:& Int} \sqsubseteq \rec{\text{x} &:& Number}$, provided $Int \sqsubseteq Number$.
 
 Relationships between objects can be modeled using \textbf{ptypes}, complex types constructed from predicates and objects.
 For instance, the type $\text{hug}(a,b)$ is constructed from the predicate 'hug' with the objects $a$ in the first place and $b$ in the second.
@@ -179,7 +179,7 @@ The situation that $a$ is hugging $b$ is true if there exists a witness of $\tex
 A type can be restricted to only have a single witness:
 If $T$ is a type and $a:T$, then $T_a$ is a \textbf{singleton type} having $a$ as its only witness.
 There is an alternative notation for singleton types used in record types:
-The record type $[x:Ind_a]$ can also be written $[x=a:Ind]$, and is restricted to the record $[x=a]$.
+The record type $\rec{\text{x} &:& Ind_a}$ can also be written $\rec{\text{x}=a &:& Ind}$, and is restricted to the record $\rec{\text{x} &:& a}$.
 A singleton-typed field notated this way is known as a \textbf{manifest field}.
 Any number of fields in a record type may be manifest fields.
 
@@ -191,7 +191,7 @@ If $L$ is a list and $\forall a \in L, a : T$, then $L : [T]$.
 The list containing $a$, $b$ and $c$ can be written $[a, b, c]$.
 (This notation may not have been proposed in past \gls{ttr} literature.)
 
-[TODO discuss] Types themselves may be the witnesses of other types.
+Types themselves may be the witnesses of other types.
 $Type$ is the type of all types, so if $T$ is a type, then $T : Type$.
 (The controversial consequence that $Type : Type$ is handled in \citet[section 2.7]{CooperTypetheorysemantics2012}.)
 Similarly, $RecType$ is the type of all record types.
@@ -199,12 +199,12 @@ Similarly, $RecType$ is the type of all record types.
 
 The \textbf{relabeling} $\eta$ of a record type $T$ is a set of tuples where the first element is a label in $T$ and the second is another, new label.
 $T_\eta$ is another record type, similar to $T$ but where the first item in each element of $\eta$ has been replaced with the second item.
-So, if $T = \left[\begin{array}{rcl}\text{x} &:& T'\end{array}\right]$ and $\eta = [\langle \text{x}, \text{y}\rangle]$, then $T_\eta = \left[\begin{array}{rcl}\text{y} &:& T'\end{array}\right]$.
+So, if $T = \rec{\text{x} &:& T'}$ and $\eta = [\langle \text{x}, \text{y}\rangle]$, then $T_\eta = \rec{\text{y} &:& T'}$.
 
 \textbf{Flattening} transforms a nested record type into an non-nested record type.
-In a nested record type such as $T = \left[\begin{array}{rcl} x &:& \left[\begin{array}{rcl} y &:& T_1 \end{array}\right] \\ z &:& T_2 \end{array}\right]$, a \textbf{path} of labels from consecutive levels can be used to address a nested field, thus $x.y$ refers to the field with the type $T_1$.
+In a nested record type such as $T = \rec{x &:& \rec{y &:& T_1} \\ z &:& T_2}$, a \textbf{path} of labels from consecutive levels can be used to address a nested field, thus $x.y$ refers to the field with the type $T_1$.
 The flattened type $\varphi(T)$ contains every field in the first level, and the paths from the nested type are used as labels:
-$\varphi(T) = \left[\begin{array}{rcl} x.y &:& T_1 \\ z &:& T_2 \end{array}\right]$
+$\varphi(T) = \rec{x.y &:& T_1 \\ z &:& T_2}$
 
 The \textbf{meet} of two types $T_1 \vee T_2$ is a new type whose witnesses are those that are witnesses both of $T_1$ and $T_2$ (an intersection of the sets of witnesses).
 The \textbf{join} $T_1 \wedge T_2$ is a type whose witnesses are those that are witnesses either of $T_1$ or of $T_2$, or both (a union).
@@ -238,8 +238,8 @@ A \gls{vqa} system is presented an image and a natural-language question about t
 The initiative includes datasets and a series of annual competitions since 2016.
 
 A neural-network approach to question answering tasks in general is proposed by \cite{AndreasLearningComposeNeural2016}, where multiple neural-network modules are assembled like constituents in a syntax tree.
-For example, for the \gls{vqa} question \textit{What color is the bird?}, a network that detects objects of a given class is connected to one which classifies the color at the indicated location.
-The method of assembly is trained jointly with the module networks.
+For example, for the \gls{vqa} question ``What color is the bird?'', a network that locates objects of a given class is connected to one which classifies the color at the indicated location.
+The method of composing the various modules is trained jointly with the module networks themselves.
 
 %\cite{SchlangenResolvingReferencesObjects2015}
 

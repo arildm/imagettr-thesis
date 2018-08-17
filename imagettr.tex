@@ -37,9 +37,12 @@
 \newtheorem{definition}{Definition}
 
 %\newcommand{\ttrmerge}{\mathrel{\substack{\wedge \\[-.3em] \cdot}}}
-\newcommand{\ttrmerge}{\mathrel{\underset\cdot\wedge}}
+%\newcommand{\ttrmerge}{\mathrel{\underset\cdot\wedge}}
+\newcommand{\ttrmerge}{\mathrel{\wedge_{\mkern-10mu\cdot\mkern6mu}}}
 %\newcommand{\subtrlb}{\mathrel{\sqsubseteq\!\!\!\sqsubseteq}}
 \newcommand{\subtrlb}{\mathrel{\sqsubseteq_\text{rlb}}}
+
+\newcommand{\rec}[1]{\arraycolsep=.3em\left[\begin{array}{rcl}#1\end{array}\right]}
 
 
 
