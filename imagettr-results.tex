@@ -268,7 +268,7 @@ This new relation is discussed in \autoref{sec:subtyperelabeling}.
 
 The perceptual-conceptual pieces described above are now connected in an \textit{agent} record type (\autoref{eq:agent} and \autoref{eq:state}) with associated manipulation algorithms.
 Upon receiving an image, it will carry out object detection, individuation and spatial relation classification, in order to form its beliefs.
-It may also receive a parsed natural-language utterance, which will then be validated against the beliefs.
+It may also receive a parsed natural-language utterance, which will then be verified against the beliefs.
 %The information is in \gls{ttr} form, which finally allows the agent to connect the two modes.
 A construction like this provides a means to answer to natural-language questions about the image.
 
@@ -539,19 +539,8 @@ The \gls{fol} expression is subsequently \textit{translated} to \gls{ttr} in a n
 
 \subsubsection{Parsing to \acrlong{fol}}
 
-Parsing is done using a semantically augmented \gls{cfg}.
-The rules in the grammar determine how an utterance is parsed into a syntax tree.
-A determiner followed by a common noun form a noun phrase (NP $\rightarrow$ Det N), a sentence consists of a noun phrase and a verb phrase (S $\rightarrow$ NP VP), and so on.
-A feature-based grammar extends the \gls{cfg} framework so that each constituent is associated with a feature structure.
-This allows constituents to carry additional information which can be combined as defined in the grammar rules.
-
-The semantic augmentation uses feature structures to associate each constituent with a \gls{fol} term possibly using lambda calculus.
-For a simple example, a noun phrase may carry the term $t_{\text{NP}} = \lambda P \exists x P(x)$, and a verb phrase may carry $t_\text{VP} = \lambda z \ \text{sleep}(z)$.
-A sentence rule may combine them as $t_\text{S} \rightarrow t_\text{VP}(t_\text{NP})$.
-The result is $t_\text{S} = (\lambda P \exists x P(x)) (\lambda z \ \text{sleep}(z))$ which, after $\beta$-reduction, is equal to $t_\text{S} = \exists x \ \text{sleep}(x)$.
-(Note that the actual rules for noun and verb phrases are slightly more complex.)
-
-This project uses the semantically augmented \gls{cfg} framework available in NLTK \citep{nltk}.
+Parsing is done using the NLTK library \citep{nltk}, which contains a semantically augmented \gls{cfg} framework just like the method introduced in \autoref{sec:compsem}.
+It uses feature structures to associate each constituent with a \gls{fol} term possibly using lambda calculus.
 A snippet of the grammar is given in \autoref{lst:grammar}.
 The grammar can be used to generate the sample parse tree in \autoref{fig:tree}.
 Above the word-tokenized sentence, every node in the tree represents a constituent.
@@ -786,3 +775,59 @@ They include:
 \item[Flatten for record types] The flatten operation was implemented for records but not for record types. Flatten was used together with merging in one version of the implementation, but was later replaced by another approach, using only merging.
 \item[Latex output fixes] These did not contribute to the implementation itself, but to the writing of this thesis.
 \end{description}
+
+
+
+\subsection{Demonstration}
+
+The model has been run on a handful of images from the VQA dataset \citep{AgrawalVQAVisualQuestion2015}
+The results are presented in \autoref{tab:demo}.
+Where the answer is incorrect, this is explained by different reasons.
+In 1.2, the car is classified as \textit{truck} and our model does not have any inference system for determining that if something is a truck then it is also a car.
+(The answer could alternatively be considered to be correct, as all persons seen are actually to the left of the car, from the perspective of the car itself. This would however be a pointless coincidence, as there is no support in this model for intrinsical spatial relations, as discussed in \autoref{sec:method-spatrel}.)
+In 2.1 and 4.1, some of the objects are not successfully detected by the object detection system.
+In 3.1, the simplistic account of spatial relations conflicts with that of our intuition.
+Sure enough, there is at least one snowboard whose center coordinates is higher on the $y$ axis than that of at least one person.
+
+\begin{table}
+\begin{tabular}{p{.5\textwidth}p{.5\textwidth}}
+\def\arraystretch{1.5}
+
+	\includegraphics[width=0.5\textwidth]{vqa1.jpg} &
+	\includegraphics[width=0.5\textwidth]{vqa3.jpg} \\
+	1.1 \ Is there an aeroplane?
+
+	\qquad Yes (Correct)
+
+	1.2 \ Is there a person to the right of a car?
+
+	\qquad No (Incorrect?) &
+
+	3.1 \ Is there a snowboard above a person?
+
+	\qquad Yes (Incorrect)
+
+	3.2 \ Is there a snowboard below a person?
+
+	\qquad Yes (Correct) \\[1.5em]
+
+	\includegraphics[width=0.5\textwidth]{vqa2.jpg} &
+	\includegraphics[width=0.5\textwidth]{vqa4.jpg} \\
+
+	2.1 \ Is there a tent?
+
+	\qquad No (Incorrect)
+
+	2.2 \ Is there a kite above a person?
+
+	\qquad Yes (Correct) &
+
+	4.1 \ Is there a giraffe below a tree?
+
+	\qquad No (Incorrect)
+
+\end{tabular}
+\caption{Demonstration of model performance.}
+\label{tab:demo}
+\end{table}
+

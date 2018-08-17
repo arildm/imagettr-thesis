@@ -11,34 +11,49 @@ This section will highlight some important pieces of the history of past researc
 
 In image recognition, visual data is analyzed in order to detect and classify objects.
 A wide range of models have been developed to solve this task.
-Some focus only on the detection of objects \citep{BlaschkoLearningLocalizeObjects2008}, some only on classification \citep[ResNet,][]{HeDeepResidualLearning2015}, and others attempt to solve the full problem in an integrated fashion \citep{RedmonYouOnlyLook2015,HeMaskRCNN2017}.
+Some focus only on the detection of objects \citep{BlaschkoLearningLocalizeObjects2008}, some only on classification \citep[e.g. ResNet,][]{HeDeepResidualLearning2015}, and others attempt to solve the full problem in an integrated fashion \citep{RedmonYouOnlyLook2015,HeMaskRCNN2017}.
 
-There are different strategies for encoding the image into features.
+Like in machine learning in general, and other kinds of data processing, significant values from the input data (the image) are collected in a process known as feature extraction.
+Various types of features exist for image processing.
 For one, SIFT is a technique where significant locations of an image are used to extract \textit{keypoints} \citep{LoweObjectrecognitionlocal1999}.
 Classification can then be performed by comparing the keypoints of a target image to those in a database.
 
-With \textit{convolutional neural networks}, however, the need for prior feature extraction is generally eliminated \citep{HeDeepResidualLearning2015, HeMaskRCNN2017}.
-Color image data is highly dimensional: it is typically represented digitally as a 2D matrix of pixels, where each pixel itself specifies a quantity of each of three basic colors.
-Convolutional layers reduce the dimensionality so that an image can be encoded in a single (one-dimensional) vector.
-The full image is often first divided into same-size overlapping segments, thus capturing locational aspects of the data.
+With neural networks, however, the need for prior feature extraction is generally eliminated \citep{HeDeepResidualLearning2015, HeMaskRCNN2017}.
+Neural networks that process image data typically contain convolutional network layers.
+Color image data is highly dimensional, typically represented as a 2D matrix of pixels, where each pixel itself specifies a quantity of each of three basic colors.
+Convolutional layers are used to divide the image into smaller, overlapping segments, thus capturing locational aspects of the data.
+This way, the dimensionality can be reduced to a single, one-dimensional vector.
 
 
 
 \subsection{Computational semantics}
+\label{sec:compsem}
 
 Semantics is the study of meaning.
-Computational semantics is concerned with how to represent meaning digitally, and then use it to perform semantic parsing, inference and other tasks \citep{BlackburnComputationalsemantics2003}.
+Computational semantics is concerned with how to represent meaning digitally, and use it to perform semantic parsing, inference and other tasks \citep{BlackburnComputationalsemantics2003}.
+
 A well-established and largely capable formalism for expressing and operating on propositions is \gls{fol}.
-\cite{MontagueFormalPhilosophySelected1974} used \gls{fol} with syntactic parsing for semantic parsing.
+In \gls{fol}, the phrase ``all dogs run'' can be expressed as $\forall x [ \text{dog}(x) \rightarrow \text{run}(x) ]$:
+for each individual it holds that if it is a dog then it runs.
+\cite{BlackburnComputationalsemantics2003} claimed that \gls{fol} is an adequate semantic representation in a majority of cases, but ``other approaches are both possible and interesting''.
+
+\cite{MontagueFormalPhilosophySelected1974} connected \gls{fol} and lambda calculus with syntactic parsing to obtain semantic parsing.
 Thus, a natural-language utterance can be translated to a logical representation.
+One method for this is \gls{cfg} with feature structures.
+In \gls{cfg}, a set of rules determine how an utterance is parsed into a syntax tree:
+A determiner followed by a common noun form a noun phrase (NP $\rightarrow$ Det N), a sentence consists of a noun phrase and a verb phrase (S $\rightarrow$ NP VP), and so on.
+Extending a \gls{cfg} framework with feature structures allows constituents to carry additional information, such as semantic representations, which can be combined as defined in the grammar rules.
+
+For a simple example, a noun phrase may carry the term $t_{\text{NP}} = \lambda P \exists x P(x)$, and a verb phrase may carry $t_\text{VP} = \lambda z \ \text{sleep}(z)$.
+A sentence rule may combine them as $t_\text{S} \rightarrow t_\text{VP}(t_\text{NP})$.
+The result is $t_\text{S} = (\lambda P \exists x P(x)) (\lambda z \ \text{sleep}(z))$ which, after $\beta$-reduction, is equal to $t_\text{S} = \exists x \ \text{sleep}(x)$.
+In real applications, the rules for noun and verb phrases are usually more complex in order to cover more complex grammatical constructions.
 
 With recent advancements in computer science, ambitious computational-semantic theories are now in abundance.
 As a competitor to formal systems, statistical methods have emerged which do well in various tasks within semantics.
-They utilize the performance of modern computers and leverage the large amounts of data that are available as a product of our largely digitalized society.
-Data-driven approaches are easily adapted for wide coverage (assuming enough data is available) but they often produce shallow knowledge.
+They leverage the performance of modern computers and the large amounts of data that are available as a product of our largely digitalized society.
+These data-driven approaches are easily adapted for wide coverage (assuming enough data is available) but they often produce shallow knowledge.
 Formal approaches, on the other hand, require more or less precisely crafted rules and formulations, which is time-consuming, but it typically enables the result to be more structured and comprehensive \citep{Dobnik:2017ag}.
-
-\cite{BlackburnComputationalsemantics2003} claimed (at that time) that \gls{fol} is an adequate semantic representation in a majority of cases, but ``other approaches are both possible and interesting''.
 
 \cite{SearleMindsbrainsprograms1980} disputes whether a computer really can \textit{understand} concepts, that is, whether it will be able operate on grounded symbols or just the (arbitrary) symbols themselves.
 \cite{HarnadSymbolGroundingProblem1990} names this the \textit{symbol grounding problem}.
@@ -59,9 +74,10 @@ By using terms of spatial relations (``left'', ``right'', ``above'', etc.), the 
 Different terminology have been used to refer to the two roles, but we will use \textit{located object} and \textit{reference object} \citep{DobnikModellinglanguageaction2012}.
 
 \cite{Garnhamunifiedtheorymeaning1989} explores terms of spatial relations and claims that there are three types of meanings for each term: basic, deictic and intrinsic.
+The basic meaning relative to the speaker and holds for a single object only.
 The deictic and intrinsical meanings hold for relations between two objects.
 The deictic meaning is relative to the coordinate frame of the speaker, while the intrinsical is relative to that of the reference object.
-The basic meaning, introduced by \citeauthor{Garnhamunifiedtheorymeaning1989}, is also relative to the speaker, but holds for a single object only.
+For someone facing the right side of a car, an object said to be ``to the left of the car'' could be understood to be either near the car's backside (deictic meaning) or its left side (intrinsical meaning).
 
 %The vertical (or gravitational) axis is special, so the terms ``above'' and ``below'' work differently than expected when the related object is, for example, upside down.
 %\citeauthor{Garnhamunifiedtheorymeaning1989} uses a rule known as the \textit{framework vertical constraint} to explain this.
@@ -119,7 +135,7 @@ spoken language \citep{CooperTypetheorylanguage2016}.
 
 \cite{DobnikModellinglanguageaction2012} presents how \gls{ttr} can be used to model a situated conversational agent.
 The agent moves around in a point-space world.
-Objects, detected as sub point-spaces are recognized, as are (geometric and extra-geometric) spatial relations between them.
+Objects, detected as sub-point-spaces are recognized, as are (geometric and extra-geometric) spatial relations between them.
 The work is followed up by \cite{ttrspat} and \cite{lspc}, which model similar situated agents.
 
 %\cite{LarssonFormalsemanticsperceptual2015}
@@ -167,7 +183,7 @@ The record type $[x:Ind_a]$ can also be written $[x=a:Ind]$, and is restricted t
 A singleton-typed field notated this way is known as a \textbf{manifest field}.
 Any number of fields in a record type may be manifest fields.
 
-[discuss] A function from $T_{dom}$ to $T_{rng}$ is a witness of the \textbf{function type} $(T_{dom} \rightarrow T_{rng})$.
+[TODO discuss] A function from $T_{dom}$ to $T_{rng}$ is a witness of the \textbf{function type} $(T_{dom} \rightarrow T_{rng})$.
 For instance, if $f = \lambda x : Ind\ .\ \text{blue}(x)$, then $f : (Ind \rightarrow Type)$.
 
 A list of objects of type $T$ is a witness of the \textbf{list type} $[T]$:
@@ -175,15 +191,28 @@ If $L$ is a list and $\forall a \in L, a : T$, then $L : [T]$.
 The list containing $a$, $b$ and $c$ can be written $[a, b, c]$.
 (This notation may not have been proposed in past \gls{ttr} literature.)
 
-[discuss] Types themselves may be the witnesses of other types.
+[TODO discuss] Types themselves may be the witnesses of other types.
 $Type$ is the type of all types, so if $T$ is a type, then $T : Type$.
 (The controversial consequence that $Type : Type$ is handled in \citet[section 2.7]{CooperTypetheorysemantics2012}.)
 Similarly, $RecType$ is the type of all record types.
 % PType, the type of ptypes?
 
-[TODO Relabel, $\eta$, flatten]
+The \textbf{relabeling} $\eta$ of a record type $T$ is a set of tuples where the first element is a label in $T$ and the second is another, new label.
+$T_\eta$ is another record type, similar to $T$ but where the first item in each element of $\eta$ has been replaced with the second item.
+So, if $T = \left[\begin{array}{rcl}\text{x} &:& T'\end{array}\right]$ and $\eta = [\langle \text{x}, \text{y}\rangle]$, then $T_\eta = \left[\begin{array}{rcl}\text{y} &:& T'\end{array}\right]$.
 
-[TODO Merge, join, meet]
+\textbf{Flattening} transforms a nested record type into an non-nested record type.
+In a nested record type such as $T = \left[\begin{array}{rcl} x &:& \left[\begin{array}{rcl} y &:& T_1 \end{array}\right] \\ z &:& T_2 \end{array}\right]$, a \textbf{path} of labels from consecutive levels can be used to address a nested field, thus $x.y$ refers to the field with the type $T_1$.
+The flattened type $\varphi(T)$ contains every field in the first level, and the paths from the nested type are used as labels:
+$\varphi(T) = \left[\begin{array}{rcl} x.y &:& T_1 \\ z &:& T_2 \end{array}\right]$
+
+The \textbf{meet} of two types $T_1 \vee T_2$ is a new type whose witnesses are those that are witnesses both of $T_1$ and $T_2$ (an intersection of the sets of witnesses).
+The \textbf{join} $T_1 \wedge T_2$ is a type whose witnesses are those that are witnesses either of $T_1$ or of $T_2$, or both (a union).
+
+The \textbf{merge} of two types $T_1 \ttrmerge T_2$ is a somewhat more complicated operation.
+If $T_1$ and $T_2$ are record types, their fields are added together to a new record type;
+if any label occurs in both types, so $T_1$ has $\langle \ell, T'_1\rangle$ and $T_2$ has $\langle \ell, T'_2\rangle$, a field with that label is added, which has the merge of the two field types, $\langle \ell, T'_1 \ttrmerge T'_2\rangle$.
+If any of $T_1$ and $T_2$ is not a record type, then $T_1 \ttrmerge T_2 = T_1 \wedge T_2$.
 
 
 
