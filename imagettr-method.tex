@@ -1,3 +1,6 @@
+\renewcommand{\sectionautorefname}{Section}
+\let\subsectionautorefname\sectionautorefname
+\let\subsubsectionautorefname\sectionautorefname
 \section{Method}
 \label{sec:method}
 
@@ -89,7 +92,7 @@ In this process, the bounding box coordinates are cast from a top-left and botto
 
 
 
-\subsection{Objects and perception}
+\subsection{Objects and perception with \gls{ttr}}
 
 The perception of objects in this model is largely based on \cite{lspc}.
 First, the object detection algorithm returns a set of \textit{perceptual objects}.
@@ -119,7 +122,7 @@ Another simplification is the neglection of the \textit{functional} aspects of s
 In our model, a spatial classifier $\kappa$ takes two locations and returns a boolean result.
 We have implemented spatial classifiers as Python functions.
 For the purpose of this thesis, no sophisticated spatial classification has been considered.
-Instead, a naive comparison between centers of bounding boxes was implemented.
+Instead, a naive comparison between centers of bounding boxes was implemented using pre-defined rules.
 This was done for the four relations ``left'', ``right'', ``above'' and ``below''.
 
 

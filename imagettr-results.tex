@@ -1,8 +1,11 @@
+\renewcommand{\sectionautorefname}{Section}
+\let\subsectionautorefname\sectionautorefname
+\let\subsubsectionautorefname\sectionautorefname
 \section{Results}
 \label{sec:results}
 
 The results of this project consists primarily of a \gls{ttr} model, which connects language to visual perception in a basic \gls{vqa} setting and uses \gls{ttr} throughout (\autoref{sec:ttrmodel}).
-There are also a few significant sub-problems, which are not entirely within the \gls{ttr} model but tightly connected to it.
+The project also solves a few significant sub-problems, which are not entirely within the \gls{ttr} model but tightly connected to it.
 These have been solved as algorithms implemented in Python.
 They are: efficiently combining multiple belief record types into one (\autoref{sec:combine}), basic translation from first-order logic to \gls{ttr} (\autoref{sec:parsing}) and finally a subtype relation insensitive to labels, $\subtrlb$ (\autoref{sec:subtyperelabeling}).
 
@@ -21,7 +24,6 @@ Five basic types exist in the model.
 \item [$Int$] An integer, such as 415.
 \item [$Image$] A 2-dimensional digital image. It serves as an identifier to a set of extracted information, and its file type and actual data is not important in this thesis.
 \item [$String$] A piece of plain text of arbitrary length.
-\item [$Nothing$] Has a single, empty value as its only witness.
 \end{description}
 
 A $Segment$ is a record type describing a rectangular bounding box within an (implicit) image (\autoref{eq:seg}).
@@ -239,7 +241,7 @@ Therefore, parsing must be done externally to the \gls{ttr} model.
 This is described in \autoref{sec:parsing}.
 %Any utterance is input to the model only as a TTR record type.
 % What will the parsing result look like in TTR?
-Equation~\ref{eq:question} models the question ``Is there a lamp above a table?''.
+Equation~\ref{eq:question} models the question ``Is there a lamp above a table?'' (equivalent to the statement ``There is a lamp above a table'').
 
 \begin{equation}\label{eq:question}
 \rec{
@@ -256,7 +258,7 @@ Equation~\ref{eq:question} models the question ``Is there a lamp above a table?'
 As mentioned in \autoref{sec:languagevqa}, answering the question corresponds to checking whether $S \sqsubseteq Q$.
 An important problem, however, stems from the fact that \gls{ttr} record types are labeled.
 In general, fields in the scene type and question type will not share labels in a way that enables simple subtype checking to be useful.
-The remedy to this is an alternative subtype relation $\subtrlb$ which is insensitive to labels.
+The remedy to this is an alternative subtype relation $\subtrlb$ which is insensitive to label names.
 This new relation is discussed in \autoref{sec:subtyperelabeling}.
 
 
@@ -281,17 +283,21 @@ Agent = \rec{
 
 \begin{equation}\label{eq:state}
 AgentState = \rec{
-    \text{img} &:& Image \vee Nothing \\
+    \text{img} &:& Image \\
     \text{perc} &:& [Obj] \\
     \text{bel} &:& [RecType] \\
-    \text{utt} &:& String \vee Nothing \\
+    \text{utt} &:& String \\
     \text{que} &:& RecType \\
     }
 \end{equation}
 
 The fields `objdetector', `indfun' and `relclfs' of $Agent$ are to be statically defined for a specific agent.
 While running, the agent will modify the $AgentState$ record in `state'.
-For an agent $ag : Agent$, the perception and question-answering procedure is carried out as follows.
+The `perc' field will contain a list of perceptual objects.
+The `bel' field will be a list of beliefs modelled as record types:
+individuated objects and spatial relationships between individuals.
+
+For an agent record $ag : Agent$, the perception and question-answering procedure is carried out as follows.
 
 \paragraph{Visual perception}
 
@@ -312,19 +318,16 @@ For an agent $ag : Agent$, the perception and question-answering procedure is ca
     Note that the $IndObj$ have manifest fields which carry on to the $LocTup$ type, so it is more specific than just instantiating $LocTup$ itself.
 \end{enumerate}
 
-
-
 \paragraph{Language}
 
 \begin{enumerate}
 \item Any language input utterance is assigned to $ag.\text{state.utt}$.
 \item The utterance is parsed and the resulting record type ($Q$) assigned to $ag.\text{state.que}$.
-\item The record types in $ag.\text{state.bel}$ are combined ($S$). If the resulting record type is a relabel-subtype of $ag.\text{state.que}$, $S \subtrlb Q$ the answer ``Yes'' is emitted; otherwise ``No''.
+\item The record types in $ag.\text{state.bel}$ are combined to one ($S$). If the resulting record type is a relabel-subtype of $ag.\text{state.que}$, $S \subtrlb Q$ the answer ``Yes'' is emitted; otherwise ``No''.
 \end{enumerate}
 
-
-
-An example state of an agent $ag$ is shown in \autoref{eq:ag}.
+The state of an agent is a record of the type $Agent$.
+An example state $ag$ is shown in \autoref{eq:ag}.
 
 \begin{landscape}
 \begin{equation}\label{eq:ag}
@@ -371,8 +374,8 @@ ag =
 					&:& Segment \\
 				},
 			{}{} \rec{
-				\text{x} &:& Ind_{a_{0}} \\
-				\text{y} &:& Ind_{a_{1}} \\
+				\text{x} = a_0 &:& Ind \\
+				\text{y} = a_1 &:& Ind \\
 				\text{cr} &:& \text{above}(\text{x}, \text{y})
 				},
 			... ] \\
