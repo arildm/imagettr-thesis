@@ -295,7 +295,7 @@ The fields `objdetector', `indfun' and `relclfs' of $Agent$ are to be statically
 While running, the agent will modify the $AgentState$ record in `state'.
 The `perc' field will contain a list of perceptual objects.
 The `bel' field will be a list of beliefs modelled as record types:
-individuated objects and spatial relationships between individuals.
+individuated objects and spatial relations between individuals.
 
 For an agent record $ag : Agent$, the perception and question-answering procedure is carried out as follows.
 
@@ -403,35 +403,35 @@ These are \textit{combined} into one, in order to build the scene type $S$.
 Consider the spatial relation classifiers, which create record types with the fields `x', `y', and `cr'.
 One of these record types may be specified so that it declares that an individual $a_1$ is above another individual $a_2$ (\autoref{eq:combineterm1}).
 Another record type may declare that $a_2$ is to the right of $a_1$ (\autoref{eq:combineterm2}).
-The \textit{combination} of these beliefs, which declares both these relationships, is described by \autoref{eq:combination}.
+The \textit{combination} of these beliefs, which declares both these relations, is described by \autoref{eq:combination}.
 To avoid conflict, some fields have been relabeled, prompting the expectation that combination results have no informative or predictable labels.
 
 \begin{equation} \label{eq:combineterm1}
 T_1 = \rec{
-    \text{x} &:& Ind_{a_1} \\
-    \text{y} &:& Ind_{a_2} \\
+    \text{x}=a_1 &:& Ind \\
+    \text{y}=a_2 &:& Ind \\
     \text{cr} &:& \text{above}(\text{x}, \text{y})
     }
 \end{equation}
 
 \begin{equation} \label{eq:combineterm2}
 T_2 = \rec{
-    \text{x} &:& Ind_{a_2} \\
-    \text{y} &:& Ind_{a_1} \\
+    \text{x}=a_2 &:& Ind \\
+    \text{y}=a_1 &:& Ind \\
     \text{cr} &:& \text{right}(\text{x}, \text{y})
     }
 \end{equation}
 
 \begin{equation} \label{eq:combination}
 \rec{
-    \text{x} &:& Ind_{a_1} \\
-    \text{y} &:& Ind_{a_2} \\
+    \text{x}=a_1 &:& Ind \\
+    \text{y}=a_2 &:& Ind \\
     \text{cr}_1 &:& \text{above}(\text{x}, \text{y}) \\
     \text{cr}_2 &:& \text{right}(\text{y}, \text{x})
     }
 \end{equation}
 
-\gls{ttr} features a \textit{merge} operation ($\ttrmerge$), but a merge will not have the result desired here.
+\gls{ttr} features an \textit{merge} operation ($\ttrmerge$), but a merge will not have the result desired here.
 Since the same labels occur in both belief types, a merge would result in \textit{meet types}, as seen in \autoref{eq:merge}, in a way which is not useful for this purpose.
 The meet type of two different singleton types, $Ind_{a_1} \wedge Ind_{a_2}$, can only be true if the two individuals are the same, $a_1 = a_2$.
 The constraint in the `cr' field then says that some individual is above and to the right of itself, which is meaningless and certainly not what we are trying to obtain.
@@ -453,11 +453,11 @@ The field labeled `x' in $T_1$ is now labeled `prev.x' and does not conflict wit
 
 \begin{equation} \label{eq:combineprev}
 \rec{
-    \text{prev.x} &:& Ind_{a_1} \\
-    \text{prev.y} &:& Ind_{a_2} \\
+    \text{prev.x}=a_1 &:& Ind \\
+    \text{prev.y}=a_2 &:& Ind \\
     \text{prev.cr} &:& \text{above}(\text{prev.x}, \text{prev.y}) \\
-    \text{x} &:& Ind_{a_2} \\
-    \text{y} &:& Ind_{a_1} \\
+    \text{x}=a_2 &:& Ind \\
+    \text{y}=a_1 &:& Ind \\
     \text{cr} &:& \text{right}(\text{x}, \text{y})
     }
 \end{equation}
@@ -469,11 +469,11 @@ Generating unique labels is an operation outside \gls{ttr}, making this method l
 
 \begin{equation} \label{eq:combineunconflict}
 \rec{
-    \text{x}_1 &:& Ind_{a_1} \\
-    \text{y}_1 &:& Ind_{a_2} \\
+    \text{x}_1=a_1 &:& Ind \\
+    \text{y}_1=a_2 &:& Ind \\
     \text{cr}_1 &:& \text{above}(\text{x}_1, \text{y}_1) \\
-    \text{x}_2 &:& Ind_{a_2} \\
-    \text{y}_2 &:& Ind_{a_1} \\
+    \text{x}_2=a_2 &:& Ind \\
+    \text{y}_2=a_1 &:& Ind \\
     \text{cr}_2 &:& \text{right}(\text{x}_2, \text{y}_2)
     }
 \end{equation}
@@ -630,7 +630,7 @@ def eng_to_pyttr(text):
 \label{sec:subtyperelabeling}
 
 Perceptual mechanisms and the combination of belief types have produced a scene type $S$.
-Separately, natural language parsing has provided a question type $Q$.
+Separately, natural language parsing of a speaker utterance has provided a question type $Q$.
 Now, in order to answer the question, we are interested in whether $S \sqsubseteq Q$.
 
 However, the fact that \gls{ttr} record types are labeled prevents direct usage of the subtype relation.
@@ -768,7 +768,7 @@ They include:
 
 \begin{description}
 \item[Python-body functions] A \gls{ttr} function is modelled by the PyTTR \texttt{Fun} class, where the function body is made up by another PyTTR object. Application of the function is implemented as substituting the argument in the body object. Some operations here have required more advanced operations. A \texttt{LambdaFun} subclass of \texttt{Fun} was thus created to allow any Python code as its body.
-\item[Copying a record type] This facilitated the creation of new record types based off an existing one, without altering the original.
+\item[Copying a record type] This facilitated the creation of new record types based on an existing one, without altering the original.
 \item[Relabeling multiple fields] PyTTR originally only contains a method for relabeling a single field.
 \item[Relabel fix] When a relabeled field occurs in a sibling dependent field value, the dependent field value must be updated to use the new label. For instance, if `x' is relabeled to `y' in $\rec{\text{x} &:& Ind \\ \text{c} &:& \text{p}(\text{x})}$, then $\text{p}(\text{x})$ must be updated to $\text{p}(\text{y})$.
 \item[A fix for LazyObject] LazyObject is a class in the PyTTR library used for making references between fields. Prior to the fix, it could only be used for paths longer than one item, for instance $r.x$ but not $r$.
@@ -784,7 +784,7 @@ The model has been run on a handful of images from the VQA dataset \citep{Agrawa
 The results are presented in \autoref{tab:demo}.
 Where the answer is incorrect, this is explained by different reasons.
 In 1.2, the car is classified as \textit{truck} and our model does not have any inference system for determining that if something is a truck then it is also a car.
-(The answer could alternatively be considered to be correct, as all persons seen are actually to the left of the car, from the perspective of the car itself. This would however be a pointless coincidence, as there is no support in this model for intrinsical spatial relations, as discussed in \autoref{sec:method-spatrel}.)
+(The answer could alternatively be considered correct, as all persons seen are actually to the left of the car, from the perspective of the car itself. This would however be a pointless coincidence, as there is no support in this model for intrinsic spatial relations, as discussed in \autoref{sec:method-spatrel}.)
 In 2.1 and 4.1, some of the objects are not successfully detected by the object detection system.
 In 3.1, the simplistic account of spatial relations conflicts with that of our intuition.
 Sure enough, there is at least one snowboard whose center coordinates is higher on the $y$ axis than that of at least one person.
