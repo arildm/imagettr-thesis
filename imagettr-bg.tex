@@ -198,7 +198,7 @@ Similarly, $RecType$ is the type of all record types.
 
 The \textbf{relabeling} $\eta$ of a record type $T$ is a set of tuples where the first element is a label in $T$ and the second is another, new label.
 $T_\eta$ is another record type, similar to $T$ but where the first item in each element of $\eta$ has been replaced with the second item.
-So, if $T = \rec{\text{x} &:& T'}$ and $\eta = [\langle \text{x}, \text{y}\rangle]$, then $T_\eta = \rec{\text{y} &:& T'}$.
+So, if $T = \rec{\text{x} &:& T'}$ and $\eta = \{\langle \text{x}, \text{y}\rangle\}$, then $T_\eta = \rec{\text{y} &:& T'}$.
 
 \textbf{Flattening} transforms a nested record type into an non-nested record type.
 In a nested record type such as $T = \rec{x &:& \rec{y &:& T_1} \\ z &:& T_2}$, a \textbf{path} of labels from consecutive levels can be used to address a nested field, thus $x.y$ refers to the field with the type $T_1$.

@@ -9,6 +9,9 @@ The project also solves a few significant sub-problems, which are not entirely w
 These have been solved as algorithms implemented in Python.
 They are: efficiently combining multiple belief record types into one (\autoref{sec:combine}), basic translation from first-order logic to \gls{ttr} (\autoref{sec:parsing}) and finally a subtype relation insensitive to labels, $\subtrlb$ (\autoref{sec:subtyperelabeling}).
 
+The code is written in a Jupyter notebook file and released at \url{https://github.com/arildm/imagettr} under the open-source MIT license.
+This section contains references to that code (specifically the version tagged 1.0) in the form of notebook cell numbers.
+
 
 
 \subsection{\Gls{ttr} model}
@@ -17,12 +20,15 @@ They are: efficiently combining multiple belief record types into one (\autoref{
 The types in the \gls{ttr} model are largely based on \cite{lspc}, but the $Segment$ type is new, the individuation function is improved and the $RelClf$ mechanism is more concretely defined.
 The $Agent$ type is also new.
 
-Five basic types exist in the model.
+In the code, the \gls{ttr} model is constructed in notebook cells 9–10, 14–19 and 23–26.
+
+Four basic types exist in the model.
 
 \begin{description}
 \item [$Ind$] A single individual object, such as the reader or the Eiffel Tower.
 \item [$Int$] An integer, such as 415.
-\item [$Image$] A 2-dimensional digital image. It serves as an identifier to a set of extracted information, and its file type and actual data is not important in this thesis.
+\item [$Image$] A 2-dimensional digital image.
+It serves as an identifier to a set of extracted information, and its file type and actual data is not important in this thesis.
 \item [$String$] A piece of plain text of arbitrary length.
 \end{description}
 
@@ -54,6 +60,7 @@ An example record is given in \autoref{eq:objrec}.
 %$Obj$ records are the result of performing \textit{object detection}.
 %This fact is expressed in TTR as the function type $ObjDetector$ (\autoref{eq:objdetector}).
 An object detector is a function from an image to a set of such perceptual objects, as captured by the $ObjDetector$ function type (\autoref{eq:objdetector}).
+The YOLO object detector is typed as $ObjDetector$ in notebook cell 14.
 
 %[differences/similarites LSPC and others]
 
@@ -91,15 +98,15 @@ The `cl' field specifies that `loc' is the location of `x', and the purpose of `
 As all individuated objects are subtypes of $IndObj$, the `cp' field must have a type that will be a supertype of any ptype; we define $PType$ to be this.
 
 \begin{definition}
-For any ptype $T = \mathit{pred}(\mathit{args})$, $T \sqsubseteq PType$.
+For any ptype $T = \mathit{pred}(v_1, ..., v_n)$, $T \sqsubseteq PType$.
 \end{definition}
 
 \begin{equation}\label{eq:indobj}
 IndObj = \rec{
 \text{x} &:& Ind \\
-\text{loc} &:& Segment \\
 \text{cp} &:& PType \\
 \text{cl} &:& \text{location}(\text{x}, \text{loc}) \\
+\text{loc} &:& Segment \\
 }
 \end{equation}
 
@@ -110,7 +117,7 @@ It is typed as $IndFun$ (\autoref{eq:indfun}).
 IndFun = ( Obj \rightarrow RecType )
 \end{equation}
 
-The individuation function is defined as $f_{IndFun}$ in \autoref{eq:indfundef}.
+The individuation function is defined as $f_{IndFun}$ in \autoref{eq:indfundef} (notebook cell 15).
 The record type resulting from applying $f_{IndFun}$ is a subtype of $IndObj$, where the `x' and `loc' fields are specified using manifest fields.
 The `x' field is specified as a newly instantiated $Ind$ object, $a_n$ (where $n$ is a number such that the new instatiation is unique).
 The `loc' field is specified as the value of `seg' in the $Obj$ record.
@@ -189,9 +196,13 @@ Of course, the requirement that the individual $r.\text{lo}.\text{x}$ is actuall
     \text{cr} &:& \text{left}(\text{x}, \text{y}) \\
 },
 & \text{if } \kappa_{left}(r.\text{lo}.\text{loc}, r.\text{refo}.\text{loc}) \\
-[], & \text{otherwise}
+[\:], & \text{otherwise}
 \end{cases}
 \end{equation}
+
+This is implemented in notebook cell 16, where the function \texttt{relclf} creates functions like the one in \autoref{eq:leftclfdef}.
+The function \texttt{get\_relclfs} creates such a function for each of the four predicate-classifier pairs, and \texttt{find\_all\_rels} applies each classifier to each $IndObj$ pair.
+(The latter step is later re-implemented in the agent algorithm.)
 
 
 
@@ -310,9 +321,10 @@ For an agent record $ag : Agent$, the perception and question-answering procedur
 	%\item The fields of the domain record type of the function is considered its arguments.
 	%\item Each combination of $ag.\text{state.bel}$ record types that matches the argument types is considered for input.
 	%\item The input record types are combined to match the domain record type of the function, and the type is instantiated.
-    \item For each pair $T_1$ and $T_2$ in $ag.\text{state.bel}$, a $LocTup$ record type is constructed as $\rec{\text{lo} &:& T_1 \\ \text{refo} &:& T_2}$. Note that this will be specified to certain individuals and segments, and is thus more informative than the plain $LocTup$ type.
+    \item For each pair $T_1$ and $T_2$ in $ag.\text{state.bel}$, a $LocTup$ record type is constructed as $\rec{\text{lo} &:& T_1 \\ \text{refo} &:& T_2}$.
+    Note that this will be specified to certain individuals and segments, and is thus more informative than the plain $LocTup$ type.
     \item The specified $LocTup$ type is instantiated to a record.
-	\item Each function in $ag.\text{relclfs}$ is applied to the created record, and the record type resulting from each application is added to $ag.\text{state.bel}$ unless it is empty ($[]$).
+	\item Each function in $ag.\text{relclfs}$ is applied to the created record, and the record type resulting from each application is added to $ag.\text{state.bel}$ unless it is empty ($[\:]$).
 	\end{enumerate}
 	For example, the \textit{left} classifier in \autoref{eq:leftclfdef} is applied to each pair of $IndObj$ after combining them into a $LocTup$ and instantiating it.
     Note that the $IndObj$ have manifest fields which carry on to the $LocTup$ type, so it is more specific than just instantiating $LocTup$ itself.
@@ -323,8 +335,12 @@ For an agent record $ag : Agent$, the perception and question-answering procedur
 \begin{enumerate}
 \item Any language input utterance is assigned to $ag.\text{state.utt}$.
 \item The utterance is parsed and the resulting record type ($Q$) assigned to $ag.\text{state.que}$.
-\item The record types in $ag.\text{state.bel}$ are combined to one ($S$). If the resulting record type is a relabel-subtype of $ag.\text{state.que}$, $S \subtrlb Q$ the answer ``Yes'' is emitted; otherwise ``No''.
+\item The record types in $ag.\text{state.bel}$ are combined to one ($S$).
+If the resulting record type is a relabel-subtype of $ag.\text{state.que}$, $S \subtrlb Q$ the answer ``Yes'' is emitted; otherwise ``No''.
 \end{enumerate}
+
+The $Agent$ type is implemented in notebook cell 23 and instatiated as a record in cell 24.
+Its algorithms are implemented in cell 25 as \texttt{agent\_see} for the \textit{visual perception} part and \texttt{agent\_hear} for \textit{language}.
 
 The state of an agent is a record of the type $Agent$.
 An example state $ag$ is shown in \autoref{eq:ag}.
@@ -445,11 +461,24 @@ T_1  \ttrmerge T_2 =
     }
 \end{equation}
 
-\cite{CooperTypetheorylanguage2016} solves this by a method of nesting and flattening.
-Each belief is added as the type of a new field `prev' in the next belief: $[\text{prev} : T_1] \ttrmerge T_2$.
+\cite{CooperTypetheorylanguage2016} solves this by a method of nesting and flattening (notebook cell 17).
+Each belief is added as the type of a new field `prev' in the next belief: $[\text{prev} : T_1] \ttrmerge T_2$ (\autoref{eq:combineprevnest}).
 The result is then flattened to avoid the nesting (\autoref{eq:combineprev}).
 The field labeled `x' in $T_1$ is now labeled `prev.x' and does not conflict with the field labeled `x' from $T_2$.
 % Duplicates?
+
+\begin{equation} \label{eq:combineprevnest}
+\rec{
+    \text{prev} &:& \rec{
+        \text{x}=a_1 &:& Ind \\
+        \text{y}=a_2 &:& Ind \\
+        \text{cr} &:& \text{above}(\text{x}, \text{y}) \\
+        } \\
+    \text{x}=a_2 &:& Ind \\
+    \text{y}=a_1 &:& Ind \\
+    \text{cr} &:& \text{right}(\text{x}, \text{y})
+    }
+\end{equation}
 
 \begin{equation} \label{eq:combineprev}
 \rec{
@@ -462,7 +491,7 @@ The field labeled `x' in $T_1$ is now labeled `prev.x' and does not conflict wit
     }
 \end{equation}
 
-Another method is used in this project for the purpose of computational speed.
+Another method is used in this project for the purpose of computational speed (notebook cell 18).
 In this method, each belief record type is relabeled to only have unique labels, and then merged.
 An example result is shown in \autoref{eq:combineunconflict}.
 Generating unique labels is an operation outside \gls{ttr}, making this method less purely \gls{ttr}-powered.
@@ -478,20 +507,21 @@ Generating unique labels is an operation outside \gls{ttr}, making this method l
     }
 \end{equation}
 
-Both methods result in duplicate fields: there is no meaningful difference between the fields labeled `$\text{x}_1$' and `$\text{y}_2$' above, as both have the same type.
+Both methods result in duplicate fields: there is no meaningful difference between the fields labeled `$\text{x}_1$' and `$\text{y}_2$' above, as both have the same singleton type.
 Removing these duplicates (also \textit{deduplication}, or \textit{dedupe}) is necessary for the subtype check that will follow.
 This process first involves finding which fields have the same type as another field.
 Subsequently, simply removing duplicates is not an option, as there may be other fields that depend on the duplicate field.
 These dependent fields must also be updated to use the remaining field.
 
-The \texttt{combine} and \texttt{dedupe} functions are defined in \autoref{lst:combine}.
+The \texttt{combine} and \texttt{dedupe} functions are defined in \autoref{lst:combine} (notebook cells 7 and 18).
 
 In \texttt{combine}, a list of record types are reduced to one type by unique relabeling and merging.
 The \texttt{unique\_labels} function makes use of \texttt{gensym} in the PyTTR library, which generates new, consecutively numbered labels such as \texttt{loc\_4} (typeset here as $\text{loc}_4$).
 A label containing an underscore (`\_') is assumed to already be uniquely numbered.
 Thus, labels without undescores are relabeled to new, numbered labels.
 
-Finally, the \texttt{dedupe} function removes any duplicated field types by relabeling all occurrences of a field type with one of their labels. For example, in $\rec{\text{x} &:& Ind_{a_1} \\ \text{y} &:& Ind_{a_1}}$, `y' is relabeled to `x'.
+Finally, the \texttt{dedupe} function removes any duplicated singleton and complex field types by relabeling all occurrences of each such field type with one of their labels.
+For example, in $\rec{\text{x}=a_1 &:& Ind \\ \text{y}=a_1 &:& Ind}$, `y' is relabeled to `x'.
 (Or possibly vice versa; the order of record type fields is unspecified.)
 When all duplicates of some field type have been removed, recursion is used to avoid usage of old labels in the outer for-loop.
 
@@ -507,7 +537,10 @@ def dedupe(T):
     """Make a copy of a record type without duplicated field values."""
     for l,v in T.fields():
         # Are there more fields with the same value?
-        l2s = [l2 for l2,v2 in T.fields() if l2 != l and show(v) == show(v2)]
+        l2s = [l2 for l2,v2 in T.fields() if l2 != l
+               # Dedupe singleton types and complex types.
+               and (isinstance(v, SingletonType) or not is_basic_type(v))
+               and show(v) == show(v2)]
         if len(l2s):
             # Relabel all these fields to the same label,
 			# overwriting until one remains.
@@ -541,7 +574,7 @@ The \gls{fol} expression is subsequently \textit{translated} to \gls{ttr} in a n
 
 Parsing is done using the NLTK library \citep{nltk}, which contains a semantically augmented \gls{cfg} framework just like the method introduced in \autoref{sec:compsem}.
 It uses feature structures to associate each constituent with a \gls{fol} term possibly using lambda calculus.
-A snippet of the grammar is given in \autoref{lst:grammar}.
+A snippet of the grammar is given in \autoref{lst:grammar} (the full grammar is given in notebook cell 20).
 The grammar can be used to generate the sample parse tree in \autoref{fig:tree}.
 Above the word-tokenized sentence, every node in the tree represents a constituent.
 Underneath the abbreviation, each constituent features first the expression given in the grammar specification (with some typographical modification), and second, the \gls{fol} term resulting from substitution and $\beta$-reduction.
@@ -574,11 +607,15 @@ N[SEM=<person>] -> 'person'
 \subsubsection{Translating \gls{fol} to \gls{ttr}}
 
 The result of the \gls{cfg} parsing is a Python object that encodes the \gls{fol} expression.
-A custom Python function \texttt{fol\_to\_pyttr}, given in \autoref{lst:foltopyttr}, traverses this object recursively and builds a PyTTR type.
-For an ``Exists'' expression, an $Ind$ field is added to the type.
-For an ``Application'' expression, a ptype field is added, copying the predicate and variable names.
-An ``And'' expression simply triggers recursion into each of the two terms.
-The constant `true' is added to allow simple existential questions like ``Is there an aeroplane?''
+A custom Python function \texttt{fol\_to\_pyttr}, given in \autoref{lst:foltopyttr} (notebook cell 20), traverses this object recursively and builds a PyTTR type.
+
+\begin{itemize}
+\item For an ``Exists'' expression, an $Ind$ field is added to the type.
+\item For an ``Application'' expression, a ptype field is added, copying the predicate and variable names.
+\item An ``And'' expression simply triggers recursion into each of the two terms.
+\item The constant `true' is added to allow simple existential questions like ``Is there an aeroplane?''
+\end{itemize}
+
 A wrapper function \texttt{eng\_to\_pyttr} combines simple word tokenization, \gls{cfg} parsing and \gls{fol}-to-\gls{ttr} translation.
 
 \begin{lstlisting}[label=lst:foltopyttr, caption=Translation from \gls{fol} to \gls{ttr}.]
@@ -653,27 +690,16 @@ An alternative algorithm is presented below for the purpose of this project, whe
 
 
 
-\begin{comment}
-\paragraph{Subtype-relabeling}
-Subtypeness can instead be checked field-wise:
-For every field $\langle\ell_Q, T_Q\rangle$ in $Q$, if there is a field $\langle\ell_S, T_S\rangle$ in $S$ such that $T_S \sqsubseteq T_Q$, then let $\eta(\ell_Q) = \ell_S$.
-If $\eta$ covers all fields in $Q$, then it follows that $S \sqsubseteq Q_\eta$.
-
-However, we need to mind the types that are dependent on other fields.
-For example, $\text{dog}(\text{x}) \cancel{\sqsubseteq} \text{dog}(\text{y})$ even if both $\text{x}:Ind$ and $\text{y}:Ind$ are fields in the respective record types.
-To remedy this, the simple approach mentioned above is carried out as a first step, but for basic-type fields only.
-Then, for every basic-field relabeling, the second approach is carried out.
-In the example case, some of the basic-type relabelings will then have relabeled $\text{y}$ to $\text{x}$ so that the field-wise check becomes $\text{dog}(\text{x}) \sqsubseteq \text{dog}(\text{x})$.
-\end{comment}
-
-
 \subsubsection{Subtype relabeling algorithm}
 
 This algorithm handles non-dependent (``basic'') and dependent fields separately.
-When considering relabelings of $Q$, only the basic fields are included.
+
+First, when considering relabelings of $Q$, only the basic fields are included.
+(In this project, those fields are associated with singleton types of either $Ind$ or $Segment$.)
 This drastically limits the number of relabelings to try:
 If $S$ has eight basic fields and $Q$ has two, there are only $\dfrac{8!}{(8-2)!} = 56$ relabelings.
-For each relabeling, the remaining (dependent) fields are subtype-checked individually.
+
+Then, for each relabeling being tried, the remaining (dependent) fields are subtype-checked individually, in order to avoid more relabeling.
 This means checking
 $\text{dog}(\text{x}) \sqsubseteq \text{dog}(\text{x})$ (true) instead of
 $\rec{\text{c}_1 &:& \text{dog}(\text{x})} \sqsubseteq \rec{\text{c}_2 &:& \text{dog}(\text{x})}$ (false).
@@ -682,41 +708,58 @@ If there is some field in $Q_\eta$ that does not have a subtype field in $S$, th
 % TODO what is this in terms of big-O?
 
 %\paragraph{Prerequisites}
-The algorithm imposes some prerequisites on the scene type $S$ and question type $Q$:
-
-\begin{itemize}
-\item Any dependent fields depend only on basic (non-dependent) fields.
-
+As a prerequisite, any dependent fields must depend only on basic (non-dependent) fields.
 For example, $\rec{
 \text{x} &:& Ind \\
 \text{c}_1 &:& \text{great}(\text{x}) \\
 \text{c}_2 &:& \text{believe}(\text{x}, \text{c}_1)
 }$ is not allowed.
 
-\item No nested record types.
-(This restraint may be eliminated by using flattening, but it is not needed in this scope.)
-\end{itemize}
+The algorithm does not recurse into nested record types.
+This restraint could be eliminated by using flattening, but it is not needed in this scope.
 
-%%%%%%%%
-\begin{comment}
-\paragraph{Algorithm}
+%The implementation assumes that there is only one basic type ($Ind$) in the record types (at the top level):
+%when listing basic-field relabelings, it does not distinguish between different basic types.
+%Should there be more than one basic field in the top level, the results are the same but the performance suffers because 
+
+For an illustration, consider the following simple example.
+A relabel-subtype check is being performed on the record types $S$ (\autoref{eq:strlbs}) and $Q$ (\autoref{eq:strlbq}).
+
+\begin{equation}\label{eq:strlbs}
+S = \rec{
+    \text{x} &:& Ind \\
+    \text{y} &:& Ind \\
+    \text{z} &:& Ind \\
+    \text{c} &:& \text{right}(\text{x}, \text{y}) \\
+    \text{d} &:& \text{left}(\text{x}, \text{z})
+    }
+\end{equation}
+
+\begin{equation}\label{eq:strlbq}
+Q = \rec{
+    \text{p} &:& Ind \\
+    \text{q} &:& Ind \\
+    \text{e} &:& \text{left}(\text{p}, \text{q})
+    }
+\end{equation}
 
 \begin{enumerate}
-\item For each basic-field relabeling of Q:
-    \begin{enumerate}
-    \item For each complex field in Q:
-        \begin{enumerate}
-        \item Find a subtype field in S and remember it
-        \item If no subtype field was found, skip to next basic-field relabeling
-        \end{enumerate}
-    \item A subtype S field was found for all complex Q fields; return the relabeling
-    \end{enumerate}
-\item Return nothing
+\item The first basic-field relabeling to try is $\eta_1 = \{\langle \text{p}, \text{x}\rangle, \langle \text{q}, \text{y}\rangle\}$, yielding $Q_{\eta_1} = \rec{ \text{x} &:& Ind \\ \text{y} &:& Ind \\ \text{e} &:& \text{left}(\text{x}, \text{y}) }$.
+%Now $Q_{\eta_1}.\text{x} \sqsubseteq S.\text{x}$ and $Q_{\eta_1}.\text{y} \sqsubseteq S.\text{y}$
+\item However, neither $\text{right}(\text{x}, \text{y})$ or $\text{left}(\text{x}, \text{z})$, the dependent fields in $S$, is a subtype of $\text{left}(\text{x}, \text{y})$
+\item The next relabeling to try is $\eta_2 = \{\langle \text{p}, \text{x}\rangle, \langle \text{q}, \text{z}\rangle\}$, yielding $Q_{\eta_2} = \rec{ \text{x} &:& Ind \\ \text{z} &:& Ind \\ \text{e} &:& \text{left}(\text{x}, \text{z}) }$.
+Similar to before, $Q_{\eta_2}.\text{x} \sqsubseteq S.\text{x}$ and $Q_{\eta_2}.\text{z} \sqsubseteq S.\text{z}$
+\item Now, $\text{left}(\text{x}, \text{z}) \sqsubseteq \text{left}(\text{x}, \text{z})$
+\item Conclusively, $S \sqsubseteq Q_{\eta_2}$ and thus $S \subtrlb Q$
 \end{enumerate}
-\end{comment}
-%%%%%%%%
 
-A Python implementation is given in \autoref{lst:find_subtype_relabeling}.
+
+A Python implementation is given in \autoref{lst:find_subtype_relabeling} (notebook cell 21).
+
+%As a caveat, the implementation does not take into account the types of basic fields.
+%It will attempt relabelings where, for instance, an $Ind$-typed field in $Q$ is relabeled to the label of a $Segment$-typed field in $S$.
+%This will not lead to any false results in this project, because $Ind$ is the only basic type that will occur in $Q$.
+%It does however affect performance negatively, as more relabelings are tried than is necessary.
 
 \begin{lstlisting}[label={lst:find_subtype_relabeling}, caption=The \texttt{find\_subtype\_relabeling} function]
 from itertools import permutations, combinations
@@ -758,36 +801,47 @@ def find_subtype_relabeling(S, Q):
 
 \subsection{Additions to PyTTR}
 
-Some extensions to PyTTR were necessary for the implementation to be possible.
+Some extensions to PyTTR, listed below, were necessary for the implementation to be possible.
 %In order to utilize PyTTR in the application, a few TTR operations had to be added.
 %Additionally, a few functions which were TTR-related, but not obviously operations, were added.
 Of these, some were added directly to the PyTTR library, because simpler version of the operations of functions were already there.
-Others were defined in the custom application.
-These were all small functions or additions.
-They include:
+Others were defined in the custom application; in these cases, a notebook cell reference is supplied in the list below.
 
 \begin{description}
-\item[Python-body functions] A \gls{ttr} function is modelled by the PyTTR \texttt{Fun} class, where the function body is made up by another PyTTR object. Application of the function is implemented as substituting the argument in the body object. Some operations here have required more advanced operations. A \texttt{LambdaFun} subclass of \texttt{Fun} was thus created to allow any Python code as its body.
-\item[Copying a record type] This facilitated the creation of new record types based on an existing one, without altering the original.
-\item[Relabeling multiple fields] PyTTR originally only contains a method for relabeling a single field.
-\item[Relabel fix] When a relabeled field occurs in a sibling dependent field value, the dependent field value must be updated to use the new label. For instance, if `x' is relabeled to `y' in $\rec{\text{x} &:& Ind \\ \text{c} &:& \text{p}(\text{x})}$, then $\text{p}(\text{x})$ must be updated to $\text{p}(\text{y})$.
-\item[A fix for LazyObject] LazyObject is a class in the PyTTR library used for making references between fields. Prior to the fix, it could only be used for paths longer than one item, for instance $r.x$ but not $r$.
-\item[Flatten for record types] The flatten operation was implemented for records but not for record types. Flatten was used together with merging in one version of the implementation, but was later replaced by another approach, using only merging.
-\item[Latex output fixes] These did not contribute to the implementation itself, but to the writing of this thesis.
+\item[Python-body functions] A \gls{ttr} function is modelled by the PyTTR \texttt{Fun} class, where the function body is made up by another PyTTR object.
+Application of the function is implemented as substituting the argument in the body object.
+Some operations here have required more advanced operations.
+I created a \texttt{LambdaFun} subclass of \texttt{Fun} to allow any Python code as its body (notebook cell 8).
+\item[Copying a record type] This facilitates the creation of new record types based on an existing one, without altering the original.
+\item[Relabeling multiple fields] (notebook cell 4) PyTTR originally only contains a method for relabeling a single field.
+\item[Relabel fix] When a relabeled field occurs in a sibling dependent field value, the dependent field value must be updated to use the new label.
+For instance, if `x' is relabeled to `y' in $\rec{\text{x} &:& Ind \\ \text{c} &:& \text{p}(\text{x})}$, then $\text{p}(\text{x})$ must be updated to $\text{p}(\text{y})$.
+\item[A fix for LazyObject] LazyObject is a class in the PyTTR library used for making references between fields.
+Prior to the fix, it could only be used for paths longer than one item, for instance $r.\text{x}$ but not $r$.
+\item[Flatten for record types] The flatten operation was previously implemented for records but not for record types.
+I added it to the record type class in order to implement \citeauthor{CooperTypetheorylanguage2016}'s merge-and-flatten method described in \autoref{sec:combine}.
+%\item[Latex output fixes] These did not contribute to the implementation itself, but to the writing of this thesis.
 \end{description}
 
 
 
 \subsection{Demonstration}
 
-The model has been run on a handful of images from the VQA dataset \citep{AgrawalVQAVisualQuestion2015}
+With the purpose of testing the integrity of the model, and for the sake of illustration, the model has been run on a handful of images from the VQA dataset \citep{AgrawalVQAVisualQuestion2015} (notebook cell 26).
 The results are presented in \autoref{tab:demo}.
-Where the answer is incorrect, this is explained by different reasons.
-In 1.2, the car is classified as \textit{truck} and our model does not have any inference system for determining that if something is a truck then it is also a car.
-(The answer could alternatively be considered correct, as all persons seen are actually to the left of the car, from the perspective of the car itself. This would however be a pointless coincidence, as there is no support in this model for intrinsic spatial relations, as discussed in \autoref{sec:method-spatrel}.)
-In 2.1 and 4.1, some of the objects are not successfully detected by the object detection system.
-In 3.1, the simplistic account of spatial relations conflicts with that of our intuition.
-Sure enough, there is at least one snowboard whose center coordinates is higher on the $y$ axis than that of at least one person.
+%The purpose of these runs are not to assess accuracy or performance, but to confirm the integrity of the model or, in other words, see that it works.
+
+Note that the accuracy of the answers returned by the model are not a priority in this project.
+The performance is dependent on what external modules for classification are integrated.
+This is discussed further in \autoref{sec:discussion}.
+
+%Where the answer is incorrect, this is explained by different reasons.
+%In 1.2, the car is classified as \textit{truck} and our model does not have any inference system for determining that if something is a truck then it is also a car.
+%(The answer could alternatively be considered correct, as all persons seen are actually to the left of the car, from the perspective of the car itself.
+%This would however be a pointless coincidence, as there is no support in this model for intrinsic spatial relations, as discussed in \autoref{sec:method-spatrel}.)
+%In 2.1 and 4.1, some of the objects are not successfully detected by the object detection system.
+%In 3.1, the simplistic account of spatial relations conflicts with that of our intuition.
+%Sure enough, there is at least one snowboard whose center coordinates is higher on the $y$ axis than that of at least one person.
 
 \begin{table}
 \begin{tabular}{p{.5\textwidth}p{.5\textwidth}}

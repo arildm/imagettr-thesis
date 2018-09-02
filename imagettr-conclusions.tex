@@ -18,6 +18,18 @@ Extensions to PyTTR were made where needed.
 
 \subsection{Future work}
 
+The relabel-subtype implementation in the \texttt{find\_subtype\_relabeling} Python function makes some assumptions about the record types being checked (\autoref{sec:subtyperelabeling}).
+More specifically, a field type may not be dependent on another dependent field, and record types may not be nested.
+More complex applications could be achieved if the implementation were extended to handle these cases and eliminate the assumptions.
+It is also possible that performance improvements of the operation can be made.
+
+The agent structure is a rather simplistic model, tailored for the use case at hand.
+It accepts as input an image followed by a number of questions.
+There is no semantic connection between the current image and question, other than the sequence in which they are input.
+There is also nothing like a dialogue system;
+the background to any answer from the agent is the latest image and the latest question only.
+Changing these things could be important for further some extensions.
+
 Spatial classification and language parsing were achieved using minimal and simplistic implementations.
 Substituting them with sophisticated systems would make for wider question coverage and higher question answering scores.
 For instance, \cite{LoganComputationalAnalysisApprehension1996} proposes spatial templates, regions of acceptability and compound relations (like ``above to the right of'').
@@ -50,6 +62,14 @@ The use of formal frameworks for question-answering tasks especially invites tec
 Consider an image of a person wearing glasses, and the question ``Does this person have 20/20 vision?''
 It is reasonable to assume that a person is wearing glasses because they do not have perfect eyesight, to which ``20/20 vision'' is synonymous.
 Inference could help to achieve the synonymity as well as the relationship between eyesight and wearing glasses.
+
+From a software engineering perspective, the code implemented in this project could be better structured.
+The code was implemented in a single Jupyter Notebook file, for the sake of easy experimenting.
+It could be rewritten in standard Python files to make it easier to run on different systems.
+
+The PyTTR codebase deserves some additional development.
+Its documentation is currently in the form of Jupyter Notebook files, but it would be helpful to also add in-code comments that explain how the library can be used.
+It would also help to package the code properly so it could be released and imported to projects like this one more easily.
 
 %(b) left for future work in terms of (1) semantic representations of grounded language in TTR; (ii) their implementation in pyTTR; (iii) in the domain of visual question answering? 
 
