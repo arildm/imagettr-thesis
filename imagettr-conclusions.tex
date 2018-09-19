@@ -58,10 +58,15 @@ Another is to widen the problem domain and add more properties and relations tha
 For instance, attribute classifiers could recognise color, size, facial expressions and positions, in order to authorise questions such as ``Is the girl sitting down?'' and ``Where is the red flower?''.
 Action event classifiers could identify actions such as ``riding'' and ``talking to''.
 
-The use of formal frameworks for question-answering tasks especially invites techniques for inference.
+The use of formal frameworks for question-answering tasks especially invites techniques for logical inference.
 Consider an image of a person wearing glasses, and the question ``Does this person have 20/20 vision?''
 It is reasonable to assume that a person is wearing glasses because they do not have perfect eyesight, to which ``20/20 vision'' is synonymous.
-Inference could help to achieve the synonymity as well as the relationship between eyesight and wearing glasses.
+Logical inference could help to achieve the synonymity as well as the relationship between eyesight and wearing glasses.
+
+As mentioned in \autoref{sec:discussion-inferencefirst}, this algorithm does not scale well, as it performs classification of spatial relations (and, in extension, any other kind of inference) before parsing the question.
+This problem could be overcome by first extracting only direct information from the image, namely the result of the $ObjDetector$.
+When the question has been parsed, a theorem prover could be used to make only the inferences necessary to be able to answer the question.
+This is a necessary condition for most extensions of the language domain and inference.
 
 From a software engineering perspective, the code implemented in this project could be better structured.
 The code was implemented in a single Jupyter Notebook file, for the sake of easy experimenting.

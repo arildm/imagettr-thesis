@@ -4,12 +4,20 @@
 \section{Discussion}
 \label{sec:discussion}
 
-%A flexible formal-semantic framework, \gls{ttr} is here being used to model meaning apprehended from different modalities: vision and natural language.
+
+
+\subsection{The subtype check}
+\label{sec:discussion-subtype}
 
 Once the perceived scene and the parsed question had been modeled as two situation types, the task of finding an answer to the question was reduced to a subtype check.
 Under the current restriction to polar questions, type theory has thus proven itself useful and straightforward as a means for the \gls{vqa} problem (and, in extension, question answering in general).
 \gls{ttr} in particular, however, posed a problem for the subtype check due to the dependence on field labels.
 This feature necessitated an extra algorithmic layer to allow a label-insensitive comparison in the proposed relabel-subtype check.
+
+
+
+\subsection{PyTTR}
+\label{sec:discussion-pyttr}
 
 The PyTTR programming library provided the ability to work with \gls{ttr} types, objects and operations.
 Some extensions were needed in order to realise the present project.
@@ -18,4 +26,19 @@ These could be implemented directly in the PyTTR library.
 Others provided operations that were quite specific to the use case at hand, such as ``combining'' record types with label conflict resolving and deduplicated field types.
 As such, they are less suited for direct inclusion in PyTTR, and should remain in the project-specific source code.
 (As both PyTTR and the source code for this project are released open-source, all parts of the implementation are open for anyone to reuse.)
-% The project is open source. URL?
+
+
+
+\subsection{Inference-first}
+\label{sec:discussion-inferencefirst}
+
+The algorithm of perception described in \autoref{sec:agent} performs classification of spatial relations on all pairs of individuated objects.
+In other words, all of the agent's beliefs are inferred at once.
+Later, when attempting to answer the given question, the beliefs can be queried directly in the subtype check.
+
+In this application, where the goal is to answer a given question, that means spending more effort than necessary.
+So far as this project goes, this is no significant impediment, as the number of inferences to make (namely, classification of spatial relations) is rather small.
+In extension, however, the computation time will grow with the amount of inferences (as well as the amount of detected objects) and this approach does not scale.
+
+A more viable alternative is to first parse the question and then perform inference as needed to arrive to an answer.
+If the question is about the spatial relation between a dog and a person, it will probably be enough to see that there is a dog and a person in the scene, and that the spatial relation between them matches the one expressed in the question.
