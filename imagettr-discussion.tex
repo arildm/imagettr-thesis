@@ -6,13 +6,16 @@
 
 
 
-\subsection{The subtype check}
+\subsection{Subtype check}
 \label{sec:discussion-subtype}
 
 Once the perceived scene and the parsed question had been modeled as two situation types, the task of finding an answer to the question was reduced to a subtype check.
 Under the current restriction to polar questions, type theory has thus proven itself useful and straightforward as a means for the \gls{vqa} problem (and, in extension, question answering in general).
-\gls{ttr} in particular, however, posed a problem for the subtype check due to the dependence on field labels.
+
+\gls{ttr} in particular posed a problem for the subtype check due to the dependence on field labels.
 This feature necessitated an extra algorithmic layer to allow a label-insensitive comparison in the proposed relabel-subtype check.
+As a variant of the subtype check, this solves the problem within the scope of this project, but if the model of perception is extended, the computation time grows quickly.
+In particular, generating more basic-type fields would drastically increase the number of relabelings.
 
 
 

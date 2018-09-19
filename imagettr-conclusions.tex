@@ -18,11 +18,6 @@ Extensions to PyTTR were made where needed.
 
 \subsection{Future work}
 
-The relabel-subtype implementation in the \texttt{find\_subtype\_relabeling} Python function makes some assumptions about the record types being checked (\autoref{sec:subtyperelabeling}).
-More specifically, a field type may not be dependent on another dependent field, and record types may not be nested.
-More complex applications could be achieved if the implementation were extended to handle these cases and eliminate the assumptions.
-It is also possible that performance improvements of the operation can be made.
-
 The agent structure is a rather simplistic model, tailored for the use case at hand.
 It accepts as input an image followed by a number of questions.
 There is no semantic connection between the current image and question, other than the sequence in which they are input.
@@ -63,9 +58,19 @@ Consider an image of a person wearing glasses, and the question ``Does this pers
 It is reasonable to assume that a person is wearing glasses because they do not have perfect eyesight, to which ``20/20 vision'' is synonymous.
 Logical inference could help to achieve the synonymity as well as the relationship between eyesight and wearing glasses.
 
+The relabel-subtype implementation in the \texttt{find\_subtype\_relabeling} Python function makes some assumptions about the record types being checked (\autoref{sec:subtyperelabeling}).
+More specifically, a field type may not be dependent on another dependent field, and record types may not be nested.
+More complex applications could be achieved if the implementation were extended to handle these cases and eliminate the assumptions.
+
+Furthermore, as discussed in \autoref{sec:discussion-subtype}, the implementation does not scale to handle some of the extensions mentioned here.
+One measure to improve the performance is to introduce type-sensitivity when finding feasible basic-field relabelings.
+For example, do not try to relabel a field with type $Ind$ to one with type $Int$, since $Int \cancel\sqsubseteq Ind$.
+In the general case, however, the relabel-subtype algorithm may need to be replaced with one that utilises theorem proving in order to find a subtype-compatible relabeling.
+
 As mentioned in \autoref{sec:discussion-inferencefirst}, this algorithm does not scale well, as it performs classification of spatial relations (and, in extension, any other kind of inference) before parsing the question.
-This problem could be overcome by first extracting only direct information from the image, namely the result of the $ObjDetector$.
-When the question has been parsed, a theorem prover could be used to make only the inferences necessary to be able to answer the question.
+This problem could be overcome by first extracting only direct information from the image, namely the result of the $ObjDetector$;
+then, when the question has been parsed, finding out what inference steps are necessary to perform.
+The process of finding required inferences may need to be integrated with the amended subtype strategy just mentioned.
 This is a necessary condition for most extensions of the language domain and inference.
 
 From a software engineering perspective, the code implemented in this project could be better structured.
