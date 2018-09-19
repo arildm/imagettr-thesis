@@ -127,8 +127,11 @@ Having these fields specified allows us to access the values (the individual and
 For the types in the `cl' and `cp' fields, it is not important to know \textit{what} the proof is, as long as there is a proof.
 Therefore, they do not need to be instantiated and specified.
 
-%For the $x$ field, we create a new individual object $a_{new} : Ind$.
-%For the ptype fields $cp$ and $cl$, we also create new objects $e_{new} : r.\text{pfun}(\text{x})$ and $e_{new} : \text{location}(\text{x}, \text{loc})$.
+The instantiation of new individual objects $a_n$ assumes that no two $Obj$ records describe the same individual.
+If more than one object detection model were applied, perhaps in an attempt at wider coverage, then we might end up with generating multiple individual objects where a human observer would detect only one.
+A merging step could then be added in connection with the individuation procedure, where objects of the same property and similar locations are merged as one.
+Furthemore, the detection models may return different but similar labels, such as ``car'' and ``truck''.
+Covering these cases would additionally require measuring the similarity of different semantic concepts.
 
 An example application of $f_{IndFun}$ is shown in \autoref{eq:indfunrec}.
 The output record type describes a situation where an individual identified as $a_0$ is classified as a bicycle and is occupying a $422 \times 242$-sized rectangle with its center at $(435, 355)$.
