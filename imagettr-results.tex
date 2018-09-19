@@ -319,12 +319,13 @@ individuated objects and spatial relations between individuals.
 For an agent record $ag : Agent$, the perception and question-answering procedure is carried out as follows.
 
 \paragraph{Visual perception}
+\renewcommand{\itemautorefname}{Step}
 
 \begin{enumerate}
 \item Visual input in the form of an image is received and assigned to $ag.\text{state}.\text{img}$.
 \item $ag.\text{objdetector}$ is invoked on $ag.\text{state.img}$ and creates a collection of perceptual object records that are assigned to $ag.\text{state}.\text{perc}$.
 \item $ag.\text{indfun}$ is, in turn, invoked on each record in $ag.\text{state.perc}$ and resulting individuated object record types are added to $ag.\text{state.bel}$.
-\item Now, each function in $ag.\text{relclfs}$ is applied to each pair of record types in $ag.\text{state.bel}$:
+\item \label{item:relclfsbel} Now, each function in $ag.\text{relclfs}$ is applied to each pair of record types in $ag.\text{state.bel}$:
 	\begin{enumerate}
 	%\item The fields of the domain record type of the function is considered its arguments.
 	%\item Each combination of $ag.\text{state.bel}$ record types that matches the argument types is considered for input.
@@ -337,6 +338,12 @@ For an agent record $ag : Agent$, the perception and question-answering procedur
 	For example, the \textit{left} classifier in \autoref{eq:leftclfdef} is applied to each pair of $IndObj$ after combining them into a $LocTup$ and instantiating it.
     Note that the $IndObj$ have manifest fields which carry on to the $LocTup$ type, so it is more specific than just instantiating $LocTup$ itself.
 \end{enumerate}
+
+The individuated objects and the spatial relations are contained in the same list, $ag.\text{state.bel}$, which models beliefs of the agent.
+(Remember that an individuated object is a belief that a certain individual has a certain property and location.)
+In extension, this list may contain record types of many other shapes, perhaps describing situations where an idividual has a certain color or two individuals are involved in an event (as suggested in \autoref{sec:futurework}).
+\autoref{item:relclfsbel} works here because $ag.\text{state.bel}$ is sure to contain only $IndObj$ record types at this point, and because $ag.\text{relclfs}$ only contains $RelClf$ functions.
+The general case would necessitate a different formulation (and a new name for the `relclfs' field), perhaps utilising subtype checking to qualify possible argument combinations.
 
 \paragraph{Language}
 
@@ -715,21 +722,6 @@ If there is some field in $Q_\eta$ that does not have a subtype field in $S$, th
 
 % TODO what is this in terms of big-O?
 
-%\paragraph{Prerequisites}
-As a prerequisite, any dependent fields must depend only on basic (non-dependent) fields.
-For example, $\rec{
-\text{x} &:& Ind \\
-\text{c}_1 &:& \text{great}(\text{x}) \\
-\text{c}_2 &:& \text{believe}(\text{x}, \text{c}_1)
-}$ is not allowed.
-
-The algorithm does not recurse into nested record types.
-This restraint could be eliminated by using flattening, but it is not needed in this scope.
-
-%The implementation assumes that there is only one basic type ($Ind$) in the record types (at the top level):
-%when listing basic-field relabelings, it does not distinguish between different basic types.
-%Should there be more than one basic field in the top level, the results are the same but the performance suffers because 
-
 For an illustration, consider the following simple example.
 A relabel-subtype check is being performed on the record types $S$ (\autoref{eq:strlbs}) and $Q$ (\autoref{eq:strlbq}).
 
@@ -761,6 +753,27 @@ Similar to before, $Q_{\eta_2}.\text{x} \sqsubseteq S.\text{x}$ and $Q_{\eta_2}.
 \item Conclusively, $S \sqsubseteq Q_{\eta_2}$ and thus $S \subtrlb Q$
 \end{enumerate}
 
+
+
+\subsubsection{Restrictions of the algorithm}
+
+As a prerequisite, any dependent fields must depend only on basic (non-dependent) fields.
+For example, the algorithm will not correctly handle $\rec{
+\text{x} &:& Ind \\
+\text{c}_1 &:& \text{great}(\text{x}) \\
+\text{c}_2 &:& \text{believe}(\text{x}, \text{c}_1)
+}$.
+
+The algorithm does not recurse into nested record types.
+This restraint could be eliminated by using flattening, but it is not needed in this scope.
+
+%The implementation assumes that there is only one basic type ($Ind$) in the record types (at the top level):
+%when listing basic-field relabelings, it does not distinguish between different basic types.
+%Should there be more than one basic field in the top level, the results are the same but the performance suffers because 
+
+
+
+\subsubsection{Implementation}
 
 A Python implementation is given in \autoref{lst:find_subtype_relabeling} (notebook cell 21).
 

@@ -8,15 +8,37 @@
 Within this project, the foundations of \gls{vqa} have been implemented in \gls{ttr}.
 The result is an executable application powered by PyTTR.
 
-The formal-semantic framework behind the application provides transparency and reversibility, and enables relatively simple implementation of operations (such as verifying a proposition).
+
+
+\subsection{Suitability}
+
+This project has shown that \gls{ttr} can indeed be used to connect existing vision and language systems.
+It enables a detailed model of multi-modal perception and semantics.
 \Gls{ttr} is the single framework that serves to operate all parts of the pipeline: perception, language and grounding.
 
-The model is one of the few applications of the recently developed PyTTR library, which allows \gls{ttr} to be used in executable programs.
+This is one of the few applications of the recently developed PyTTR library, which has enabled executing this model on actual data.
 Extensions to PyTTR were made where needed.
 
 
 
+\subsection{Benefits}
+
+The formal-semantic framework behind the application provides transparency and reversibility.
+This can be contrasted to neural-network-based models, where the path from input to results is encoded in impermable statistical data.
+The framework also enables relatively simple implementation of operations (such as verifying a proposition).
+
+
+
+\subsection{Can it tell us something about semantics?}
+
+The problem of answering polar questions has been modeled as a subtype check between two situation types: a grounded scene type and a hypothetical question type.
+This is different than the commonly established modeling of questions as sets of propositions \citep{HamblinQuestionsMontagueEnglish1973}.
+The question could be cast into a set as $\{T \mathrel{|} T \subtrlb Q\}$, but it still relies on the subtype check.
+
+
+
 \subsection{Future work}
+\label{sec:futurework}
 
 The agent structure is a rather simplistic model, tailored for the use case at hand.
 It accepts as input an image followed by a number of questions.
