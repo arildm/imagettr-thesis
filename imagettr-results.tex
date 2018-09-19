@@ -93,13 +93,6 @@ ObjDetector = ( Image \rightarrow [Obj] )
 The perceptual object couples a property with a location, but it does not explicitly say anything about any individual object.
 In \cite{lspc}, the step from the perceptual to the \textit{conceptual} domain is made by generating a record type that corresponds to a situation, namely the situation that a certain individual has a certain property and is at a certain location.
 This situation record type is known as an \textit{individuated object}, and is a subtype of $IndObj$ (\autoref{eq:indobj}).
-Here, `x' is an individual and `loc' is a bounding box.
-The `cl' field specifies that `loc' is the location of `x', and the purpose of `cp' is to declare a property of `x'.
-As all individuated objects are subtypes of $IndObj$, the `cp' field must have a type that will be a supertype of any ptype; we define $PType$ to be this.
-
-\begin{definition}
-For any ptype $T = \mathit{pred}(v_1, ..., v_n)$, $T \sqsubseteq PType$.
-\end{definition}
 
 \begin{equation}\label{eq:indobj}
 IndObj = \rec{
@@ -110,8 +103,17 @@ IndObj = \rec{
 }
 \end{equation}
 
+Here, `x' is an individual and `loc' is a bounding box.
+The `cl' field specifies that `loc' is the location of `x', and the purpose of `cp' is to declare a property of `x'.
+As all individuated objects are subtypes of $IndObj$, the `cp' field must have a type that will be a supertype of any ptype; we define $PType$ to be this.
+
+\begin{definition}
+For any ptype $T = \mathit{pred}(v_1, ..., v_n)$, $T \sqsubseteq PType$.
+\end{definition}
+
 A function for generating an $IndObj$ subtype from an $Obj$ record is known from \cite{lspc} as an \textit{individuation function}.
 It is typed as $IndFun$ (\autoref{eq:indfun}).
+Note that it generates a record type, in contrast to $ObjDetector$ which generates records.
 
 \begin{equation}\label{eq:indfun}
 IndFun = ( Obj \rightarrow RecType )
@@ -121,6 +123,9 @@ The individuation function is defined as $f_{IndFun}$ in \autoref{eq:indfundef} 
 The record type resulting from applying $f_{IndFun}$ is a subtype of $IndObj$, where the `x' and `loc' fields are specified using manifest fields.
 The `x' field is specified as a newly instantiated $Ind$ object, $a_n$ (where $n$ is a number such that the new instatiation is unique).
 The `loc' field is specified as the value of `seg' in the $Obj$ record.
+Having these fields specified allows us to access the values (the individual and the location) at a later stage, when we are looking at the $IndObj$ record types and not the $Obj$ records.
+For the types in the `cl' and `cp' fields, it is not important to know \textit{what} the proof is, as long as there is a proof.
+Therefore, they do not need to be instantiated and specified.
 
 %For the $x$ field, we create a new individual object $a_{new} : Ind$.
 %For the ptype fields $cp$ and $cl$, we also create new objects $e_{new} : r.\text{pfun}(\text{x})$ and $e_{new} : \text{location}(\text{x}, \text{loc})$.
