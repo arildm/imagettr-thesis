@@ -6,7 +6,14 @@ By Arild Matsson <arild@klavaro.se>
 
 The Latex document needs the fonts Free and Liberation.
 
-Use `latexmk` to compile and view the document:
+To use `latexmk` to compile and view the document, first put this in `~/.latexmkrc`:
+
+    $pdflatex = q/xelatex -synctex=1 %O %S/;
+
+Then execute
 
     latexmk -pdf imagettr.tex
+
+or
+
     latexmk -pdf -pvc imagettr.tex

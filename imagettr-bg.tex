@@ -62,6 +62,24 @@ With the success in these experiments, \citeauthor{SteelsSymbolGroundingProblem2
 
 
 
+\subsubsection{Type theory in linguistics}
+
+Type theory is a logic system developed by \cite{WhiteheadPrincipiamathematica1910}, \cite{church40}, \cite{martinlof84} among others \citep{CoquandTypeTheory2015}.
+The theory revolves around the concept that any object belongs to a type.
+The judgement that an object $a$ belongs to a type $T$ is written $a:T$.
+Functions are restricted to certain types, which allows more specificity in how they can be applied.
+For example, the factorial function $f_!$ may be defined over natural numbers by typing it as $f_! :\mathbb{N} \rightarrow \mathbb{N}$.
+%Several different type theories have been created, of which Church's \textit{simply typed \textlambda-calculus} \cite{church40} and Martin-Löf's \textit{intuitionistic type theory} \citep{martinlof84} are some prominent examples.
+
+\cite{RantaTypetheoreticalGrammar1995} uses type theory to drive a method of syntactic parsing.
+At a glance, consider how the type-theoretical judgements $\text{``the''} : \mathit{Det}$, $\text{``door''} : \mathit{N}$ and $f_\text{DetN}:\mathit{Det}\rightarrow\mathit{N}\rightarrow\mathit{NP}$ dictate that $f_\text{DetN}(\text{``the''}, \text{``door''})$ is an object of the type $\mathit{NP}$.
+
+Another example of type theory in \gls{nlp} is \cite{KohlhaseTypeTheoreticSemanticslDRT1996}, which extends Discourse Representation Theory (DRT) with elements from type theory in order to provide compositionality.
+
+%[a hint of what tt provides]
+
+
+
 \subsection{Perceptual semantics}
 % ... in general, and spatial relations in particular
 
@@ -102,20 +120,6 @@ For example, an umbrella may be well said to be \textit{above} a man, but less c
 
 \subsection{\Gls{ttr}}
 \label{sec:ttnlp}
-
-Type theory is a logic system developed by \cite{WhiteheadPrincipiamathematica1910}, \cite{church40}, \cite{martinlof84} among others \citep{CoquandTypeTheory2015}.
-The theory revolves around the concept that any object belongs to a type.
-The judgement that an object $a$ belongs to a type $T$ is written $a:T$.
-Functions are restricted to certain types, which allows more specificity in how they can be applied.
-For example, the factorial function $f_!$ may be defined over natural numbers by typing it as $f_! :\mathbb{N} \rightarrow \mathbb{N}$.
-%Several different type theories have been created, of which Church's \textit{simply typed \textlambda-calculus} \cite{church40} and Martin-Löf's \textit{intuitionistic type theory} \citep{martinlof84} are some prominent examples.
-
-\cite{RantaTypetheoreticalGrammar1995} uses type theory to drive a method of syntactic parsing.
-At a glance, consider how the type-theoretical judgements $\text{``the''} : \mathit{Det}$, $\text{``door''} : \mathit{N}$ and $f_\text{DetN}:\mathit{Det}\rightarrow\mathit{N}\rightarrow\mathit{NP}$ dictate that $f_\text{DetN}(\text{``the''}, \text{``door''})$ is an object of the type $\mathit{NP}$.
-
-Another example of type theory in \gls{nlp} is \cite{KohlhaseTypeTheoreticSemanticslDRT1996}, which extends Discourse Representation Theory (DRT) with elements from type theory in order to provide compositionality.
-
-%[a hint of what tt provides]
 
 % Introducing TTR
 
