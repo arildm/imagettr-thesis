@@ -540,7 +540,8 @@ For example, in $\rec{\text{x}=a_1 &:& Ind \\ \text{y}=a_1 &:& Ind}$, `y' is rel
 (Or possibly vice versa; the order of record type fields is unspecified.)
 When all duplicates of some field type have been removed, recursion is used to avoid usage of old labels in the outer for-loop.
 
-\begin{lstlisting}[label={lst:combine}, caption=The \texttt{combine} and \texttt{dedupe} functions.]
+\begin{listing}
+\begin{lstlisting}[label={lst:combine}]
 from functools import reduce
 
 def unique_labels(T):
@@ -572,6 +573,8 @@ def combine(Ts):
     f = lambda a, b: a.merge(unique_labels(b))
     return dedupe(reduce(f, Ts, RecType()))
 \end{lstlisting}
+\caption{The \texttt{combine} and \texttt{dedupe} functions.}
+\end{listing}
 
 
 
@@ -595,7 +598,8 @@ The grammar can be used to generate the sample parse tree in \autoref{fig:tree}.
 Above the word-tokenized sentence, every node in the tree represents a constituent.
 Underneath the abbreviation, each constituent features first the expression given in the grammar specification (with some typographical modification), and second, the \gls{fol} term resulting from substitution and $\beta$-reduction.
 
-\begin{lstlisting}[label={lst:grammar}, caption=A snippet of the FCFG grammar]
+\begin{listing}
+\begin{lstlisting}[label={lst:grammar}]
 QS[SEM=<?np(?pp)>] -> 'is' 'there' NP[SEM=?np] PP[SEM=?pp]
 QS[SEM=<?np(\P.true)>] -> 'is' 'there' NP[SEM=?np]
 
@@ -610,6 +614,8 @@ Prep[SEM=<left>] -> 'to' 'the' 'left' 'of'
 N[SEM=<dog>] -> 'dog'
 N[SEM=<person>] -> 'person'
 \end{lstlisting}
+\caption{A snippet of the FCFG grammar.}
+\end{listing}
 
 \begin{figure}[h]
 \includegraphics[width=\textwidth]{tree}
@@ -634,7 +640,8 @@ A custom Python function \texttt{fol\_to\_pyttr}, given in \autoref{lst:foltopyt
 
 A wrapper function \texttt{eng\_to\_pyttr} combines simple word tokenization, \gls{cfg} parsing and \gls{fol}-to-\gls{ttr} translation.
 
-\begin{lstlisting}[label=lst:foltopyttr, caption=Translation from \gls{fol} to \gls{ttr}.]
+\begin{listing}
+\begin{lstlisting}[label=lst:foltopyttr]
 import nltk
 from nltk.sem.logic import ApplicationExpression, AndExpression, ExistsExpression, ConstantExpression
 
@@ -676,6 +683,8 @@ def eng_to_pyttr(text):
     T = fol_to_pyttr(sem, RecType())
     return T
 \end{lstlisting}
+\caption{Translation from \gls{fol} to \gls{ttr}.}
+\end{listing}
 
 
 
@@ -783,7 +792,8 @@ A Python implementation is given in \autoref{lst:find_subtype_relabeling} (noteb
 %This will not lead to any false results in this project, because $Ind$ is the only basic type that will occur in $Q$.
 %It does however affect performance negatively, as more relabelings are tried than is necessary.
 
-\begin{lstlisting}[label={lst:find_subtype_relabeling}, caption=The \texttt{find\_subtype\_relabeling} function]
+\begin{listing}
+\begin{lstlisting}[label={lst:find_subtype_relabeling}]
 from itertools import permutations, combinations
 
 def my_subtype_of(sub, sup):
@@ -818,6 +828,8 @@ def find_subtype_relabeling(S, Q):
             return dict(**rlb_basic, **rlb_dep)
     return None
 \end{lstlisting}
+\caption{The \texttt{find\_subtype\_relabeling} function.}
+\end{listing}
 
 
 

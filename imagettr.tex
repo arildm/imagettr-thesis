@@ -8,21 +8,16 @@
 \usepackage{setspace}
 \usepackage{comment}
 \usepackage{caption}
-\usepackage{listings}
 \usepackage{textgreek}
 \usepackage{lscape}
 \usepackage{cancel}
 \usepackage{amssymb}
+
+\usepackage{listings}
 \lstset{language=Python,basicstyle=\footnotesize,breaklines=true,breakatwhitespace=true,tabsize=4}
 
 \usepackage[acronym]{glossaries}
 \glsdisablehyper
-
-\title{Implementing perceptual semantics in Type Theory with Records (TTR)}
-%\subtitle{An implementation of visual perception and spatial relations in \gls{ttr}}
-\author{Arild Matsson}
-\date{}
-
 \newacronym{hmm}{HMM}{Hidden Markov Model}
 \newacronym{lstm}{LSTM}{Long Short-Term Memory}
 \newacronym{cnn}{CNN}{convolutional neural network}
@@ -33,6 +28,10 @@
 \newacronym{nlp}{NLP}{natural language processing}
 \newacronym{fol}{FOL}{first-order logic}
 \newacronym{cfg}{CFG}{context-free grammar}
+
+\usepackage{float}
+\newfloat{listing}{h}{lst}
+\floatname{listing}{Listing}
 
 \newtheorem{definition}{Definition}
 
@@ -45,7 +44,10 @@
 
 \newcommand{\rec}[1]{\arraycolsep=.3em\left[\begin{array}{rcl}#1\end{array}\right]}
 
-
+\title{Implementing perceptual semantics in Type Theory with Records (TTR)}
+%\subtitle{An implementation of visual perception and spatial relations in \gls{ttr}}
+\author{Arild Matsson}
+\date{}
 
 \begin{document}
 

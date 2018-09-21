@@ -73,7 +73,8 @@ When invoked from Python, the return value is a collection of dictionary objects
 Results with confidence over a certain threshold are cast into \gls{ttr} records.
 In this process, the bounding box coordinates are cast from a top-left and bottom-right tuple $\langle\langle x_1, y_1\rangle, \langle x_2, y_2\rangle\rangle$ to a center-width-height tuple $\langle x_c, y_c, w, h\rangle$ (later defined as the $Segment$ type), as the latter is more adequate for the spatial classification used in this project.
 
-\begin{lstlisting}[label=lst:yoloout, caption=Example output of YOLO invocation]
+\begin{listing}
+\begin{lstlisting}[label=lst:yoloout]
 [
     {
         'topleft': {'x': 354, 'y': 86},
@@ -90,6 +91,8 @@ In this process, the bounding box coordinates are cast from a top-left and botto
 	...
 ]
 \end{lstlisting}
+\caption{Example output of YOLO invocation.}
+\end{listing}
 
 
 
