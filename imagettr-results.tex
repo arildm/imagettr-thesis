@@ -541,7 +541,7 @@ For example, in $\rec{\text{x}=a_1 &:& \type{Ind} \\ \text{y}=a_1 &:& \type{Ind}
 When all duplicates of some field type have been removed, recursion is used to avoid usage of old labels in the outer for-loop.
 
 \begin{listing}
-\begin{lstlisting}[label={lst:combine}]
+\begin{lstlisting}
 from functools import reduce
 
 def unique_labels(T):
@@ -574,6 +574,7 @@ def combine(Ts):
     return dedupe(reduce(f, Ts, RecType()))
 \end{lstlisting}
 \caption{The \texttt{combine} and \texttt{dedupe} functions.}
+\label{lst:combine}
 \end{listing}
 
 
@@ -599,7 +600,7 @@ Above the word-tokenized sentence, every node in the tree represents a constitue
 Underneath the abbreviation, each constituent features first the expression given in the grammar specification (with some typographical modification), and second, the \gls{fol} term resulting from substitution and $\beta$-reduction.
 
 \begin{listing}
-\begin{lstlisting}[label={lst:grammar}]
+\begin{lstlisting}
 QS[SEM=<?np(?pp)>] -> 'is' 'there' NP[SEM=?np] PP[SEM=?pp]
 QS[SEM=<?np(\P.true)>] -> 'is' 'there' NP[SEM=?np]
 
@@ -615,6 +616,7 @@ N[SEM=<dog>] -> 'dog'
 N[SEM=<person>] -> 'person'
 \end{lstlisting}
 \caption{A snippet of the FCFG grammar.}
+\label{lst:grammar}
 \end{listing}
 
 \begin{figure}[h]
@@ -641,7 +643,7 @@ A custom Python function \texttt{fol\_to\_pyttr}, given in \autoref{lst:foltopyt
 A wrapper function \texttt{eng\_to\_pyttr} combines simple word tokenization, \gls{cfg} parsing and \gls{fol}-to-\gls{ttr} translation.
 
 \begin{listing}
-\begin{lstlisting}[label=lst:foltopyttr]
+\begin{lstlisting}
 import nltk
 from nltk.sem.logic import ApplicationExpression, AndExpression, ExistsExpression, ConstantExpression
 
@@ -684,6 +686,7 @@ def eng_to_pyttr(text):
     return T
 \end{lstlisting}
 \caption{Translation from \gls{fol} to \gls{ttr}.}
+\label{lst:foltopyttr}
 \end{listing}
 
 
@@ -793,7 +796,7 @@ A Python implementation is given in \autoref{lst:find_subtype_relabeling} (noteb
 %It does however affect performance negatively, as more relabelings are tried than is necessary.
 
 \begin{listing}
-\begin{lstlisting}[label={lst:find_subtype_relabeling}]
+\begin{lstlisting}
 from itertools import permutations, combinations
 
 def my_subtype_of(sub, sup):
@@ -829,6 +832,7 @@ def find_subtype_relabeling(S, Q):
     return None
 \end{lstlisting}
 \caption{The \texttt{find\_subtype\_relabeling} function.}
+\label{lst:find_subtype_relabeling}
 \end{listing}
 
 

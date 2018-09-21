@@ -7,7 +7,6 @@
 \usepackage{graphicx}
 \usepackage{setspace}
 \usepackage{comment}
-\usepackage{caption}
 \usepackage{textgreek}
 \usepackage{lscape}
 \usepackage{cancel}
@@ -15,6 +14,9 @@
 
 \usepackage{listings}
 \lstset{language=Python,basicstyle=\footnotesize,breaklines=true,breakatwhitespace=true,tabsize=4}
+
+\usepackage{caption}
+\DeclareCaptionType{listing}
 
 \usepackage[acronym]{glossaries}
 \glsdisablehyper
@@ -28,10 +30,6 @@
 \newacronym{nlp}{NLP}{natural language processing}
 \newacronym{fol}{FOL}{first-order logic}
 \newacronym{cfg}{CFG}{context-free grammar}
-
-\usepackage{float}
-\newfloat{listing}{h}{lst}
-\floatname{listing}{Listing}
 
 \newtheorem{definition}{Definition}
 
