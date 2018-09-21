@@ -1,0 +1,667 @@
+\section{Code}
+
+\autoref{cell:3}
+
+\newcounter{cellc}
+\newenvironment{cell}
+  {\stepcounter{cellc}\subsection*{Cell \arabic{cellc}}\label{cell:\arabic{cellc}}\verbatim}
+  {\endverbatim}
+
+\makeatletter
+\def\verbatim@font{\scriptsize\ttfamily}
+\makeatother
+
+\begin{cell}
+import sys
+sys.path.append('pyttr')
+from pyttr.ttrtypes import *
+from pyttr.utils import *
+import PIL.Image
+\end{cell}
+
+\begin{cell}
+Ind = BType('Ind')
+\end{cell}
+
+\begin{cell}
+
+
+# Can be called with multiple args *at the end* of a code block to illustrate PyTTR types and objects.
+def latex(*objs, code=False):
+    # code = True # Uncomment to always get code.
+    texcode = '\n\n'.join(to_ipython_latex(obj) for obj in objs)
+    if code: print(texcode)
+    return Latex(texcode)
+
+# Redefine Image.show() to work with Rec.show().
+def image_show(self):
+    return str(self)
+PIL.Image.Image.show = image_show
+\end{cell}
+
+\begin{cell}
+def rectype_relabels(T, rlbs):
+    """Relabel multiple fields, given a dict of from-to pairs."""
+    T = T.copy()
+    # Add a temporary label to each pair, to avoid overwriting.
+    # This is not a guard against {a:c, b:c}, but against {a:b, b:c}.
+    rlbs = [(l1, l2, gensym('rlb')) for l1, l2 in rlbs.items()]
+    # First relabel all fields to tmp labels, then all to desired labels.
+    for l1, l2, l_tmp in rlbs:
+        T.Relabel(l1, l_tmp)
+    for l1, l2, l_tmp in rlbs:
+        T.Relabel(l_tmp, l2)
+    return T
+
+def is_basic_type(T):
+    """Whether a type is a "basic field", i.e. a BType or a SingletonType of a BType."""
+    return (isinstance(T, SingletonType) and is_basic_type(T.comps.base_type)) or isinstance(T, BType)
+
+def basic_fields(T):
+    """The labels of basic fields in a RecType."""
+    return [k for k, v in T.fields() if is_basic_type(v)]
+
+def nonbasic_fields(T):
+    """The labels of non-basic fields in a RecType."""
+    return [k for k, v in T.fields() if not is_basic_type(v)]
+\end{cell}
+
+\begin{cell}
+T = RecType({'a': 1, 'b': 2, 'c': 3})
+# Valid relabeling; is handled.
+print(show(rectype_relabels(T, {'a': 'b', 'b':'d'})))
+# Invalid relabeling; fails. Fix your usage.
+print(show(rectype_relabels(T, {'a': 'c', 'b':'c'})))
+\end{cell}
+
+\begin{cell}
+# mkptype saves the created PType objects. If called a second time with the same pred and vars,
+# the existing object is returned, instead of instantiating PType every time.
+ptypes = dict()
+def mkptype(sym, types=[Ind], vars=['v']):
+    """Make preds and ptypes identifiable by their predicate names."""
+    id = '/'.join([sym, ','.join(show(type) for type in types), ','.join(vars)])
+    if id not in ptypes:
+        ptypes[id] = PType(Pred(sym, types), vars)
+    return ptypes[id]
+
+def create_fun(pred_name, vars=['a']):
+    """Create a function of a given number of Inds (length of vars).
+    
+    Example: create_fun('give', 'abc') --> \a. \b. \c. give(a, b, c)
+    """
+    fun = mkptype(pred_name, types=[Ind]*len(vars), vars=vars)
+    for v in reversed(vars):
+        fun = Fun(v, Ind, fun)
+    return fun
+
+latex(create_fun('give', 'abc'))
+\end{cell}
+
+\begin{cell}
+def dedupe(T):
+    """Make a copy of a record type without duplicated field values."""
+    for l,v in T.fields():
+        # Are there more fields with the same value?
+        l2s = [l2 for l2,v2 in T.fields() if l2 != l
+               # Dedupe singleton types and complex types.
+               and (isinstance(v, SingletonType) or not is_basic_type(v))
+               # Using show is error-prone, pyttr should have an equals method.
+               and show(v) == show(v2)]
+        if len(l2s):
+            # Relabel all these fields to the same label, overwriting until one remains.
+            for l2 in l2s:
+                T.Relabel(l2, l)
+            # Dependent fields have changed, so start over.
+            return dedupe(T)
+    # No more duplicates.
+    return T
+
+T = RecType({
+    'x': SingletonType(Ind, 'a'),
+    'y': SingletonType(Ind, 'a'),
+    'c': (create_fun('foo'), ['x']),
+    'd': (create_fun('foo'), ['y']),
+})
+latex(T, dedupe(T.copy()))
+\end{cell}
+
+\begin{cell}
+class LambdaFun(Fun):
+    """Models a unary Python function as a TTR function.
+    
+    Type/subtype checking on a Fun will app() on a HypObj and use the result.
+    In a LambdaFun, the body function may require a real object,
+    and would have to be rewritten to be able to handle a HypObj for this purpose.
+    To avoid this, an example argument can be specified in __init__,
+    in which case that will be used in place of a HypObj.
+    """
+    def __init__(self,dom,body, example=None):
+        self.__setattr__('domain_type',dom)
+        self.__setattr__('body',body)
+        self.__setattr__('example', example)
+    def show(self):
+        return 'lambda r' + ':' + self.domain_type.show() + ' . ' + self.body.__name__ + '(r)'
+    def to_latex(self):
+        return '\\lambda r' + ':' + self.domain_type.to_latex() + '\\ .\\ ' + self.body.__name__ + '(r)'
+    def validate(self):
+        return isinstance(self.domain_type,Type)
+
+    def app(self,arg):
+        if self.example is not None and LambdaFun.is_hypobj(arg):
+            arg = self.example
+        
+        res = self.body(arg)
+        if 'eval' in dir(res):
+            return res.eval()
+        else:
+            return res
+
+    def is_hypobj(r):
+        return isinstance(r, HypObj) or \
+            (isinstance(r, Rec) and forsome([v for l,v in r.fields()], LambdaFun.is_hypobj))
+
+    def subst(self,v,a):
+        return self
+
+P = FunType(Ind, Ty)
+T = RecType({'f': P})
+def on_a(r):
+    return RecType({'c': r.f.app('z')})
+fun = LambdaFun(T, on_a, Rec({'f': create_fun('ex')}))
+print(show(fun.app(Rec({'f': create_fun('dog')}))))
+
+# With hypobj.
+F = FunType(T, RecTy)
+print(F.query(fun))
+\end{cell}
+
+\begin{cell}
+# Basic types.
+
+# Ind has already been defined.
+
+Int = BType('Int')
+Int.learn_witness_condition(lambda x: isinstance(x, int))
+print(Int.query(365))
+
+String = BType('String')
+String.witness_conditions.append(lambda s: isinstance(s, str))
+print(String.query('Hello World!'))
+
+Image = BType('Image')
+Image.learn_witness_condition(lambda x: isinstance(x, PIL.Image.Image) or x is None)
+img = PIL.Image.open('res/dogride.jpg') # https://www.flickr.com/photos/hickatee/34017375600
+print(Image.query(img))
+
+# Segment type: a rectangular area of a given image.
+
+Segment = RecType({'cx': Int, 'cy': Int, 'w': Int, 'h': Int})
+print(Segment.query(Rec({'cx': 100, 'cy': 150, 'w': 40, 'h': 20})))
+\end{cell}
+
+\begin{cell}
+PTy = Type('PType')
+PTy.learn_witness_condition(lambda p: isinstance(p, PType) or (
+    isinstance(p, HypObj) and forsome(p.types, lambda t: isinstance(t, PType))))
+
+Ppty = FunType(Ind, PTy)
+Obj = RecType({'seg': Segment, 'pfun': Ppty})
+Objs = ListType(Obj)
+ObjDetector = FunType(Image, Objs)
+
+latex(ObjDetector)
+\end{cell}
+
+\begin{cell}
+# Instantiate YOLO.
+
+from darkflow.net.build import TFNet
+
+tfnet = TFNet({"model": "yolo/yolo.cfg", "load": "yolo/yolo.weights",
+    'config': 'yolo', "threshold": 0.2})
+\end{cell}
+
+\begin{cell}
+# Function to apply YOLO to a given image.
+
+import numpy as np
+
+yolo_out = dict()
+def yolo(img):
+    """Invokes YOLO on a PIL image, caches and returns the result."""
+    if str(img) not in yolo_out:
+        res = tfnet.return_predict(np.array(img))
+        # Save the most confident detections.
+        res.sort(key=lambda o: -o['confidence'])
+        yolo_out[str(img)] = res[:7]
+    return yolo_out[str(img)]
+
+def yolo_coords(o):
+    """Extract the coordinates from a YOLO output item as ((x0,y0), (x1,y1))."""
+    return (o['topleft']['x'], o['topleft']['y']), (o['bottomright']['x'], o['bottomright']['y'])
+
+def xy1xy2_to_cwh(x1, y1, x2, y2):
+    '''Transform to center, width and height.'''
+    return {'cx': int(x1/2 + x2/2), 'cy': int(y1/2 + y2/2), 'w': x2 - x1, 'h': y2 - y1}
+
+def yolo_reformat(o):
+    """Discards the confidence item and reformats the coordinates."""
+    return {'label': o['label'],
+        'loc': xy1xy2_to_cwh(*sum(yolo_coords(o), ()))}
+\end{cell}
+
+\begin{cell}
+from PIL import ImageFont, ImageDraw
+from IPython.display import display
+
+# Generate distinguishable colors.
+phi = 2 / (1 + 5 ** .5)
+colors = ('hsl({}, 90%, 70%)'.format(int(x * 360)) for x in count(0, phi))
+
+def yolo_annotate(img):
+    """Displays the image with YOLO results annotated."""
+    img_annotated = img.copy()
+    draw = ImageDraw.Draw(img_annotated)
+    for o in yolo(img):
+        color = next(colors)
+        draw.rectangle(yolo_coords(o), outline=color)
+        draw.text(yolo_coords(o)[0], o['label'], fill=color)
+    display(img_annotated)
+    
+yolo_annotate(img)
+# Modified image under licence CC-by-nc-sa: https://creativecommons.org/licenses/by-nc-sa/2.0/
+\end{cell}
+
+\begin{cell}
+# Representing detected objects in TTR.
+
+def yolo_detector(i):
+    """Creates IndObj records for YOLO results."""
+    for o in yolo(i):
+        o = yolo_reformat(o)
+        yield Rec({
+            'seg': Rec(o['loc']),
+            'pfun': create_fun(o['label'].replace(' ', '_')),
+        })
+ObjDetector.witness_cache.append(yolo_detector)
+
+objs = list(yolo_detector(img))
+
+print(ObjDetector.query(yolo_detector))
+print(Objs.query(objs))
+print(Obj.query(objs[0]))
+print(Ppty.query(objs[0].pfun))
+print(Segment.query(objs[0].seg))
+
+latex(objs)
+\end{cell}
+
+\begin{cell}
+location_ptype = mkptype('location', [Ind, Segment], ['k', 'l'])
+cl_fun = Fun('k', Ind, Fun('l', Segment, location_ptype))
+
+IndObj = RecType({
+    'x' : Ind,
+    'loc' : Segment,
+    'cp' : PTy,
+    'cl' : (cl_fun, ['x', 'loc']),
+})
+IndFun = FunType(Obj, RecTy)
+
+def indfun(r):
+    if not Obj.query(r):
+        raise ValueError('Input must be Obj')
+    indobj = RecType({
+        'x': SingletonType(Ind, Ind.create()),
+        'cp': (r.pfun, ['x']),
+        'loc': SingletonType(Segment, r.seg),
+        'cl': (cl_fun, ['x', 'loc']),
+    })
+    if not indobj.subtype_of(IndObj):
+        raise ValueError('The result is not a subtype of IndObj')
+    return indobj
+IndFun.witness_cache.append(indfun)
+
+indobjs = [indfun(r) for r in objs]
+
+print(Obj.query(objs[1]))
+print(RecTy.query(indobjs[1]))
+print(indobjs[1].subtype_of(IndObj))
+print(IndObj.query(indobjs[1].create_hypobj()))
+latex(indobjs)
+\end{cell}
+
+\begin{cell}
+from itertools import product
+
+LocTup = RecType({'lo': IndObj, 'refo': IndObj})
+RelClf = FunType(LocTup, RecTy)
+
+location_relation_classifiers = {
+    # predicate: classifier
+    'left': lambda a, b: a.cx < b.cx,
+    'right': lambda a, b: a.cx > b.cx,
+    'above': lambda a, b: a.cy < b.cy,
+    'below': lambda a, b: a.cy > b.cy,
+}
+
+def relclf(r, pred, f):
+    # Support type checking of this function, which uses HypObj.
+    if isinstance(r.lo.loc.cx, HypObj):
+        return RecType()
+    # @TODO Why not? IndObj.query(r.lo) and IndObj.query(r.refo)
+    if f(r.lo.loc, r.refo.loc):
+        c = create_fun(pred, 'ab')
+        return RecType({
+            'x': SingletonType(Ind, r.lo.x),
+            'y': SingletonType(Ind, r.refo.x),
+            'cr': (c, ['x', 'y']),
+        })
+    return RecType()
+
+def get_relclfs():
+    relclfs = []
+    for pred, f in location_relation_classifiers.items():
+        relclfs.append(lambda r, pred=pred, f=f: relclf(r, pred, f))
+    return relclfs
+
+relclfs = [LambdaFun(LocTup, relclf) for relclf in get_relclfs()]
+
+loctups = []
+def find_all_rels(indobjs):
+    """Find all relations between IndObj records."""
+    for relclf in relclfs:
+        for loT, refoT in product(indobjs, indobjs):
+            loctup = Rec({'lo': loT.create(), 'refo': refoT.create()})
+            loctups.append(loctup)
+            yield relclf.app(loctup)
+        
+rels = list(rel for rel in find_all_rels(indobjs) if len(rel.labels()) > 0)
+
+latex(rels)
+\end{cell}
+
+\begin{cell}
+# The classical method using nesting and flattening.
+
+from functools import reduce
+
+Prev = LambdaFun(RecTy, lambda old:
+         LambdaFun(RecTy, lambda new:
+           RecType({'prev': old}).merge(new).flatten()))
+
+def combine_prev(Ts):
+    f = lambda old, new: Prev.app(old).app(new)
+    return dedupe(reduce(f, Ts, RecType()))
+\end{cell}
+
+\begin{cell}
+# Custom method with unique labels before merging.
+
+def unique_labels(T):
+    """Relabel a RecType so each field label is unique over all RecTypes."""
+    rlb = ((l, gensym(l)) for l in T.labels() if '_' not in l)
+    return rectype_relabels(T, dict(rlb))
+
+def combine(Ts):
+    """Combine a list of belief record types into one."""
+    f = lambda a, b: a.merge(unique_labels(b))
+    return dedupe(reduce(f, Ts, RecType()))
+\end{cell}
+
+\begin{cell}
+bel = indobjs + rels
+
+# combine = combine_prev
+bel_comb = combine(bel)
+
+latex(bel_comb)
+\end{cell}
+
+\begin{cell}
+import nltk
+from nltk.sem.logic import ApplicationExpression, AndExpression, ExistsExpression, ConstantExpression
+
+# Parsing to PyTTR cannot really be done directly. NLTK feature grammars support output in the form
+# of strings or FOL, where variable substitution is only allowed in FOL. Here we produce a FOL
+# expression and later translate it to a PyTTR record type.
+
+grammar = nltk.grammar.FeatureGrammar.fromstring(r'''
+%start S
+S[SEM=<?np(?vp)>] -> NP[SEM=?np] VP[SEM=?vp]
+S[SEM=?q] -> QS[SEM=?q]
+QS[SEM=<?np(?pp)>] -> 'is' 'there' NP[SEM=?np] PP[SEM=?pp]
+QS[SEM=<?np(\P.true)>] -> 'is' 'there' NP[SEM=?np]
+
+NP[SEM=<?det(?n)>] -> Det[SEM=?det] N[SEM=?n]
+Det[SEM=<\P Q.exists x.(P(x) & Q(x))>] -> 'a' | 'an'
+
+VP[SEM=?pp] -> 'is' PP[SEM=?pp]
+PP[SEM=<\x.(?np(\y.?prep(x, y)))>] -> Prep[SEM=?prep] NP[SEM=?np]
+
+Prep[SEM=<left>] -> 'to' 'the' 'left' 'of'
+Prep[SEM=<right>] -> 'to' 'the' 'right' 'of'
+Prep[SEM=<above>] -> 'above'
+Prep[SEM=<below>] -> 'below'
+N[SEM=<aeroplane>] -> 'aeroplane'
+N[SEM=<backpack>] -> 'backpack'
+N[SEM=<bicycle>] -> 'bicycle'
+N[SEM=<car>] -> 'car'
+N[SEM=<dog>] -> 'dog'
+N[SEM=<giraffe>] -> 'giraffe'
+N[SEM=<kite>] -> 'kite'
+N[SEM=<person>] -> 'person'
+N[SEM=<snowboard>] -> 'snowboard'
+N[SEM=<tent>] -> 'tent'
+N[SEM=<tree>] -> 'tree'
+''')
+parser = nltk.FeatureChartParser(grammar)
+
+texts = [
+    'A dog is to the left of a bicycle',
+    'Is there a dog to the left of a bicycle?',
+    'Is there a person?',
+]
+
+def fol_to_pyttr(expr, T=RecType()):
+    """Turns a FOL object into a RecType."""
+    # Existential quantifier -> Ind field.
+    if isinstance(expr, ExistsExpression):
+        T.addfield(str(expr.variable), Ind)
+        return fol_to_pyttr(expr.term, T)
+    
+    # Application -> ptype, e.g. left(x, y)
+    if isinstance(expr, ApplicationExpression):
+        pred, args = expr.uncurry()
+        # Create a PType function, e.g. lambda x:Ind . dog(x)
+        fun = create_fun(str(pred), 'abcd'[:len(args)])
+        T.addfield(gensym('c'), (fun, [str(a) for a in args]))
+        return T
+    
+    # For and-expressions, interpret each term.
+    if isinstance(expr, AndExpression):
+        fol_to_pyttr(expr.first, T)
+        fol_to_pyttr(expr.second, T)
+        return T
+    
+    # A constant function in the "is there an X" rule trivially gives "true".
+    if isinstance(expr, ConstantExpression) and str(expr.variable) == 'true':
+        return T
+    
+    raise ValueError('Unknown expression: ' + str(type(expr)) + ' ' + str(expr))
+
+def eng_to_pyttr(text):
+    # Tokenize.
+    sent = text.lower().strip('.?!').split()
+    # NLTK-parse to syntax tree.
+    try:
+        trees = parser.parse(sent)
+    except ValueError:
+        return RecType()
+    # Extract semantic representation for the tree.
+    sem = nltk.sem.root_semrep(list(trees)[0])
+    # Interpret to TTR record type.
+    T = fol_to_pyttr(sem, RecType())
+    return T
+
+print(texts[1])
+q = eng_to_pyttr(texts[1])
+latex(q)
+\end{cell}
+
+\begin{cell}
+from itertools import permutations, combinations
+
+def my_subtype_of(sub, sup):
+    """Is T a subtype of U? Accept dependent rectype fields with simplistic equality test."""
+    try:
+        return sub.subtype_of(sup)
+    except AttributeError:
+        return isinstance(sub, tuple) and isinstance(sup, tuple) and show(sub) == show(sup)
+
+def find_subtype_relabeling(S, Q):
+    '''Could record type S be a sub type of record type Q if relabeling in Q is allowed?'''
+    # For each relabeling of basic-type fields
+    for sls in permutations(basic_fields(S), len(basic_fields(Q))):
+        # Try the basic-fields relabeling of Q
+        rlb_basic = dict(zip(basic_fields(Q), sls))
+        Q2 = rectype_relabels(Q, rlb_basic)
+        
+        # For each Q field, find a S field that is a subtype
+        rlb_dep = dict()
+        for ql in nonbasic_fields(Q2):
+            for sl in nonbasic_fields(S):
+                # The new labels must be unique.
+                if sl in rlb_dep.values(): continue
+                if my_subtype_of(S.field(sl), Q2.field(ql)):
+                    rlb_dep[ql] = sl
+                    break
+            if ql not in rlb_dep:
+                break
+
+        # Successful if all non-basic fields match.
+        if len(rlb_dep) == len(nonbasic_fields(Q2)):
+            return dict(**rlb_basic, **rlb_dep)
+    return None
+\end{cell}
+
+\begin{cell}
+utts_rlb = []
+for text in texts:
+    q = eng_to_pyttr(text)
+    rlb = find_subtype_relabeling(bel_comb, q)
+    print(text + ' - ' + str(bool(rlb)))
+    if rlb:
+        utt_rlb = rectype_relabels(q, rlb)
+        utts_rlb.append(utt_rlb)
+latex(utts_rlb)
+\end{cell}
+
+\begin{cell}
+AgentState = RecType({
+    'img': Image,
+    'perc': Objs,
+    'bel': ListType(RecTy),
+    'utt': String,
+    'que': RecTy
+})
+Agent = RecType({
+    'objdetector': ObjDetector,
+    'indfun': IndFun,
+    'relclfs': ListType(RelClf),
+    'state': AgentState,
+})
+latex(Agent)
+\end{cell}
+
+\begin{cell}
+st = Rec({
+    'perc': [],
+    'bel': [],
+    'img': None,
+    'utt': '',
+    'que': RecType(),
+})
+ag = Rec({
+    'objdetector': yolo_detector,
+    'indfun': indfun,
+    'relclfs': relclfs,
+    'state': st,
+})
+
+print(AgentState.query(st))
+print(Agent.query(ag))
+\end{cell}
+
+\begin{cell}
+# The combined beliefs are "cached".
+bel = None
+
+def agent_see(ag, img):
+    if not Agent.query(ag): raise ValueError
+    ag.state.img = img
+    ag.state.perc = list(ag.objdetector(ag.state.img))
+    ag.state.bel = [indfun(r) for r in ag.state.perc]
+    
+    for Ta, Tb in product(ag.state.bel, ag.state.bel):
+        if Ta == Tb: continue
+        loctup = RecType({'lo': Ta, 'refo': Tb})
+        for relclf in ag.relclfs:
+            new_bel = relclf.app(loctup.create_hypobj())
+            if new_bel:
+                ag.state.bel.append(new_bel)
+                
+    global bel
+    bel = combine(ag.state.bel)
+    if not Agent.query(ag): raise ValueError
+
+def agent_hear(ag, text):
+    if not Agent.query(ag): raise ValueError
+    ag.state.utt = text
+    ag.state.que = eng_to_pyttr(text)
+    if not Agent.query(ag): raise ValueError
+
+def agent_answer(ag):
+    rlb = find_subtype_relabeling(bel, ag.state.que)
+    return bool(rlb)
+
+q = 'is there a person above a bicycle'
+print('Q:', q)
+agent_see(ag, img)
+agent_hear(ag, q)
+a = agent_answer(ag)
+print('A:', a)
+\end{cell}
+
+\begin{cell}
+vqa_items = [
+    {'imgpath': 'res/vqa1.jpg', 'questions': [
+        'Is there an aeroplane?',
+        'Is there a person to the right of a car?',
+    ]},
+    {'imgpath': 'res/vqa2.jpg', 'questions': [
+        'Is there a tent?',
+        'Is there a kite above a person?',
+    ]},
+    {'imgpath': 'res/vqa3.jpg', 'questions': [
+        'Is there a snowboard above a person?',
+        'Is there a snowboard below a person?',
+    ]},
+    {'imgpath': 'res/vqa4.jpg', 'questions': [
+        'Is there a giraffe below a tree?',
+    ]},
+]
+
+def vqa_eval(imgpath, questions):
+    img = PIL.Image.open(imgpath)
+    yolo_annotate(img)
+    agent_see(ag, img)
+    for question in questions:
+        agent_hear(ag, question)
+        ans = 'Yes' if agent_answer(ag) else 'No'
+        print(question + ' - ' + ans)
+
+for item in vqa_items:
+    vqa_eval(**item)
+\end{cell}

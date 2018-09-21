@@ -11,6 +11,8 @@
 \usepackage{lscape}
 \usepackage{cancel}
 \usepackage{amssymb}
+\usepackage[title]{appendix}
+\usepackage{verbatim}
 
 \usepackage{listings}
 \lstset{language=Python,basicstyle=\footnotesize,breaklines=true,breakatwhitespace=true,tabsize=4}
@@ -122,18 +124,16 @@ Huge thanks to my supervisors and to professor Robin Cooper, all of whom have pr
 \setcounter{page}{1}
 
 \input{imagettr-intro.tex}
-
 \input{imagettr-bg.tex}
-
 \input{imagettr-method.tex}
-
 \input{imagettr-results.tex}
-
 \input{imagettr-discussion.tex}
-
 \input{imagettr-conclusions.tex}
-
-%\input{pyttr-output.tex}
-
 \bibliography{imagettr}
+
+\begin{appendices}
+\newpage
+\input{imagettr-code.tex}
+\end{appendices}
+
 \end{document}
