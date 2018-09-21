@@ -341,7 +341,7 @@ For an agent record $ag : \type{Agent}$, the perception and question-answering p
 
 The individuated objects and the spatial relations are contained in the same list, $ag.\text{state.bel}$, which models beliefs of the agent.
 (Remember that an individuated object is a belief that a certain individual has a certain property and location.)
-In extension, this list may contain record types of many other shapes, perhaps describing situations where an idividual has a certain color or two individuals are involved in an event (as suggested in \autoref{sec:futurework}).
+In extension, this list may contain record types of many other shapes, perhaps describing situations where an individual has a certain color or two individuals are involved in an event (as suggested in \autoref{sec:futurework}).
 \autoref{item:relclfsbel} works here because $ag.\text{state.bel}$ is sure to contain only $\type{IndObj}$ record types at this point, and because $ag.\text{relclfs}$ only contains $\type{RelClf}$ functions.
 The general case would necessitate a different formulation (and a new name for the `relclfs' field), perhaps utilising subtype checking to qualify possible argument combinations.
 
