@@ -25,7 +25,7 @@ In the code, the \gls{ttr} model is constructed in notebook cells 9–10, 14–1
 Four basic types exist in the model.
 
 \begin{description}
-\item [$\type{Ind}$] A single individual object, such as the reader or the Eiffel Tower.
+\item [$\type{Ind}$] A reference to a single individual object, such as the reader or the Eiffel Tower.
 \item [$\type{Int}$] An integer, such as 415.
 \item [$\type{Image}$] A 2-dimensional digital image.
 It serves as an identifier to a set of extracted information, and its file type and actual data is not important in this thesis.
@@ -867,6 +867,7 @@ I added it to the record type class in order to implement \citeauthor{CooperType
 
 With the purpose of testing the integrity of the model, and for the sake of illustration, the model has been run on a handful of images from the VQA dataset \citep{AgrawalVQAVisualQuestion2015} (notebook cell 26).
 The results are presented in \autoref{tab:demo}.
+Each question is followed by the answer returned by the model as well as a subjective intuition on whether the answer is correct or incorrect.
 %The purpose of these runs are not to assess accuracy or performance, but to confirm the integrity of the model or, in other words, see that it works.
 
 Note that the accuracy of the answers returned by the model are not a priority in this project.

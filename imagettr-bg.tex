@@ -15,10 +15,10 @@ Some focus only on the detection of objects \citep{BlaschkoLearningLocalizeObjec
 
 Like in machine learning in general, and other kinds of data processing, significant values from the input data (the image) are collected in a process known as feature extraction.
 Various types of features exist for image processing.
-For one, SIFT is a technique where significant locations of an image are used to extract \textit{keypoints} \citep{LoweObjectrecognitionlocal1999}.
+For one, \gls{sift} is a technique where significant locations of an image are used to extract \textit{keypoints} \citep{LoweObjectrecognitionlocal1999}.
 Classification can then be performed by comparing the keypoints of a target image to those in a database.
 
-With neural networks, however, the need for prior feature extraction is generally eliminated \citep{HeDeepResidualLearning2015, HeMaskRCNN2017}.
+With deep neural networks, however, the need for prior feature extraction is generally eliminated \citep{HeDeepResidualLearning2015, HeMaskRCNN2017}.
 Neural networks that process image data typically contain convolutional network layers.
 Color image data is highly dimensional, typically represented as a 2D matrix of pixels, where each pixel itself specifies a quantity of each of three basic colors.
 Convolutional layers are used to divide the image into smaller, overlapping segments, thus capturing locational aspects of the data.
@@ -81,6 +81,7 @@ Another example of type theory in \gls{nlp} is \cite{KohlhaseTypeTheoreticSemant
 
 
 \subsection{Perceptual semantics}
+\label{sec:percsem}
 % ... in general, and spatial relations in particular
 
 An artificial device perceiving its environment will make internal, symbolic representations of the real world outside \citep{PustejovskyPerceptualsemanticsconstruction1990}.
@@ -92,10 +93,10 @@ By using terms of spatial relations (``left'', ``right'', ``above'', etc.), the 
 Different terminology have been used to refer to the two roles, but we will use \textit{located object} and \textit{reference object} \citep{DobnikModellinglanguageaction2012}.
 
 \cite{Garnhamunifiedtheorymeaning1989} explores terms of spatial relations and claims that there are three types of meanings for each term: basic, deictic and intrinsic.
-The basic meaning relative to the speaker and holds for a single object only.
+The basic meaning is relative to the speaker and holds for a single object only.
 The deictic and intrinsical meanings hold for relations between two objects.
 The deictic meaning is relative to the coordinate frame of the speaker, while the intrinsical is relative to that of the reference object.
-For someone facing the right side of a car, an object said to be ``to the left of the car'' could be understood to be either near the car's backside (deictic meaning) or its left side (intrinsical meaning).
+For someone standing near a car and facing its right-hand side, an object said to be ``to the left of the car'' could be understood to be either near the car's backside (deictic meaning) or its left side (intrinsical meaning).
 
 %The vertical (or gravitational) axis is special, so the terms ``above'' and ``below'' work differently than expected when the related object is, for example, upside down.
 %\citeauthor{Garnhamunifiedtheorymeaning1989} uses a rule known as the \textit{framework vertical constraint} to explain this.
@@ -110,9 +111,9 @@ The ratings in spatial templates are collected through experiments.
 The model considers distance between objects and the fact that they can have different shapes (especially elongated in some direction).
 This model is compared to three simpler alternatives in seven experiments, and AVS is found to perform best.
 
-\cite{CoventryInterplayGeometryFunction2001} explores extra-geometric constraints on the meaning of spatial relational terms, especially functional ones.
+\cite{CoventryInterplayGeometryFunction2001} explore extra-geometric constraints on the meaning of spatial relational terms, especially functional ones.
 The functional relation between objects is significant for the acceptability of terms of spatial relations.
-For example, an umbrella may be well said to be \textit{above} a man, but less clearly \textit{over} him, if it does not protect him from rain falling sideways in hard wind \citep{CoventryInterplayGeometryFunction2001}.
+For example, an umbrella may well be said to be \textit{above} a man, but less clearly \textit{over} him, if it does not protect him from rain falling sideways in hard wind \citep{CoventryInterplayGeometryFunction2001}.
 
 %"say something about recognitising objects as well and grounding in general. So I would add discussions of Roy" SD
 
