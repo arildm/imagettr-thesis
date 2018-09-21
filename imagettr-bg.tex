@@ -58,7 +58,7 @@ Formal approaches, on the other hand, require more or less precisely crafted rul
 \cite{SearleMindsbrainsprograms1980} disputes whether a computer really can \textit{understand} concepts, that is, whether it will be able operate on grounded symbols or just the (arbitrary) symbols themselves.
 \cite{HarnadSymbolGroundingProblem1990} names this the \textit{symbol grounding problem}.
 \cite{SteelsSymbolGroundingProblem2007} describes experiments where a number of artificial agents participate in a language game, where they make up random words for preset concepts and manage to ``agree'' on which words to use for which concepts.
-With the success in these experiments, \citeauthor{SteelsSymbolGroundingProblem2007} concludes that the symbol grounding problem is solved.
+With the success in these experiments, \citeauthor{SteelsSymbolGroundingProblem2007} argues that the symbol grounding problem is solved.
 
 
 
@@ -68,10 +68,10 @@ Type theory is a logic system developed by \cite{WhiteheadPrincipiamathematica19
 The theory revolves around the concept that any object belongs to a type.
 The judgement that an object $a$ belongs to a type $T$ is written $a:T$.
 Functions are restricted to certain types, which allows more specificity in how they can be applied.
-For example, the factorial function $f_!$ may be defined over natural numbers by typing it as $f_! :\mathbb{N} \rightarrow \mathbb{N}$.
+For example, the factorial function $f_!$ may be declared over natural numbers by typing it as $f_! :\mathbb{N} \rightarrow \mathbb{N}$.
 %Several different type theories have been created, of which Church's \textit{simply typed \textlambda-calculus} \cite{church40} and Martin-Löf's \textit{intuitionistic type theory} \citep{martinlof84} are some prominent examples.
 
-\cite{RantaTypetheoreticalGrammar1995} uses type theory to drive a method of syntactic parsing.
+\cite{ranta-2011} uses type theory to drive a method of syntactic parsing.
 At a glance, consider how the type-theoretical judgements $\text{``the''} : \mathit{Det}$, $\text{``door''} : \mathit{N}$ and $f_\text{DetN}:\mathit{Det}\rightarrow\mathit{N}\rightarrow\mathit{NP}$ dictate that $f_\text{DetN}(\text{``the''}, \text{``door''})$ is an object of the type $\mathit{NP}$.
 
 Another example of type theory in \gls{nlp} is \cite{KohlhaseTypeTheoreticSemanticslDRT1996}, which extends Discourse Representation Theory (DRT) with elements from type theory in order to provide compositionality.
@@ -137,7 +137,7 @@ spoken language \citep{CooperTypetheorylanguage2016}.
 
 % Usage of TTR in NLP, semantics, perceptual semantics
 
-\cite{DobnikModellinglanguageaction2012} presents how \gls{ttr} can be used to model a situated conversational agent.
+\cite{DobnikModellinglanguageaction2012} present how \gls{ttr} can be used to model a situated conversational agent.
 The agent moves around in a point-space world.
 Objects, detected as sub-point-spaces are recognized, as are (geometric and extra-geometric) spatial relations between them.
 The work is followed up by \cite{ttrspat} and \cite{lspc}, which model similar situated agents.
@@ -173,7 +173,8 @@ For example, $Int \sqsubseteq Number$.
 In the case of record types, this means that a record type $T_{sub}$ is a subtype of a record type $T_{super}$ if and only if every field in $T_{super}$ is present also in $T_{sub}$ (allowing that a type in a $T_{sub}$ field is itself a subtype of the type in the corresponding $T_{super}$ field).
 For example, $\rec{\text{x} &:& Int} \sqsubseteq \rec{\text{x} &:& Number}$, provided $Int \sqsubseteq Number$.
 
-Relationships between objects can be modeled using \textbf{ptypes}, complex types constructed from predicates and objects.
+Relationships between objects can be modeled using \textbf{ptypes}.
+A ptype is constructed from a predicate and a list of objects.
 For instance, the type $\text{hug}(a,b)$ is constructed from the predicate 'hug' with the objects $a$ in the first place and $b$ in the second.
 The situation that $a$ is hugging $b$ is true if there exists a witness of $\text{hug}(a,b)$.
 In a record type, a ptype typically uses the labels of other fields for its arguments:
@@ -182,7 +183,7 @@ In $\rec{\text{x} &:& Ind \\ \text{c} &:& \text{green}(\text{x})}$, the field `c
 A type can be restricted to only have a single witness:
 If $T$ is a type and $a:T$, then $T_a$ is a \textbf{singleton type} having $a$ as its only witness.
 There is an alternative notation for singleton types used in record types:
-The record type $\rec{\text{x} &:& Ind_a}$ can also be written $\rec{\text{x}=a &:& Ind}$, and is restricted to the record $\rec{\text{x} &:& a}$.
+The record type $\rec{\text{x} &:& Ind_a}$ can also be written $\rec{\text{x}=a &:& Ind}$, and is restricted to the record $\rec{\text{x} &=& a}$.
 A singleton-typed field notated this way is known as a \textbf{manifest field}.
 Any number of fields in a record type may be manifest fields.
 
@@ -191,13 +192,14 @@ For instance, if $f = \lambda x : Ind\ .\ \text{blue}(x)$, then $f : Ind \righta
 
 A list of objects of type $T$ is a witness of the \textbf{list type} $[T]$:
 If $L$ is a list and $\forall a \in L, a : T$, then $L : [T]$.
-The list containing $a$, $b$ and $c$ can be written $[a, b, c]$.
-(This notation may not have been proposed in past \gls{ttr} literature.)
+In this thesis, the list containing $a$, $b$ and $c$ will be written as $[a, b, c]$.
 
 Types themselves may be the witnesses of other types.
-$Type$ is the type of all types, so if $T$ is a type, then $T : Type$.
-(The controversial consequence that $Type : Type$ is handled in \citet[section 2.7]{CooperTypetheorysemantics2012}.)
-Similarly, $RecType$ is the type of all record types.
+In order to allow this, types are sorted into \textbf{orders}, where types of one order may be witnesses of a type of a higher order.
+(This technique is known as \textbf{stratification}.)
+The type $Type^n, n > 0$ is the type of all types of order $n - 1$.
+Similarly, $RecType^n, n > 0$ is the type of all record types of order $n - 1$.
+Most of the types in this thesis will be of order $0$, so we will skip the order superscript unless necessary, and use $Type$ and $RecType$ to denote $Type^1$ and $RecType^1$, respectively.
 % PType, the type of ptypes?
 
 The \textbf{relabeling} $\eta$ of a record type $T$ is a set of tuples where the first element is a label in $T$ and the second is another, new label.

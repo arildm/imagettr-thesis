@@ -555,6 +555,7 @@ def dedupe(T):
         l2s = [l2 for l2,v2 in T.fields() if l2 != l
                # Dedupe singleton types and complex types.
                and (isinstance(v, SingletonType) or not is_basic_type(v))
+               # Using show is error-prone, pyttr should have an equals method.
                and show(v) == show(v2)]
         if len(l2s):
             # Relabel all these fields to the same label,

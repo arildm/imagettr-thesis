@@ -53,10 +53,11 @@ Each detection consists of a bounding box in pixel coordinates, a class label an
 YOLO is trained using a loss function which takes detection as well as classification into account.
 In other words, it simultaneously predicts bounding boxes and classifies the contained objects.
 Unlike \cite{HeMaskRCNN2017} and others, it does not contain any recurrent layers.
-The joint, recurrence-free model makes for a rather small network size and a high evaluation speed, although it does lag behind in accuracy compared to the state of the art.
+The joint, recurrence-free model makes for a rather small network size and a high evaluation speed, although it does lag behind in accuracy compared to the state of the art \citep{RedmonYouOnlyLook2015}.
 
 The model exists in a few different network configurations, which have all been trained on the COCO dataset \citep{LinMicrosoftCOCOCommon2014}.
-Development within this thesis has been using the ``YOLOv2'' configuration.
+Development within this thesis has been using the ``YOLOv2'' configuration \citep{redmon_yolo_2018}.
+
 
 \begin{figure}[h]
 \label{fig:dogbike_annotated}
@@ -66,9 +67,9 @@ Development within this thesis has been using the ``YOLOv2'' configuration.
 \end{figure}
 
 YOLO is written in C, using the Darknet neural network library \citep{darknet13}.
-It can be used in Python with the TensorFlow machine learning library and the Darkflow library which translates a Darknet model to TensorFlow.
+It can be used in Python with the TensorFlow machine learning library \citep{tensorflow2015-whitepaper} and the Darkflow library \citep{trieu_darkflow_2018} which translates a Darknet model to TensorFlow.
 
-When invoked from Python, the return value is a collection of dict objects, each containing a label, coordinates and a confidence score, as exemplified in \autoref{lst:yoloout}.
+When invoked from Python, the return value is a collection of dictionary objects, each containing a label, coordinates and a confidence score, as exemplified in \autoref{lst:yoloout}.
 Results with confidence over a certain threshold are cast into \gls{ttr} records.
 In this process, the bounding box coordinates are cast from a top-left and bottom-right tuple $\langle\langle x_1, y_1\rangle, \langle x_2, y_2\rangle\rangle$ to a center-width-height tuple $\langle x_c, y_c, w, h\rangle$ (later defined as the $Segment$ type), as the latter is more adequate for the spatial classification used in this project.
 
@@ -94,17 +95,22 @@ In this process, the bounding box coordinates are cast from a top-left and botto
 
 \subsection{Objects and perception with \gls{ttr}}
 
-The perception of objects in this model is largely based on \cite{lspc}.
+The perception of objects in this model is largely based on \citet[Section 5.1]{lspc}.
 First, the object detection algorithm returns a set of \textit{perceptual objects}.
-Each of them is evidence that a certain location is associated with a certain property (such as being a dog), but it does not constrain any individual to this association.
+Each of these is evidence that a certain location is associated with a certain property (such as being a dog).
+%It does not, however, constrain any individual to this association.
 Second, an \textit{individuated object} is generated for each perceptual object.
-This describes the situation that there is an individual, which has the given property, at the given location.
+The individuated object additionally refers to a specific individual, and explicitly associates the property and the location with this individual.
+%This describes the situation that there is an individual, which has the given property, at the given location.
 %In the \gls{ttr} implementation (presented in full in \autoref{sec:ttrmodel}), the individuated object is a type.
 %[what's so good about it being a type?] \cite{BarwiseSituationsAttitudes1981}
+%While the perceptual object only couples a property together with a location, the individuated object is the type of situations where, for example, the individual $a_1$ is a dog at location $l_1$.
+It is the type of situations where, for example, the individual $a_1$ is a dog at location $l_1$.
 
 In \cite{lspc}, the world has the form of a 3D point space rather than a 2D image.
 This necessitates different types for the perceptual input and the locations of perceived objects.
-In the point space case, the $PointMap$ set type is used for the full ``world'', and any part of the world is simply a subset of it, so it is also a $PointMap$.
+In the point space case, the $PointMap$ list type (a list of points) is used for the full ``world''.
+Any part of the world is also a list of points, thus also a $PointMap$.
 In our case, $Image$ is used for the full image but we use $Segment$ to refer to parts of it.
 
 
