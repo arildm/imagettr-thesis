@@ -71,7 +71,7 @@ It can be used in Python with the TensorFlow machine learning library \citep{ten
 
 When invoked from Python, the return value is a collection of dictionary objects, each containing a label, coordinates and a confidence score, as exemplified in \autoref{lst:yoloout}.
 Results with confidence over a certain threshold are cast into \gls{ttr} records.
-In this process, the bounding box coordinates are cast from a top-left and bottom-right tuple $\langle\langle x_1, y_1\rangle, \langle x_2, y_2\rangle\rangle$ to a center-width-height tuple $\langle x_c, y_c, w, h\rangle$ (later defined as the $Segment$ type), as the latter is more adequate for the spatial classification used in this project.
+In this process, the bounding box coordinates are cast from a top-left and bottom-right tuple $\langle\langle x_1, y_1\rangle, \langle x_2, y_2\rangle\rangle$ to a center-width-height tuple $\langle x_c, y_c, w, h\rangle$ (later defined as the $\type{Segment}$ type), as the latter is more adequate for the spatial classification used in this project.
 
 \begin{listing}
 \begin{lstlisting}[label=lst:yoloout]
@@ -112,9 +112,9 @@ It is the type of situations where, for example, the individual $a_1$ is a dog a
 
 In \cite{lspc}, the world has the form of a 3D point space rather than a 2D image.
 This necessitates different types for the perceptual input and the locations of perceived objects.
-In the point space case, the $PointMap$ list type (a list of points) is used for the full ``world''.
-Any part of the world is also a list of points, thus also a $PointMap$.
-In our case, $Image$ is used for the full image but we use $Segment$ to refer to parts of it.
+In the point space case, the $\type{PointMap}$ list type (a list of points) is used for the full ``world''.
+Any part of the world is also a list of points, thus also a $\type{PointMap}$.
+In our case, $\type{Image}$ is used for the full image but we use $\type{Segment}$ to refer to parts of it.
 
 
 

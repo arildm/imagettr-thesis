@@ -17,36 +17,36 @@ This section contains references to that code (specifically the version tagged 1
 \subsection{\Gls{ttr} model}
 \label{sec:ttrmodel}
 
-The types in the \gls{ttr} model are largely based on \cite{lspc}, but the $Segment$ type is new, the individuation function is improved and the $RelClf$ mechanism is more concretely defined.
-The $Agent$ type is also new.
+The types in the \gls{ttr} model are largely based on \cite{lspc}, but the $\type{Segment}$ type is new, the individuation function is improved and the $\type{RelClf}$ mechanism is more concretely defined.
+The $\type{Agent}$ type is also new.
 
 In the code, the \gls{ttr} model is constructed in notebook cells 9–10, 14–19 and 23–26.
 
 Four basic types exist in the model.
 
 \begin{description}
-\item [$Ind$] A single individual object, such as the reader or the Eiffel Tower.
-\item [$Int$] An integer, such as 415.
-\item [$Image$] A 2-dimensional digital image.
+\item [$\type{Ind}$] A single individual object, such as the reader or the Eiffel Tower.
+\item [$\type{Int}$] An integer, such as 415.
+\item [$\type{Image}$] A 2-dimensional digital image.
 It serves as an identifier to a set of extracted information, and its file type and actual data is not important in this thesis.
-\item [$String$] A piece of plain text of arbitrary length.
+\item [$\type{String}$] A piece of plain text of arbitrary length.
 \end{description}
 
-A $Segment$ is a record type describing a rectangular bounding box within an (implicit) image (\autoref{eq:seg}).
+A $\type{Segment}$ is a record type describing a rectangular bounding box within an (implicit) image (\autoref{eq:seg}).
 Its fields contain the center coordinates of the box (`cx' and `cy') and the width (`w') and height (`h') of the box.
-$Ppty$ is the type of functions that can be applied to an individual and return a type (\autoref{eq:ppty}).
+$\type{Ppty}$ is the type of functions that can be applied to an individual and return a type (\autoref{eq:ppty}).
 In our account the resulting type will be restricted to a ptype that is dependent on the individual, thus describing a property of it.
 
 \begin{equation}\label{eq:seg}
-Segment = \rec{
-\text{cx} &:& Int\\
-\text{cy} &:& Int\\
-\text{w} &:& Int\\
-\text{h} &:& Int
+\type{Segment} = \rec{
+\text{cx} &:& \type{Int}\\
+\text{cy} &:& \type{Int}\\
+\text{w} &:& \type{Int}\\
+\text{h} &:& \type{Int}
 }\end{equation}
 
 \begin{equation}\label{eq:ppty}
-Ppty = (Ind \rightarrow Type)\end{equation}
+\type{Ppty} = (\type{Ind} \rightarrow \type{Type})\end{equation}
 
 %[PTy?]
 
@@ -54,20 +54,20 @@ Ppty = (Ind \rightarrow Type)\end{equation}
 
 \subsubsection{Object detection}
 
-A \textit{perceptual object} is a record of the record type $Obj$ (\autoref{eq:obj}).
+A \textit{perceptual object} is a record of the record type $\type{Obj}$ (\autoref{eq:obj}).
 It contains a bounding box (the `seg' field) and a property (`pfun').
 An example record is given in \autoref{eq:objrec}.
 %$Obj$ records are the result of performing \textit{object detection}.
 %This fact is expressed in TTR as the function type $ObjDetector$ (\autoref{eq:objdetector}).
-An object detector is a function from an image to a set of such perceptual objects, as captured by the $ObjDetector$ function type (\autoref{eq:objdetector}).
-The YOLO object detector is typed as $ObjDetector$ in notebook cell 14.
+An object detector is a function from an image to a set of such perceptual objects, as captured by the $\type{ObjDetector}$ function type (\autoref{eq:objdetector}).
+The YOLO object detector is typed as $\type{ObjDetector}$ in notebook cell 14.
 
 %[differences/similarites LSPC and others]
 
 \begin{equation}\label{eq:obj}
-Obj = \rec{
-\text{seg} &:& Segment\\
-\text{pfun} &:& Ppty \\
+\type{Obj} = \rec{
+\text{seg} &:& \type{Segment}\\
+\text{pfun} &:& \type{Ppty} \\
 }\end{equation}
 
 \begin{equation}\label{eq:objrec}
@@ -79,11 +79,11 @@ obj =
 \text{cy} &=& 355\\
 \text{h} &=& 242
 }\\
-\text{pfun} &=& \lambda v:Ind\ .\ \text{bicycle}(v)\\
-} : Obj\end{equation}
+\text{pfun} &=& \lambda v:\type{Ind}\ .\ \text{bicycle}(v)\\
+} : \type{Obj}\end{equation}
 
 \begin{equation}\label{eq:objdetector}
-ObjDetector = ( Image \rightarrow [Obj] )
+\type{ObjDetector} = ( \type{Image} \rightarrow [\type{Obj}] )
 \end{equation}
 
 
@@ -92,61 +92,61 @@ ObjDetector = ( Image \rightarrow [Obj] )
 
 The perceptual object couples a property with a location, but it does not explicitly say anything about any individual object.
 In \cite{lspc}, the step from the perceptual to the \textit{conceptual} domain is made by generating a record type that corresponds to a situation, namely the situation that a certain individual has a certain property and is at a certain location.
-This situation record type is known as an \textit{individuated object}, and is a subtype of $IndObj$ (\autoref{eq:indobj}).
+This situation record type is known as an \textit{individuated object}, and is a subtype of $\type{IndObj}$ (\autoref{eq:indobj}).
 
 \begin{equation}\label{eq:indobj}
-IndObj = \rec{
-\text{x} &:& Ind \\
-\text{cp} &:& PType \\
+\type{IndObj} = \rec{
+\text{x} &:& \type{Ind} \\
+\text{cp} &:& \type{PType} \\
 \text{cl} &:& \text{location}(\text{x}, \text{loc}) \\
-\text{loc} &:& Segment \\
+\text{loc} &:& \type{Segment} \\
 }
 \end{equation}
 
 Here, `x' is an individual and `loc' is a bounding box.
 The `cl' field specifies that `loc' is the location of `x', and the purpose of `cp' is to declare a property of `x'.
-As all individuated objects are subtypes of $IndObj$, the `cp' field must have a type that will be a supertype of any ptype; we define $PType$ to be this.
+As all individuated objects are subtypes of $\type{IndObj}$, the `cp' field must have a type that will be a supertype of any ptype; we define $\type{PType}$ to be this.
 
 \begin{definition}
-For any ptype $T = \mathit{pred}(v_1, ..., v_n)$, $T \sqsubseteq PType$.
+For any ptype $T = \mathit{pred}(v_1, ..., v_n)$, $T \sqsubseteq \type{PType}$.
 \end{definition}
 
-A function for generating an $IndObj$ subtype from an $Obj$ record is known from \cite{lspc} as an \textit{individuation function}.
-It is typed as $IndFun$ (\autoref{eq:indfun}).
-Note that it generates a record type, in contrast to $ObjDetector$ which generates records.
+A function for generating an $\type{IndObj}$ subtype from an $\type{Obj}$ record is known from \cite{lspc} as an \textit{individuation function}.
+It is typed as $\type{IndFun}$ (\autoref{eq:indfun}).
+Note that it generates a record type, in contrast to $\type{ObjDetector}$ which generates records.
 
 \begin{equation}\label{eq:indfun}
-IndFun = ( Obj \rightarrow RecType )
+\type{IndFun} = ( \type{Obj} \rightarrow \type{RecType} )
 \end{equation}
 
-The individuation function is defined as $f_{IndFun}$ in \autoref{eq:indfundef} (notebook cell 15).
-The record type resulting from applying $f_{IndFun}$ is a subtype of $IndObj$, where the `x' and `loc' fields are specified using manifest fields.
-The `x' field is specified as a newly instantiated $Ind$ object, $a_n$ (where $n$ is a number such that the new instatiation is unique).
-The `loc' field is specified as the value of `seg' in the $Obj$ record.
-Having these fields specified allows us to access the values (the individual and the location) at a later stage, when we are looking at the $IndObj$ record types and not the $Obj$ records.
+The individuation function is defined as $f_\type{IndFun}$ in \autoref{eq:indfundef} (notebook cell 15).
+The record type resulting from applying $f_\type{IndFun}$ is a subtype of $\type{IndObj}$, where the `x' and `loc' fields are specified using manifest fields.
+The `x' field is specified as a newly instantiated $\type{Ind}$ object, $a_n$ (where $n$ is a number such that the new instatiation is unique).
+The `loc' field is specified as the value of `seg' in the $\type{Obj}$ record.
+Having these fields specified allows us to access the values (the individual and the location) at a later stage, when we are looking at the $\type{IndObj}$ record types and not the $\type{Obj}$ records.
 For the types in the `cl' and `cp' fields, it is not important to know \textit{what} the proof is, as long as there is a proof.
 Therefore, they do not need to be instantiated and specified.
 
-The instantiation of new individual objects $a_n$ assumes that no two $Obj$ records describe the same individual.
+The instantiation of new individual objects $a_n$ assumes that no two $\type{Obj}$ records describe the same individual.
 If more than one object detection model were applied, perhaps in an attempt at wider coverage, then we might end up with generating multiple individual objects where a human observer would detect only one.
 A merging step could then be added in connection with the individuation procedure, where objects of the same property and similar locations are merged as one.
 Furthemore, the detection models may return different but similar labels, such as ``car'' and ``truck''.
 Covering these cases would additionally require measuring the similarity of different semantic concepts.
 
-An example application of $f_{IndFun}$ is shown in \autoref{eq:indfunrec}.
+An example application of $f_\type{IndFun}$ is shown in \autoref{eq:indfunrec}.
 The output record type describes a situation where an individual identified as $a_0$ is classified as a bicycle and is occupying a $422 \times 242$-sized rectangle with its center at $(435, 355)$.
 
 \begin{equation}\label{eq:indfundef}
-f_{IndFun} = \lambda r : Obj\ . \rec{
-    \text{x} = a_n &:& Ind \\
+f_\type{IndFun} = \lambda r : \type{Obj}\ . \rec{
+    \text{x} = a_n &:& \type{Ind} \\
     \text{cp} &:& r.\text{pfun}(\text{x}) \\
     \text{cl} &:& \text{location}(\text{x}, \text{loc}) \\
-    \text{loc} = r.\text{seg} &:& Segment\\
+    \text{loc} = r.\text{seg} &:& \type{Segment}\\
 }
 \end{equation}
 
 \begin{equation}\label{eq:indfunrec}
-f_{IndFun}(
+f_\type{IndFun}(
 \rec{
 \text{seg} &=& \rec{
 \text{cx} &=& 435\\
@@ -154,11 +154,11 @@ f_{IndFun}(
 \text{cy} &=& 355\\
 \text{h} &=& 242
 }\\
-\text{pfun} &=& \lambda v:Ind\ .\ \text{bicycle}(v)\\
+\text{pfun} &=& \lambda v:\type{Ind}\ .\ \text{bicycle}(v)\\
 }
 ) =
 \rec{
-    \text{x} = a_0 &:& Ind \\
+    \text{x} = a_0 &:& \type{Ind} \\
     \text{cp} &:& \text{bicycle}(\text{x}) \\
     \text{cl} &:& \text{location}(\text{x}, \text{loc}) \\
     \text{loc} = \rec{
@@ -166,7 +166,7 @@ f_{IndFun}(
         \text{w} &=& 422\\
         \text{cy} &=& 355\\
         \text{h} &=& 242
-		} &:& Segment\\
+		} &:& \type{Segment}\\
 }
 \end{equation}
 
@@ -177,39 +177,39 @@ f_{IndFun}(
 Relations may hold between pairs of individuated objects.
 How do we detect and model a certain relation between such a pair?
 
-Since we are interested in the spatial relation between a \textit{reference object} and a \textit{located object}, we will be constructing tuple-like records of the type $LocTup$ defined in \autoref{eq:loctup}.
-Records of this type contain instantiations (records) of two $IndObj$ record types.
+Since we are interested in the spatial relation between a \textit{reference object} and a \textit{located object}, we will be constructing tuple-like records of the type $\type{LocTup}$ defined in \autoref{eq:loctup}.
+Records of this type contain instantiations (records) of two $\type{IndObj}$ record types.
 In \autoref{eq:clf}, a classifier is modeled as a function from such a record to a new record type which should describe the relation.
 
 \begin{equation}\label{eq:loctup}
-LocTup = \rec{
-    \text{lo} &:& IndObj \\
-    \text{refo} &:& IndObj \\
+\type{LocTup} = \rec{
+    \text{lo} &:& \type{IndObj} \\
+    \text{refo} &:& \type{IndObj} \\
     }
 \end{equation}
 
 \begin{equation}\label{eq:clf}
-RelClf = ( LocTup \rightarrow RecType )
+\type{RelClf} = ( \type{LocTup} \rightarrow \type{RecType} )
 \end{equation}
 
-For instance, a classifier for ``left'' might look like in \autoref{eq:leftclfdef}, where $\kappa_{left}$ is a non-\gls{ttr}, boolean function.
-Of course, the requirement that the individual $r.\text{lo}.\text{x}$ is actually located at $r.\text{lo}.\text{loc}$ (and same for $r.\text{refo}$) is implicit from the typing as $IndObj$, where a field typed as $\text{location}(\text{x}, \text{loc})$ is necessarily present.
+For instance, a classifier for ``left'' might look like in \autoref{eq:leftclfdef}, where $\kappa_\text{left}$ is a non-\gls{ttr}, boolean function.
+Of course, the requirement that the individual $r.\text{lo}.\text{x}$ is actually located at $r.\text{lo}.\text{loc}$ (and same for $r.\text{refo}$) is implicit from the typing as $\type{IndObj}$, where a field typed as $\text{location}(\text{x}, \text{loc})$ is necessarily present.
 
 \begin{equation}\label{eq:leftclfdef}
-\lambda r : LocTup \ .\ 
+\lambda r : \type{LocTup} \ .\ 
 \begin{cases}
 \rec{
     \text{x} &:& r.\text{lo}.\text{x} \\
     \text{y} &:& r.\text{refo}.\text{x} \\
     \text{cr} &:& \text{left}(\text{x}, \text{y}) \\
 },
-& \text{if } \kappa_{left}(r.\text{lo}.\text{loc}, r.\text{refo}.\text{loc}) \\
+& \text{if } \kappa_\text{left}(r.\text{lo}.\text{loc}, r.\text{refo}.\text{loc}) \\
 [\:], & \text{otherwise}
 \end{cases}
 \end{equation}
 
 This is implemented in notebook cell 16, where the function \texttt{relclf} creates functions like the one in \autoref{eq:leftclfdef}.
-The function \texttt{get\_relclfs} creates such a function for each of the four predicate-classifier pairs, and \texttt{find\_all\_rels} applies each classifier to each $IndObj$ pair.
+The function \texttt{get\_relclfs} creates such a function for each of the four predicate-classifier pairs, and \texttt{find\_all\_rels} applies each classifier to each $\type{IndObj}$ pair.
 (The latter step is later re-implemented in the agent algorithm.)
 
 
@@ -264,8 +264,8 @@ Equation~\ref{eq:question} models the question ``Is there a lamp above a table?'
 
 \begin{equation}\label{eq:question}
 \rec{
-    \text{x} &:& Ind \\
-    \text{y} &:& Ind \\
+    \text{x} &:& \type{Ind} \\
+    \text{y} &:& \type{Ind} \\
     \text{c}_\text{x} &:& \text{lamp}(\text{x}) \\
     \text{c}_\text{y} &:& \text{table}(\text{y}) \\
     \text{c}_\text{r} &:& \text{above}(\text{x}, \text{y}) \\
@@ -292,31 +292,31 @@ It may also receive a parsed natural-language utterance, which will then be veri
 A construction like this provides a means to answer to natural-language questions about the image.
 
 \begin{equation}\label{eq:agent}
-Agent = \rec{
-    \text{objdetector} &:& ObjDetector \\
-    \text{indfun} &:& IndFun \\
-    \text{relclfs} &:& [RelClf] \\
-    \text{state} &:& AgentState \\
+\type{Agent} = \rec{
+    \text{objdetector} &:& \type{ObjDetector} \\
+    \text{indfun} &:& \type{IndFun} \\
+    \text{relclfs} &:& [\type{RelClf}] \\
+    \text{state} &:& \type{AgentState} \\
     }
 \end{equation}
 
 \begin{equation}\label{eq:state}
-AgentState = \rec{
-    \text{img} &:& Image \\
-    \text{perc} &:& [Obj] \\
-    \text{bel} &:& [RecType] \\
-    \text{utt} &:& String \\
-    \text{que} &:& RecType \\
+\type{AgentState} = \rec{
+    \text{img} &:& \type{Image} \\
+    \text{perc} &:& [\type{Obj}] \\
+    \text{bel} &:& [\type{RecType}] \\
+    \text{utt} &:& \type{String} \\
+    \text{que} &:& \type{RecType} \\
     }
 \end{equation}
 
-The fields `objdetector', `indfun' and `relclfs' of $Agent$ are to be statically defined for a specific agent.
-While running, the agent will modify the $AgentState$ record in `state'.
+The fields `objdetector', `indfun' and `relclfs' of $\type{Agent}$ are to be statically defined for a specific agent.
+While running, the agent will modify the $\type{AgentState}$ record in `state'.
 The `perc' field will contain a list of perceptual objects.
 The `bel' field will be a list of beliefs modelled as record types:
 individuated objects and spatial relations between individuals.
 
-For an agent record $ag : Agent$, the perception and question-answering procedure is carried out as follows.
+For an agent record $ag : \type{Agent}$, the perception and question-answering procedure is carried out as follows.
 
 \paragraph{Visual perception}
 \renewcommand{\itemautorefname}{Step}
@@ -330,19 +330,19 @@ For an agent record $ag : Agent$, the perception and question-answering procedur
 	%\item The fields of the domain record type of the function is considered its arguments.
 	%\item Each combination of $ag.\text{state.bel}$ record types that matches the argument types is considered for input.
 	%\item The input record types are combined to match the domain record type of the function, and the type is instantiated.
-    \item For each pair $T_1$ and $T_2$ in $ag.\text{state.bel}$, a $LocTup$ record type is constructed as $\rec{\text{lo} &:& T_1 \\ \text{refo} &:& T_2}$.
-    Note that this will be specified to certain individuals and segments, and is thus more informative than the plain $LocTup$ type.
-    \item The specified $LocTup$ type is instantiated to a record.
+		\item For each pair $T_1$ and $T_2$ in $ag.\text{state.bel}$, a $\type{LocTup}$ record type is constructed as $\rec{\text{lo} &:& T_1 \\ \text{refo} &:& T_2}$.
+			Note that this will be specified to certain individuals and segments, and is thus more informative than the plain $\type{LocTup}$ type.
+		\item The specified $\type{LocTup}$ type is instantiated to a record.
 	\item Each function in $ag.\text{relclfs}$ is applied to the created record, and the record type resulting from each application is added to $ag.\text{state.bel}$ unless it is empty ($[\:]$).
 	\end{enumerate}
-	For example, the \textit{left} classifier in \autoref{eq:leftclfdef} is applied to each pair of $IndObj$ after combining them into a $LocTup$ and instantiating it.
-    Note that the $IndObj$ have manifest fields which carry on to the $LocTup$ type, so it is more specific than just instantiating $LocTup$ itself.
+		For example, the ``left'' classifier in \autoref{eq:leftclfdef} is applied to each pair of $\type{IndObj}$ after combining them into a $\type{LocTup}$ and instantiating it.
+		Note that the $\type{IndObj}$ have manifest fields which carry on to the $\type{LocTup}$ type, so it is more specific than just instantiating $\type{LocTup}$ itself.
 \end{enumerate}
 
 The individuated objects and the spatial relations are contained in the same list, $ag.\text{state.bel}$, which models beliefs of the agent.
 (Remember that an individuated object is a belief that a certain individual has a certain property and location.)
 In extension, this list may contain record types of many other shapes, perhaps describing situations where an idividual has a certain color or two individuals are involved in an event (as suggested in \autoref{sec:futurework}).
-\autoref{item:relclfsbel} works here because $ag.\text{state.bel}$ is sure to contain only $IndObj$ record types at this point, and because $ag.\text{relclfs}$ only contains $RelClf$ functions.
+\autoref{item:relclfsbel} works here because $ag.\text{state.bel}$ is sure to contain only $\type{IndObj}$ record types at this point, and because $ag.\text{relclfs}$ only contains $\type{RelClf}$ functions.
 The general case would necessitate a different formulation (and a new name for the `relclfs' field), perhaps utilising subtype checking to qualify possible argument combinations.
 
 \paragraph{Language}
@@ -354,10 +354,10 @@ The general case would necessitate a different formulation (and a new name for t
 If the resulting record type is a relabel-subtype of $ag.\text{state.que}$, $S \subtrlb Q$ the answer ``Yes'' is emitted; otherwise ``No''.
 \end{enumerate}
 
-The $Agent$ type is implemented in notebook cell 23 and instatiated as a record in cell 24.
+The $\type{Agent}$ type is implemented in notebook cell 23 and instatiated as a record in cell 24.
 Its algorithms are implemented in cell 25 as \texttt{agent\_see} for the \textit{visual perception} part and \texttt{agent\_hear} for \textit{language}.
 
-The state of an agent is a record of the type $Agent$.
+The state of an agent is a record of the type $\type{Agent}$.
 An example state $ag$ is shown in \autoref{eq:ag}.
 
 \begin{landscape}
@@ -368,7 +368,7 @@ ag =
 \rec{
     \text{objdetector} &=& \mathtt{yolo\_detector} \\
     \text{indfun} &=& \mathtt{indfun} \\
-    \text{relclfs} &=& [Clf_{left}, Clf_{right}, Clf_{above}, Clf_{below}] \\
+    \text{relclfs} &=& [\type{Clf}_\text{left}, \type{Clf}_\text{right}, \type{Clf}_\text{above}, \type{Clf}_\text{below}] \\
     \text{state} &=& \rec{
 		\text{img} &=& \text{\tt <Image "dogride.jpg">} \\
 		\text{perc} &=& [
@@ -379,7 +379,7 @@ ag =
 					\text{cy} &=& 261 \\
 					\text{h} &=& 351\\
 					}\\
-				\text{pfun} &=& \lambda a:Ind\ .\ \text{person}(a)
+				\text{pfun} &=& \lambda a:\type{Ind}\ .\ \text{person}(a)
 				},
 			\rec{
 				\text{seg} &=& \rec{
@@ -388,12 +388,12 @@ ag =
 					\text{cy} &=& 355 \\
 					\text{h} &=& 242\\
 					}\\
-				\text{pfun} &=& \lambda a:Ind\ .\ \text{bicycle}(a)
+				\text{pfun} &=& \lambda a:\type{Ind}\ .\ \text{bicycle}(a)
 				},
 			... ] \\
 		\text{bel} &=& [
 			\rec{
-				\text{x} = a_0 &:& Ind\\
+				\text{x} = a_0 &:& \type{Ind}\\
 				\text{cp} &:& \text{person}(x)\\
 				\text{cl} &:& \text{location}(x, loc)\\
 				\text{loc} = \rec{
@@ -402,18 +402,18 @@ ag =
 					\text{cy} &=& 261 \\
 					\text{h} &=& 351\\
 					}
-					&:& Segment \\
+					&:& \type{Segment} \\
 				},
 			{}{} \rec{
-				\text{x} = a_0 &:& Ind \\
-				\text{y} = a_1 &:& Ind \\
+				\text{x} = a_0 &:& \type{Ind} \\
+				\text{y} = a_1 &:& \type{Ind} \\
 				\text{cr} &:& \text{above}(\text{x}, \text{y})
 				},
 			... ] \\
         \text{utt} &=& \text{``Is there a dog to the left of a bicycle?''} \\
 		\text{que} &=& \rec{
-			\text{x} &:& Ind\\
-			\text{y} &:& Ind\\
+			\text{x} &:& \type{Ind}\\
+			\text{y} &:& \type{Ind}\\
 			\text{c}_\text{0} &:& \text{dog}(x)\\
 			\text{c}_\text{1} &:& \text{bicycle}(y)\\
 			\text{c}_\text{2} &:& \text{left}(x, y)\\
@@ -439,24 +439,24 @@ To avoid conflict, some fields have been relabeled, prompting the expectation th
 
 \begin{equation} \label{eq:combineterm1}
 T_1 = \rec{
-    \text{x}=a_1 &:& Ind \\
-    \text{y}=a_2 &:& Ind \\
+    \text{x}=a_1 &:& \type{Ind} \\
+    \text{y}=a_2 &:& \type{Ind} \\
     \text{cr} &:& \text{above}(\text{x}, \text{y})
     }
 \end{equation}
 
 \begin{equation} \label{eq:combineterm2}
 T_2 = \rec{
-    \text{x}=a_2 &:& Ind \\
-    \text{y}=a_1 &:& Ind \\
+    \text{x}=a_2 &:& \type{Ind} \\
+    \text{y}=a_1 &:& \type{Ind} \\
     \text{cr} &:& \text{right}(\text{x}, \text{y})
     }
 \end{equation}
 
 \begin{equation} \label{eq:combination}
 \rec{
-    \text{x}=a_1 &:& Ind \\
-    \text{y}=a_2 &:& Ind \\
+    \text{x}=a_1 &:& \type{Ind} \\
+    \text{y}=a_2 &:& \type{Ind} \\
     \text{cr}_1 &:& \text{above}(\text{x}, \text{y}) \\
     \text{cr}_2 &:& \text{right}(\text{y}, \text{x})
     }
@@ -464,14 +464,14 @@ T_2 = \rec{
 
 \gls{ttr} features an \textit{merge} operation ($\ttrmerge$), but a merge will not have the result desired here.
 Since the same labels occur in both belief types, a merge would result in \textit{meet types}, as seen in \autoref{eq:merge}, in a way which is not useful for this purpose.
-The meet type of two different singleton types, $Ind_{a_1} \wedge Ind_{a_2}$, can only be true if the two individuals are the same, $a_1 = a_2$.
+The meet type of two different singleton types, $\type{Ind}_{a_1} \wedge \type{Ind}_{a_2}$, can only be true if the two individuals are the same, $a_1 = a_2$.
 The constraint in the `cr' field then says that some individual is above and to the right of itself, which is meaningless and certainly not what we are trying to obtain.
 
 \begin{equation} \label{eq:merge}
 T_1  \ttrmerge T_2 =
 \rec{
-    \text{x} &:& Ind_{a_1} \wedge Ind_{a_2} \\
-    \text{y} &:& Ind_{a_2} \wedge Ind_{a_1} \\
+    \text{x} &:& \type{Ind}_{a_1} \wedge \type{Ind}_{a_2} \\
+    \text{y} &:& \type{Ind}_{a_2} \wedge \type{Ind}_{a_1} \\
     \text{cr} &:& \text{above}(\text{x}, \text{y}) \wedge \text{right}(\text{x}, \text{y})
     }
 \end{equation}
@@ -485,23 +485,23 @@ The field labeled `x' in $T_1$ is now labeled `prev.x' and does not conflict wit
 \begin{equation} \label{eq:combineprevnest}
 \rec{
     \text{prev} &:& \rec{
-        \text{x}=a_1 &:& Ind \\
-        \text{y}=a_2 &:& Ind \\
+        \text{x}=a_1 &:& \type{Ind} \\
+	\text{y}=a_2 &:& \type{Ind} \\
         \text{cr} &:& \text{above}(\text{x}, \text{y}) \\
         } \\
-    \text{x}=a_2 &:& Ind \\
-    \text{y}=a_1 &:& Ind \\
+    \text{x}=a_2 &:& \type{Ind} \\
+    \text{y}=a_1 &:& \type{Ind} \\
     \text{cr} &:& \text{right}(\text{x}, \text{y})
     }
 \end{equation}
 
 \begin{equation} \label{eq:combineprev}
 \rec{
-    \text{prev.x}=a_1 &:& Ind \\
-    \text{prev.y}=a_2 &:& Ind \\
+    \text{prev.x}=a_1 &:& \type{Ind} \\
+    \text{prev.y}=a_2 &:& \type{Ind} \\
     \text{prev.cr} &:& \text{above}(\text{prev.x}, \text{prev.y}) \\
-    \text{x}=a_2 &:& Ind \\
-    \text{y}=a_1 &:& Ind \\
+    \text{x}=a_2 &:& \type{Ind} \\
+    \text{y}=a_1 &:& \type{Ind} \\
     \text{cr} &:& \text{right}(\text{x}, \text{y})
     }
 \end{equation}
@@ -513,11 +513,11 @@ Generating unique labels is an operation outside \gls{ttr}, making this method l
 
 \begin{equation} \label{eq:combineunconflict}
 \rec{
-    \text{x}_1=a_1 &:& Ind \\
-    \text{y}_1=a_2 &:& Ind \\
+    \text{x}_1=a_1 &:& \type{Ind} \\
+    \text{y}_1=a_2 &:& \type{Ind} \\
     \text{cr}_1 &:& \text{above}(\text{x}_1, \text{y}_1) \\
-    \text{x}_2=a_2 &:& Ind \\
-    \text{y}_2=a_1 &:& Ind \\
+    \text{x}_2=a_2 &:& \type{Ind} \\
+    \text{y}_2=a_1 &:& \type{Ind} \\
     \text{cr}_2 &:& \text{right}(\text{x}_2, \text{y}_2)
     }
 \end{equation}
@@ -536,7 +536,7 @@ A label containing an underscore (`\_') is assumed to already be uniquely number
 Thus, labels without undescores are relabeled to new, numbered labels.
 
 Finally, the \texttt{dedupe} function removes any duplicated singleton and complex field types by relabeling all occurrences of each such field type with one of their labels.
-For example, in $\rec{\text{x}=a_1 &:& Ind \\ \text{y}=a_1 &:& Ind}$, `y' is relabeled to `x'.
+For example, in $\rec{\text{x}=a_1 &:& \type{Ind} \\ \text{y}=a_1 &:& \type{Ind}}$, `y' is relabeled to `x'.
 (Or possibly vice versa; the order of record type fields is unspecified.)
 When all duplicates of some field type have been removed, recursion is used to avoid usage of old labels in the outer for-loop.
 
@@ -632,7 +632,7 @@ The result of the \gls{cfg} parsing is a Python object that encodes the \gls{fol
 A custom Python function \texttt{fol\_to\_pyttr}, given in \autoref{lst:foltopyttr} (notebook cell 20), traverses this object recursively and builds a PyTTR type.
 
 \begin{itemize}
-\item For an ``Exists'' expression, an $Ind$ field is added to the type.
+\item For an ``Exists'' expression, an $\type{Ind}$ field is added to the type.
 \item For an ``Application'' expression, a ptype field is added, copying the predicate and variable names.
 \item An ``And'' expression simply triggers recursion into each of the two terms.
 \item The constant `true' is added to allow simple existential questions like ``Is there an aeroplane?''
@@ -720,7 +720,7 @@ An alternative algorithm is presented below for the purpose of this project, whe
 This algorithm handles non-dependent (``basic'') and dependent fields separately.
 
 First, when considering relabelings of $Q$, only the basic fields are included.
-(In this project, those fields are associated with singleton types of either $Ind$ or $Segment$.)
+(In this project, those fields are associated with singleton types of either $\type{Ind}$ or $\type{Segment}$.)
 This drastically limits the number of relabelings to try:
 If $S$ has eight basic fields and $Q$ has two, there are only $\dfrac{8!}{(8-2)!} = 56$ relabelings.
 
@@ -737,9 +737,9 @@ A relabel-subtype check is being performed on the record types $S$ (\autoref{eq:
 
 \begin{equation}\label{eq:strlbs}
 S = \rec{
-    \text{x} &:& Ind \\
-    \text{y} &:& Ind \\
-    \text{z} &:& Ind \\
+    \text{x} &:& \type{Ind} \\
+    \text{y} &:& \type{Ind} \\
+    \text{z} &:& \type{Ind} \\
     \text{c} &:& \text{right}(\text{x}, \text{y}) \\
     \text{d} &:& \text{left}(\text{x}, \text{z})
     }
@@ -747,17 +747,17 @@ S = \rec{
 
 \begin{equation}\label{eq:strlbq}
 Q = \rec{
-    \text{p} &:& Ind \\
-    \text{q} &:& Ind \\
+    \text{p} &:& \type{Ind} \\
+    \text{q} &:& \type{Ind} \\
     \text{e} &:& \text{left}(\text{p}, \text{q})
     }
 \end{equation}
 
 \begin{enumerate}
-\item The first basic-field relabeling to try is $\eta_1 = \{\langle \text{p}, \text{x}\rangle, \langle \text{q}, \text{y}\rangle\}$, yielding $Q_{\eta_1} = \rec{ \text{x} &:& Ind \\ \text{y} &:& Ind \\ \text{e} &:& \text{left}(\text{x}, \text{y}) }$.
+\item The first basic-field relabeling to try is $\eta_1 = \{\langle \text{p}, \text{x}\rangle, \langle \text{q}, \text{y}\rangle\}$, yielding $Q_{\eta_1} = \rec{ \text{x} &:& \type{Ind} \\ \text{y} &:& \type{Ind} \\ \text{e} &:& \text{left}(\text{x}, \text{y}) }$.
 %Now $Q_{\eta_1}.\text{x} \sqsubseteq S.\text{x}$ and $Q_{\eta_1}.\text{y} \sqsubseteq S.\text{y}$
 \item However, neither $\text{right}(\text{x}, \text{y})$ or $\text{left}(\text{x}, \text{z})$, the dependent fields in $S$, is a subtype of $\text{left}(\text{x}, \text{y})$
-\item The next relabeling to try is $\eta_2 = \{\langle \text{p}, \text{x}\rangle, \langle \text{q}, \text{z}\rangle\}$, yielding $Q_{\eta_2} = \rec{ \text{x} &:& Ind \\ \text{z} &:& Ind \\ \text{e} &:& \text{left}(\text{x}, \text{z}) }$.
+\item The next relabeling to try is $\eta_2 = \{\langle \text{p}, \text{x}\rangle, \langle \text{q}, \text{z}\rangle\}$, yielding $Q_{\eta_2} = \rec{ \text{x} &:& \type{Ind} \\ \text{z} &:& \type{Ind} \\ \text{e} &:& \text{left}(\text{x}, \text{z}) }$.
 Similar to before, $Q_{\eta_2}.\text{x} \sqsubseteq S.\text{x}$ and $Q_{\eta_2}.\text{z} \sqsubseteq S.\text{z}$
 \item Now, $\text{left}(\text{x}, \text{z}) \sqsubseteq \text{left}(\text{x}, \text{z})$
 \item Conclusively, $S \sqsubseteq Q_{\eta_2}$ and thus $S \subtrlb Q$
@@ -769,7 +769,7 @@ Similar to before, $Q_{\eta_2}.\text{x} \sqsubseteq S.\text{x}$ and $Q_{\eta_2}.
 
 As a prerequisite, any dependent fields must depend only on basic (non-dependent) fields.
 For example, the algorithm will not correctly handle $\rec{
-\text{x} &:& Ind \\
+\text{x} &:& \type{Ind} \\
 \text{c}_1 &:& \text{great}(\text{x}) \\
 \text{c}_2 &:& \text{believe}(\text{x}, \text{c}_1)
 }$.
@@ -849,7 +849,7 @@ I created a \texttt{LambdaFun} subclass of \texttt{Fun} to allow any Python code
 \item[Copying a record type] This facilitates the creation of new record types based on an existing one, without altering the original.
 \item[Relabeling multiple fields] (notebook cell 4) PyTTR originally only contains a method for relabeling a single field.
 \item[Relabel fix] When a relabeled field occurs in a sibling dependent field value, the dependent field value must be updated to use the new label.
-For instance, if `x' is relabeled to `y' in $\rec{\text{x} &:& Ind \\ \text{c} &:& \text{p}(\text{x})}$, then $\text{p}(\text{x})$ must be updated to $\text{p}(\text{y})$.
+	For instance, if `x' is relabeled to `y' in $\rec{\text{x} &:& \type{Ind} \\ \text{c} &:& \text{p}(\text{x})}$, then $\text{p}(\text{x})$ must be updated to $\text{p}(\text{y})$.
 \item[A fix for LazyObject] LazyObject is a class in the PyTTR library used for making references between fields.
 Prior to the fix, it could only be used for paths longer than one item, for instance $r.\text{x}$ but not $r$.
 \item[Flatten for record types] The flatten operation was previously implemented for records but not for record types.

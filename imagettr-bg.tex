@@ -154,41 +154,41 @@ This section is an overview of \gls{ttr} based on \cite{CooperTypetheorysemantic
 In \gls{ttr} there are two kinds of entities: types and objects.
 Each type is associated with a set of objects which are of that type, or in other words are \textbf{witnesses} of that type.
 The judgement that the object $a$ is a witness of the type $T$ is written $a : T$.
-For example, $34 : Int$ means that $34$ is of the type $Int$.
+For example, $34 : \type{Int}$ means that $34$ is of the type $\type{Int}$.
 
 A \textbf{record type} is a set of fields, each field carrying a label and a type.
-In the record type $\rec{\text{person} &:& Ind \\ \text{age} &:& Int}$ there is a field labeled `person' of type $Ind$, and one labeled `age' of the type $Int$.
+In the record type $\rec{\text{person} &:& \type{Ind} \\ \text{age} &:& \type{Int}}$ there is a field labeled `person' of type $\type{Ind}$, and one labeled `age' of the type $\type{Int}$.
 
 The witnesses of record types are \textbf{records}.
 A record is also a set of fields with labels, but instead of a type, a label is associated with an object.
 A record $r$ is a witness of a record type $T$, \textit{if and only if} every field in the record type has a matching field in the record, that is, the labels are the same and the object in the record field is a witness of the type in the record type.
 %The record may have additional fields that are not in the record type; this does not interfere with type judgement.
-The record $\rec{\text{person} &=& a_{12} \\ \text{age} &=& 28}$ is a witness of the record type just mentioned, provided $a_{12} : Ind$ and $28 : Int$.
+The record $\rec{\text{person} &=& a_{12} \\ \text{age} &=& 28}$ is a witness of the record type just mentioned, provided $a_{12} : \type{Ind}$ and $28 : \type{Int}$.
 
 % Intensional/extensional? (TTL p. 6)
 
 A type $T_{sub}$ is a \textbf{subtype} of another type $T_{super}$, written $T_{sub} \sqsubseteq T_{super}$, if any witness of the subtype is necessarily also a witness of the supertype.
-For example, $Int \sqsubseteq Number$.
+For example, $\type{Int} \sqsubseteq \type{Number}$.
 %TODO "necessarily"?
 In the case of record types, this means that a record type $T_{sub}$ is a subtype of a record type $T_{super}$ if and only if every field in $T_{super}$ is present also in $T_{sub}$ (allowing that a type in a $T_{sub}$ field is itself a subtype of the type in the corresponding $T_{super}$ field).
-For example, $\rec{\text{x} &:& Int} \sqsubseteq \rec{\text{x} &:& Number}$, provided $Int \sqsubseteq Number$.
+For example, $\rec{\text{x} &:& \type{Int}} \sqsubseteq \rec{\text{x} &:& Number}$, provided $\type{Int} \sqsubseteq Number$.
 
 Relationships between objects can be modeled using \textbf{ptypes}.
 A ptype is constructed from a predicate and a list of objects.
 For instance, the type $\text{hug}(a,b)$ is constructed from the predicate 'hug' with the objects $a$ in the first place and $b$ in the second.
 The situation that $a$ is hugging $b$ is true if there exists a witness of $\text{hug}(a,b)$.
 In a record type, a ptype typically uses the labels of other fields for its arguments:
-In $\rec{\text{x} &:& Ind \\ \text{c} &:& \text{green}(\text{x})}$, the field `c' is \textit{dependent} on the field `x'.
+In $\rec{\text{x} &:& \type{Ind} \\ \text{c} &:& \text{green}(\text{x})}$, the field `c' is \textit{dependent} on the field `x'.
 
 A type can be restricted to only have a single witness:
 If $T$ is a type and $a:T$, then $T_a$ is a \textbf{singleton type} having $a$ as its only witness.
 There is an alternative notation for singleton types used in record types:
-The record type $\rec{\text{x} &:& Ind_a}$ can also be written $\rec{\text{x}=a &:& Ind}$, and is restricted to the record $\rec{\text{x} &=& a}$.
+The record type $\rec{\text{x} &:& \type{Ind}_a}$ can also be written $\rec{\text{x}=a &:& \type{Ind}}$, and is restricted to the record $\rec{\text{x} &=& a}$.
 A singleton-typed field notated this way is known as a \textbf{manifest field}.
 Any number of fields in a record type may be manifest fields.
 
 A function from $T_{dom}$ to $T_{rng}$ is a witness of the \textbf{function type} $T_{dom} \rightarrow T_{rng}$.
-For instance, if $f = \lambda x : Ind\ .\ \text{blue}(x)$, then $f : Ind \rightarrow Type$.
+For instance, if $f = \lambda x : \type{Ind}\ .\ \text{blue}(x)$, then $f : \type{Ind} \rightarrow \type{Type}$.
 
 A list of objects of type $T$ is a witness of the \textbf{list type} $[T]$:
 If $L$ is a list and $\forall a \in L, a : T$, then $L : [T]$.
@@ -197,9 +197,9 @@ In this thesis, the list containing $a$, $b$ and $c$ will be written as $[a, b, 
 Types themselves may be the witnesses of other types.
 In order to allow this, types are sorted into \textbf{orders}, where types of one order may be witnesses of a type of a higher order.
 (This technique is known as \textbf{stratification}.)
-The type $Type^n, n > 0$ is the type of all types of order $n - 1$.
-Similarly, $RecType^n, n > 0$ is the type of all record types of order $n - 1$.
-Most of the types in this thesis will be of order $0$, so we will skip the order superscript unless necessary, and use $Type$ and $RecType$ to denote $Type^1$ and $RecType^1$, respectively.
+The type $\type{Type}^n, n > 0$ is the type of all types of order $n - 1$.
+Similarly, $\type{RecType}^n, n > 0$ is the type of all record types of order $n - 1$.
+Most of the types in this thesis will be of order $0$, so we will skip the order superscript unless necessary, and use $\type{Type}$ and $\type{RecType}$ to denote $\type{Type}^1$ and $\type{RecType}^1$, respectively.
 % PType, the type of ptypes?
 
 The \textbf{relabeling} $\eta$ of a record type $T$ is a set of tuples where the first element is a label in $T$ and the second is another, new label.
